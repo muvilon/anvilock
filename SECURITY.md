@@ -12,7 +12,7 @@ We actively support the latest version of the screenlock application. All securi
 
 If you discover a security vulnerability in the application, please report it directly to our security team. All security vulnerabilities are taken seriously, and we will respond promptly to address the issue.
 
-Contact: security@projectname.org
+Contact: sid9.karanam@gmail.com
 
 Please avoid publicly disclosing the vulnerability until we have had a chance to address it and deploy a fix.
 
