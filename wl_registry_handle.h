@@ -3,7 +3,10 @@
 
 #include "log.h"
 #include "wl_seat_handle.h"
+#include "wl_output_handle.h"
 #include "xdg_wm_base_handle.h"
+#include "protocols/ext-session-lock-client-protocol.h"
+#include "protocols/src/ext-session-lock-client-protocol.c"
 #include <wayland-client.h>
 
 static void registry_global(void* data, struct wl_registry* wl_registry, uint32_t name,
@@ -35,6 +38,18 @@ static void registry_global(void* data, struct wl_registry* wl_registry, uint32_
     state->wl_seat = wl_registry_bind(wl_registry, name, &wl_seat_interface, 7);
     wl_seat_add_listener(state->wl_seat, &wl_seat_listener, state);
     log_message(LOG_LEVEL_INFO, "Seat interface bound.");
+  }
+  else if (strcmp(interface, ext_session_lock_manager_v1_interface.name) == 0)
+  {
+    state->ext_session_lock_manager_v1 = wl_registry_bind(wl_registry, name,
+				&ext_session_lock_manager_v1_interface, 1);
+    log_message(LOG_LEVEL_INFO, "ext_session_lock_manager interface bound.");
+  }
+  else if (strcmp(interface, wl_output_interface.name) == 0)
+  {
+    state->output_state.wl_output = wl_registry_bind(wl_registry, name, &wl_output_interface, version);
+    wl_output_add_listener(state->output_state.wl_output, &wl_output_listener, state);
+    log_message(LOG_LEVEL_INFO, "Output interface bound.");
   }
   else
   {
