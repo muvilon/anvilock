@@ -100,7 +100,7 @@
 
 int main(int argc, char* argv[]) {
     struct client_state state = {0};
-
+    
     // Initialize and connect to the Wayland display
     state.wl_display = wl_display_connect(NULL);
     state.username   = getlogin();

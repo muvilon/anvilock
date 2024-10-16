@@ -5,8 +5,13 @@
 #include <string.h>
 #include "client_state.h"
 #include "log.h"
+#include "surface_colors.h"
 
-static struct wl_buffer* draw_lock_screen(struct client_state* state) {
+#define DOT_RADIUS            6 // Radius for the dots
+
+float pulse_factor = 1.5f;
+
+static struct wl_buffer* draw_lock_screen(struct client_state* state, const char* message) {
     const int width = state->output_state.width;
     const int height = state->output_state.height;
     int stride = width * 4;
@@ -42,16 +47,10 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state) {
         return NULL;
     }
 
-    // Draw a gradient background
+    // Draw background
     for (int y = 0; y < height; ++y) {
-        // Calculate the color for this row
-        uint8_t r = 102 + (y * 153) / height; // Gradient from 102 to 255
-        uint8_t g = 102 + (y * 153) / height; // Gradient from 102 to 255
-        uint8_t b = 102 + (y * 153) / height; // Gradient from 102 to 255
-        uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b; // ARGB format
-
         for (int x = 0; x < width; ++x) {
-            data[y * width + x] = color;
+            data[y * width + x] = GRUVBOX_BG; // Set all pixels to background color
         }
     }
 
@@ -64,26 +63,43 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state) {
     // Draw password box background
     for (int y = box_y; y < box_y + box_height; ++y) {
         for (int x = box_x; x < box_x + box_width; ++x) {
-            data[y * width + x] = 0xFF222222;  // Darker gray for password box
+            data[y * width + x] = GRUVBOX_DARK1;  // Darker gray for password box
         }
     }
 
-    // Display the password input
-    int password_length = strlen(state->password);
-    int text_x = box_x + 10; // Padding from left
-    int text_y = box_y + (box_height - 20) / 2; // Center vertically
+    // Draw the password input (as dots) with pulse effect
+    for (int i = 0; i < state->password_index; i++) {
+        uint32_t color = GRUVBOX_BLUE; // White for password text (dots)
+        int char_x = box_x + 10 + (i * 20); // Assuming a fixed-width font of 20 pixels
 
-    // Draw each character of the password
-    for (int i = 0; i < password_length; i++) {
-        uint32_t color = 0xFFFFFFFF; // White for password text
-        int char_x = text_x + (i * 15); // Assuming a fixed-width font of 15 pixels
-        // Here, you can implement your own character drawing logic
-        // For demonstration, we just fill a pixel area for each character
-        for (int dy = -5; dy < 5; dy++) {
-            for (int dx = -5; dx < 5; dx++) {
-                if (char_x + dx >= box_x && char_x + dx < box_x + box_width &&
-                    text_y + dy >= box_y && text_y + dy < box_y + box_height) {
-                    data[(text_y + dy) * width + (char_x + dx)] = color;
+        // Draw a filled circle to represent a dot with pulse effect
+        for (int dy = -DOT_RADIUS; dy <= DOT_RADIUS; dy++) {
+            for (int dx = -DOT_RADIUS; dx <= DOT_RADIUS; dx++) {
+                if (dx * dx + dy * dy <= (DOT_RADIUS + pulse_factor) * (DOT_RADIUS + pulse_factor)) {
+                    if (char_x + dx >= box_x && char_x + dx < box_x + box_width &&
+                        box_y + (box_height / 2) + dy >= box_y && box_y + (box_height / 2) + dy < box_y + box_height) {
+                        data[(box_y + (box_height / 2) + dy) * width + (char_x + dx)] = color;
+                    }
+                }
+            }
+        }
+    }
+
+    // Draw the authentication failed message if provided
+    if (message != NULL) {
+        int message_x = (width - strlen(message) * 10) / 2; // Center the message
+        int message_y = box_y + box_height + 10; // Below the password box
+        // Draw each character of the message
+        for (int i = 0; message[i] != '\0'; i++) {
+            uint32_t color = GRUVBOX_RED; // Red for error message
+            int char_x = message_x + (i * 10); // Assuming a fixed-width font of 10 pixels
+            // Draw the character as a filled rectangle for simplicity
+            for (int dy = -5; dy < 5; dy++) {
+                for (int dx = -5; dx < 5; dx++) {
+                    if (char_x + dx >= 0 && char_x + dx < width &&
+                        message_y + dy >= 0 && message_y + dy < height) {
+                        data[(message_y + dy) * width + (char_x + dx)] = color;
+                    }
                 }
             }
         }
@@ -99,7 +115,7 @@ static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, u
     struct client_state* state = data;
     xdg_surface_ack_configure(xdg_surface, serial);
 
-    struct wl_buffer* buffer = draw_lock_screen(state);
+    struct wl_buffer* buffer = draw_lock_screen(state, NULL);
     if (!buffer) {
         log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
         return;

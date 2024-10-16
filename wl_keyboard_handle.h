@@ -2,6 +2,7 @@
 #define WL_KB_HANDLER_H
 
 #include "client_state.h"
+#include "xdg_surface_handle.h"
 #include <assert.h>
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
@@ -72,6 +73,17 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
         {
           log_message(LOG_LEVEL_AUTH, "Authentication failed. Try again.\n");
           client_state->password_index = 0; // Reset the password input
+          client_state->password[client_state->password_index] = '\0';
+          
+          struct wl_buffer* buffer = draw_lock_screen(client_state, "Authentication failed. Try again.");
+          if (!buffer) {
+              log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+              return;
+          }
+
+          wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
+          wl_surface_commit(client_state->wl_surface);
+          return;
         }
 
         // Reset the flag to allow new input after an attempt
@@ -88,6 +100,14 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
       // Capture character input
       client_state->password[client_state->password_index++] = (char)sym;
     }
+    struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
+    if (!buffer) {
+        log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+        return;
+    }
+
+    wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
+    wl_surface_commit(client_state->wl_surface);
   }
 }
 

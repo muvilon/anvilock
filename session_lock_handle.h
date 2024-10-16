@@ -39,7 +39,7 @@ void render_lock_screen(struct client_state *state) {
     }
 
     // Create and draw lock screen buffer
-    struct wl_buffer *buffer = draw_lock_screen(state);
+    struct wl_buffer *buffer = draw_lock_screen(state, NULL);
     if (!buffer) {
         log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
         return;

@@ -47,12 +47,16 @@ void log_init(enum log_importance verbosity)
         log_importance = verbosity;
     }
 
-    // Open the log file for appending, create it if it does not exist
-    log_file = fopen("casuality.log", "a");
+    // Open the log file for writing (this will overwrite the existing file)
+    log_file = fopen("casuality.log", "w");
     if (log_file == NULL)
     {
         fprintf(stderr, "Failed to open log file: %s\n", strerror(errno));
+        return; // Exit early if log file cannot be opened
     }
+
+    // Disable buffering for the log file
+    setvbuf(log_file, NULL, _IONBF, 0);
 }
 
 /* Logging function */
