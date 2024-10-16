@@ -1,17 +1,18 @@
 #ifndef CLIENT_STATE_H
 #define CLIENT_STATE_H
 
-#include <wayland-client.h>
 #include <stdbool.h>
+#include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 
 // Define a structure to store output-related information
-struct output_state {
-    uint32_t id;
-    int32_t width;
-    int32_t height;
-    int32_t refresh_rate;
-    struct wl_output *wl_output;
+struct output_state
+{
+  uint32_t          id;
+  int32_t           width;
+  int32_t           height;
+  int32_t           refresh_rate;
+  struct wl_output* wl_output;
 };
 
 struct pointer_event
@@ -40,7 +41,7 @@ struct client_state
   struct wl_compositor* wl_compositor; // Compositor interface
   struct xdg_wm_base*   xdg_wm_base;   // XDG window manager base interface
   struct wl_seat*       wl_seat;       // Input device seat
-  struct wl_output *wl_output;
+  struct wl_output*     wl_output;
   /* Objects */
   struct wl_surface*   wl_surface;   // Wayland surface
   struct xdg_surface*  xdg_surface;  // XDG surface
@@ -63,13 +64,13 @@ struct client_state
   int   password_index;
   bool  authenticated;
   bool  locked;
-  /* SESSION LOCK */ 
-  bool surface_created;
-  bool surface_dirty;
-  struct ext_session_lock_manager_v1 *ext_session_lock_manager_v1;
-	struct ext_session_lock_v1 *ext_session_lock_v1;
-  struct ext_session_lock_surface_v1 *ext_session_lock_surface_v1;
-  /* wl_output */ 
+  /* SESSION LOCK */
+  bool                                surface_created;
+  bool                                surface_dirty;
+  struct ext_session_lock_manager_v1* ext_session_lock_manager_v1;
+  struct ext_session_lock_v1*         ext_session_lock_v1;
+  struct ext_session_lock_surface_v1* ext_session_lock_surface_v1;
+  /* wl_output */
   struct output_state output_state;
 };
 

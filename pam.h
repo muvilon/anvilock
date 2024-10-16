@@ -54,7 +54,7 @@ int authenticate_user(const char* username, const char* input_password)
 
   if (pam_status != PAM_SUCCESS)
   {
-    log_message(LOG_LEVEL_ERROR, "PAM start failed: %s\n", pam_strerror(pamh, pam_status));
+    log_message(LOG_LEVEL_ERROR, "PAM start failed: %s", pam_strerror(pamh, pam_status));
     password_buffer_destroy(password, strlen(input_password) + 1); // Clean up
     return 0;
   }
@@ -62,7 +62,7 @@ int authenticate_user(const char* username, const char* input_password)
   pam_status = pam_authenticate(pamh, 0);
   if (pam_status != PAM_SUCCESS)
   {
-    log_message(LOG_LEVEL_ERROR, "PAM authentication failed: %s\n", pam_strerror(pamh, pam_status));
+    log_message(LOG_LEVEL_ERROR, "PAM authentication failed: %s", pam_strerror(pamh, pam_status));
     pam_end(pamh, pam_status);
     password_buffer_destroy(password, strlen(input_password) + 1); // Clean up
     return 0;
@@ -71,7 +71,7 @@ int authenticate_user(const char* username, const char* input_password)
   pam_status = pam_acct_mgmt(pamh, 0);
   if (pam_status != PAM_SUCCESS)
   {
-    log_message(LOG_LEVEL_ERROR, "PAM account management failed: %s\n",
+    log_message(LOG_LEVEL_ERROR, "PAM account management failed: %s",
                 pam_strerror(pamh, pam_status));
     pam_end(pamh, pam_status);
     password_buffer_destroy(password, strlen(input_password) + 1); // Clean up

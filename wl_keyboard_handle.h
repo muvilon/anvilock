@@ -66,19 +66,21 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
         // Attempt PAM authentication
         if (authenticate_user(client_state->username, client_state->password))
         {
-          log_message(LOG_LEVEL_AUTH, "Authentication successful.\n");
+          log_message(LOG_LEVEL_AUTH, "Authentication successful.");
           client_state->authenticated = true;
         }
         else
         {
-          log_message(LOG_LEVEL_AUTH, "Authentication failed. Try again.\n");
-          client_state->password_index = 0; // Reset the password input
+          log_message(LOG_LEVEL_AUTH, "Authentication failed. Try again.");
+          client_state->password_index                         = 0; // Reset the password input
           client_state->password[client_state->password_index] = '\0';
-          
-          struct wl_buffer* buffer = draw_lock_screen(client_state, "Authentication failed. Try again.");
-          if (!buffer) {
-              log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-              return;
+
+          struct wl_buffer* buffer =
+            draw_lock_screen(client_state, "Authentication failed. Try again.");
+          if (!buffer)
+          {
+            log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+            return;
           }
 
           wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
@@ -101,9 +103,10 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
       client_state->password[client_state->password_index++] = (char)sym;
     }
     struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
-    if (!buffer) {
-        log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-        return;
+    if (!buffer)
+    {
+      log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+      return;
     }
 
     wl_surface_attach(client_state->wl_surface, buffer, 0, 0);

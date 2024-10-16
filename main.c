@@ -4,18 +4,18 @@
 #include "pam.h"
 #include "protocols/src/xdg-shell-client-protocol.c"
 #include "protocols/xdg-shell-client-protocol.h"
+#include "session_lock_handle.h"
 #include "shared_mem_handle.h"
 #include "wl_buffer_handle.h"
 #include "wl_keyboard_handle.h"
+#include "wl_output_handle.h"
 #include "wl_pointer_handle.h"
 #include "wl_registry_handle.h"
 #include "wl_seat_handle.h"
 #include "xdg_surface_handle.h"
 #include "xdg_wm_base_handle.h"
-#include "wl_output_handle.h"
 #include <unistd.h>
 #include <xkbcommon/xkbcommon.h>
-#include "session_lock_handle.h"
 
 /**********************************************
  * @WAYLAND CLIENT EXAMPLE CODE
@@ -98,66 +98,71 @@
  * the Wayland compositor through various protocols and listeners.
  **********************************************/
 
-int main(int argc, char* argv[]) {
-    struct client_state state = {0};
-    
-    // Initialize and connect to the Wayland display
-    state.wl_display = wl_display_connect(NULL);
-    state.username   = getlogin();
-    log_message(LOG_LEVEL_INFO, "Found User @ %s", state.username);
+int main(int argc, char* argv[])
+{
+  struct client_state state = {0};
 
-    if (!state.wl_display) {
-        log_message(LOG_LEVEL_ERROR, "Failed to connect to Wayland display\n");
-        return -1;
+  // Initialize and connect to the Wayland display
+  state.wl_display = wl_display_connect(NULL);
+  state.username   = getlogin();
+  log_message(LOG_LEVEL_INFO, "Found User @ %s", state.username);
+
+  if (!state.wl_display)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to connect to Wayland display\n");
+    return -1;
+  }
+
+  // Get the registry and set up listeners
+  state.wl_registry = wl_display_get_registry(state.wl_display);
+  state.xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+
+  // Add listeners for registry objects
+  wl_registry_add_listener(state.wl_registry, &wl_registry_listener, &state);
+
+  // Roundtrip to process the registry and get the compositor, shm, seat, etc.
+  wl_display_roundtrip(state.wl_display);
+
+  // Create the Wayland surface and initialize XDG shell surface
+  state.wl_surface  = wl_compositor_create_surface(state.wl_compositor);
+  state.xdg_surface = xdg_wm_base_get_xdg_surface(state.xdg_wm_base, state.wl_surface);
+
+  // Add listeners for XDG surface events
+  xdg_surface_add_listener(state.xdg_surface, &xdg_surface_listener, &state);
+
+  // Create the XDG toplevel (window management)
+  state.xdg_toplevel = xdg_surface_get_toplevel(state.xdg_surface);
+  xdg_toplevel_set_title(state.xdg_toplevel, "Screen Lock");
+
+  // Initialize XKB for handling keyboard input
+  state.xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+  state.xkb_keymap =
+    xkb_keymap_new_from_names(state.xkb_context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
+  state.xkb_state = xkb_state_new(state.xkb_keymap);
+
+  // Initialize pointer and keyboard state
+  state.authenticated = false; // Initialize authentication state
+
+  // Add listeners for seat (input devices like keyboard)
+  wl_seat_add_listener(state.wl_seat, &wl_seat_listener, &state);
+
+  // Commit the surface to make it visible
+  wl_surface_commit(state.wl_surface);
+
+  // Enter event loop for handling lock state and input
+  while (!state.authenticated && wl_display_dispatch(state.wl_display) != -1)
+  {
+    // Check if the session needs to be locked
+    if (!state.surface_created)
+    {
+      initiate_session_lock(&state);
     }
+  }
 
-    // Get the registry and set up listeners
-    state.wl_registry = wl_display_get_registry(state.wl_display);
-    state.xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS); 
-
-    // Add listeners for registry objects
-    wl_registry_add_listener(state.wl_registry, &wl_registry_listener, &state);
-
-    // Roundtrip to process the registry and get the compositor, shm, seat, etc.
-    wl_display_roundtrip(state.wl_display);
-
-    // Create the Wayland surface and initialize XDG shell surface
-    state.wl_surface  = wl_compositor_create_surface(state.wl_compositor);
-    state.xdg_surface = xdg_wm_base_get_xdg_surface(state.xdg_wm_base, state.wl_surface);
-    
-    // Add listeners for XDG surface events
-    xdg_surface_add_listener(state.xdg_surface, &xdg_surface_listener, &state);
-
-    // Create the XDG toplevel (window management)
-    state.xdg_toplevel = xdg_surface_get_toplevel(state.xdg_surface);
-    xdg_toplevel_set_title(state.xdg_toplevel, "Screen Lock");
-
-    // Initialize XKB for handling keyboard input
-    state.xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    state.xkb_keymap = xkb_keymap_new_from_names(state.xkb_context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
-    state.xkb_state = xkb_state_new(state.xkb_keymap);
-
-    // Initialize pointer and keyboard state
-    state.authenticated = false; // Initialize authentication state
-
-    // Add listeners for seat (input devices like keyboard)
-    wl_seat_add_listener(state.wl_seat, &wl_seat_listener, &state);
-
-    // Commit the surface to make it visible
-    wl_surface_commit(state.wl_surface);
-
-    // Enter event loop for handling lock state and input
-    while (!state.authenticated && wl_display_dispatch(state.wl_display) != -1) {
-        // Check if the session needs to be locked
-        if (!state.surface_created) {
-            initiate_session_lock(&state);
-        }
-    }
-
-    // Disconnect from the Wayland display
-    unlock_and_destroy_session_lock(&state);
-    wl_display_roundtrip(state.wl_display);
-    wl_display_disconnect(state.wl_display);
-    log_message(LOG_LEVEL_SUCCESS, "Unlocking...");
-    return 0;
+  // Disconnect from the Wayland display
+  unlock_and_destroy_session_lock(&state);
+  wl_display_roundtrip(state.wl_display);
+  wl_display_disconnect(state.wl_display);
+  log_message(LOG_LEVEL_SUCCESS, "Unlocking...");
+  return 0;
 }

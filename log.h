@@ -9,6 +9,18 @@
 #include <time.h>
 #include <unistd.h>
 
+/* Define color codes */
+#define COLOR_RESET    "\x1B[0m"
+#define COLOR_RED      "\x1B[1;31m"
+#define COLOR_YELLOW   "\x1B[1;33m"
+#define COLOR_BLUE     "\x1B[1;34m"
+#define COLOR_DARKGRAY "\x1B[1;30m"
+#define COLOR_MAGENTA  "\x1B[1;35m"
+#define COLOR_GREEN    "\x1B[1;32m"
+#define COLOR_CYAN     "\x1B[1;36m"
+#define COLOR_WHITE    "\x1B[1;37m"
+#define COLOR_LIGHTRED "\x1B[1;91m"
+
 /* Define log importance levels */
 enum log_importance
 {
@@ -19,21 +31,25 @@ enum log_importance
   LOG_LEVEL_AUTH,
   LOG_LEVEL_SUCCESS,
   LOG_LEVEL_DEBUG,
+  LOG_LEVEL_TRACE,    // New level for detailed tracing
+  LOG_LEVEL_ALERT,    // New level for alerts
   LOG_IMPORTANCE_LAST // Keep this as the last element to define the range
 };
 
 /* Current log importance level */
 static enum log_importance log_importance = LOG_LEVEL_DEBUG;
 
-/* Define verbosity colors */
+/* Define verbosity colors using macros */
 static const char* verbosity_colors[] = {
-  [LOG_LEVEL_SILENT]  = "",
-  [LOG_LEVEL_ERROR]   = "\x1B[1;31m", // Red
-  [LOG_LEVEL_WARN]    = "\x1B[1;33m", // Yellow
-  [LOG_LEVEL_INFO]    = "\x1B[1;34m", // Blue
-  [LOG_LEVEL_DEBUG]   = "\x1B[1;30m", // Dark Gray
-  [LOG_LEVEL_AUTH]    = "\x1B[1;35m", // Pink (Magenta)
-  [LOG_LEVEL_SUCCESS] = "\x1B[1;32m"  // Green
+  [LOG_LEVEL_SILENT]  = "",             // No color for silent
+  [LOG_LEVEL_ERROR]   = COLOR_RED,      // Red for errors
+  [LOG_LEVEL_WARN]    = COLOR_YELLOW,   // Yellow for warnings
+  [LOG_LEVEL_INFO]    = COLOR_BLUE,     // Blue for information
+  [LOG_LEVEL_AUTH]    = COLOR_MAGENTA,  // Magenta for authentication
+  [LOG_LEVEL_SUCCESS] = COLOR_GREEN,    // Green for success
+  [LOG_LEVEL_DEBUG]   = COLOR_WHITE,    // Dark gray for debugging
+  [LOG_LEVEL_TRACE]   = COLOR_CYAN,     // Cyan for tracing
+  [LOG_LEVEL_ALERT]   = COLOR_LIGHTRED, // Light red for alerts
 };
 
 /* Function to initialize logging with a specified verbosity level */
@@ -74,7 +90,7 @@ void log_message(enum log_importance verbosity, const char* fmt, ...)
 
   if (isatty(STDERR_FILENO))
   {
-    fprintf(stderr, "\x1B[0m"); // Reset color
+    fprintf(stderr, COLOR_RESET); // Reset color after message
   }
 
   fprintf(stderr, "\n");
