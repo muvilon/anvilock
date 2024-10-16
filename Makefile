@@ -1,9 +1,9 @@
-# Makefile for muvilock
+# Makefile for anvilock
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -g
 LIBS = -lwayland-client -lwayland-server -lpam -lxkbcommon
-TARGET = muvilock
+TARGET = anvilock
 SRC = main.c
 
 all: $(TARGET)

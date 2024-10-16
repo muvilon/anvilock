@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 
   // Create the XDG toplevel (window management)
   state.xdg_toplevel = xdg_surface_get_toplevel(state.xdg_surface);
-  xdg_toplevel_set_title(state.xdg_toplevel, "Screen Lock");
+  xdg_toplevel_set_title(state.xdg_toplevel, "Anvilock");
 
   // Initialize XKB for handling keyboard input
   state.xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);

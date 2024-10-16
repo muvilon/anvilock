@@ -1,4 +1,4 @@
-project('muvilock', 'c')
+project('anvilock', 'c')
 
 cc = meson.get_compiler('c')
 
@@ -8,7 +8,7 @@ pam = cc.find_library('pam', required: true)
 xkbcommon = dependency('xkbcommon')
 
 executable(
-  'muvilock',
+  'anvilock',
   'main.c',
   dependencies: [wayland_client, wayland_server, pam, xkbcommon],
   install: true

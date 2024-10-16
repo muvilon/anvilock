@@ -1,10 +1,12 @@
-# MUVILOCK
+# ANVILOCK
+
+ANVILOCK stands for **A Naive yet Intelligent LOCK**
 
 An upcoming screen lock for Wayland compositors that abides by the **ext-session-lock-v1** Wayland Protocol.
 
 > [!IMPORTANT]
 > 
-> MUVILOCK is a [WIP] - Work in Progress
+> ANVILOCK is a [WIP] - Work in Progress
 > 
 > Stay tuned for more updates!
 
@@ -12,17 +14,17 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 
 ## List of Contents
 
-1. [Project Structure](#project-structure)
-2. [Dependencies](#dependencies)
-3. [Building](#building)
-4. [Future](#future)
+1. [Project Structure](https://github.com/muvilon/anvilock?tab=readme-ov-file#1-project-structure)
+2. [Dependencies](https://github.com/muvilon/anvilock?tab=readme-ov-file#2-dependencies)
+3. [Building](https://github.com/muvilon/anvilock?tab=readme-ov-file#3-building)
+4. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#4-future)
 
 ---
 
 ## 1. Project Structure
 
 ```
-MUVILOCK
+ANVILOCK
 ├── main.c
 ├── client_state.h
 ├── log.h
@@ -31,6 +33,7 @@ MUVILOCK
 ├── wl_registry_handle.h
 ├── wl_buffer_handle.h
 ├── wl_seat_handle.h
+├── surface_colors.h
 ├── wl_keyboard_handle.h
 ├── wl_pointer_handle.h
 ├── xdg_surface_handle.h
@@ -38,8 +41,10 @@ MUVILOCK
 ├── shared_mem_handle.h
 └── protocols
     ├── xdg-shell-client-protocol.h
+    ├── ext-session-lock-client-protocol.h
     └── src
         └── xdg-shell-client-protocol.c
+        ├── ext-session-lock-client-protocol.c
 ```
 
 ### File Descriptions
@@ -61,11 +66,14 @@ MUVILOCK
 - **protocols/xdg-shell-client-protocol.h**: Protocol definitions for XDG shell clients, managing surfaces and windows.
 - **protocols/src/xdg-shell-client-protocol.c**: Implementation of the XDG shell client protocol.
 
+- **protocols/ext-session-lock-client-protocol.h**: Protocol definitions for `ext-session-lock-v1` protocol, session lock listener and management of lock surface. 
+- **protocols/src/ext-session-lock-client-protocol.c**: Implementation of `ext-session-lock-v1` protocol.
+
 ---
 
 ## 2. Dependencies
 
-MUVILOCK relies on the following dependencies:
+ANVILOCK relies on the following dependencies:
 
 - **libwayland-client**: Handles Wayland client communication.
 - **libxkbcommon**: Provides keyboard keymap compilation and handling.
@@ -91,12 +99,12 @@ Ensure that the following are installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/muvilon/muvilock.git
+   git clone https://github.com/muvilon/anvilock.git
    ```
 
 2. Navigate to the project directory and build the application:
    ```bash
-   cd muvilock
+   cd anvilock
    mkdir build && cd build
    cmake ..  # Or meson setup build
    make
@@ -104,7 +112,7 @@ Ensure that the following are installed:
 
 3. Run the application (ensure the compositor is Wayland-compatible):
    ```bash
-   ./muvilock
+   ./anvilock
    ```
 
 ---

@@ -1,4 +1,4 @@
-# SECURITY for MUVILOCK
+# SECURITY for ANVILOCK
 
 ## Security Policy
 
