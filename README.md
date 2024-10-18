@@ -84,36 +84,132 @@ All dependencies must be installed on your system before building.
 
 ---
 
-## 3. Building
+## Building
 
-### Prerequisites:
+### Prerequisites
 
 Ensure that the following are installed:
 
 - **Wayland development libraries**
 - **PAM development libraries**
-- **CMake or Meson** (depending on the project’s build system)
-- **gcc/clang** for compiling the project
+- **CMake** (if building with CMake) or **Meson** (if building with Meson)
+- **gcc** or **clang** for compiling the project
 
-### Build Instructions:
+## Build Instructions
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/muvilon/anvilock.git
-   ```
+### 1. Cloning the Repository
 
-2. Navigate to the project directory and build the application:
+First, clone the repository:
+
+```bash
+git clone https://github.com/muvilon/anvilock.git
+```
+
+### 2. Building the Application
+
+You can build the application using one of the following methods: Make, CMake, or Meson. Choose one based on your preference or environment.
+
+#### Method 1: Building with Make
+
+1. Navigate to the project directory:
+
    ```bash
    cd anvilock
-   mkdir build && cd build
-   cmake ..  # Or meson setup build
+   ```
+
+2. Build the application:
+
+   ```bash
    make
    ```
 
 3. Run the application (ensure the compositor is Wayland-compatible):
+
    ```bash
    ./anvilock
    ```
+
+**Caveats for Make:**
+- Ensure that the `Makefile` is configured properly to find all necessary libraries and dependencies.
+- The Make build may not automatically handle out-of-source builds, so you might want to keep your source directory clean.
+
+---
+
+#### Method 2: Building with CMake
+
+1. Navigate to the project directory:
+
+   ```bash
+   cd anvilock
+   ```
+
+2. Create a build directory and navigate into it:
+
+   ```bash
+   mkdir build && cd build
+   ```
+
+3. Configure the project:
+
+   ```bash
+   cmake ..
+   ```
+
+4. Build the application:
+
+   ```bash
+   make
+   ```
+
+5. Run the application:
+
+   ```bash
+   ./anvilock
+   ```
+
+**Caveats for CMake:**
+- Ensure that you have the necessary CMake version (3.10 or later).
+- You may need to install `cmake` and `pkg-config` if they are not already available.
+- CMake supports out-of-source builds, keeping the source directory clean.
+
+---
+
+#### Method 3: Building with Meson
+
+1. Navigate to the project directory:
+
+   ```bash
+   cd anvilock
+   ```
+
+2. Create a build directory and set it up with Meson:
+
+   ```bash
+   meson setup build
+   ```
+
+3. Build the application:
+
+   ```bash
+   meson compile -C build
+   ```
+
+4. Run the application:
+
+   ```bash
+   ./build/anvilock
+   ```
+
+**Caveats for Meson:**
+- Ensure that you have Meson installed (you can usually install it via your package manager).
+- Meson defaults to an out-of-source build, which helps keep the project directory clean.
+- If you encounter issues with dependencies, you may need to install `ninja` (the default backend for Meson).
+
+---
+
+### Conclusion
+
+Choose the build system that best fits your needs. Each method has its own advantages and potential pitfalls, so feel free to reach out if you encounter any issues or need further assistance!
 
 ---
 

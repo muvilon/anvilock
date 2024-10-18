@@ -1,15 +1,17 @@
-project('anvilock', 'c')
+project('anvilock', 'c', '11')
 
-cc = meson.get_compiler('c')
+# Dependencies
+freetype_dep = dependency('freetype2', required: true)
+wayland_client_dep = dependency('wayland-client', required: true)
+wayland_server_dep = dependency('wayland-server', required: true)
+pam_dep = dependency('pam', required: true)
+xkbcommon_dep = dependency('xkbcommon', required: true)
 
-wayland_client = dependency('wayland-client')
-wayland_server = dependency('wayland-server')
-pam = cc.find_library('pam', required: true)
-xkbcommon = dependency('xkbcommon')
+# Sources
+src = 'main.c'
 
-executable(
-  'anvilock',
-  'main.c',
-  dependencies: [wayland_client, wayland_server, pam, xkbcommon],
-  install: true
+# Executable
+executable('anvilock', src,
+    dependencies: [freetype_dep, wayland_client_dep, wayland_server_dep, pam_dep, xkbcommon_dep],
+    cpp_args: ['-Wall', '-Wextra', '-Wpedantic', '-g']
 )

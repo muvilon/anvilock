@@ -4,8 +4,16 @@
 #include "client_state.h"
 #include "xdg_surface_handle.h"
 #include <assert.h>
+#include <time.h>
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
+
+static bool            backspace_held = false;
+static bool            ctrl_held      = false;
+static struct timespec last_backspace_time;
+
+#define BACKSPACE_REPEAT_DELAY_MS 200 // Initial delay before repeating (in ms)
+#define BACKSPACE_REPEAT_RATE_MS  50  // Repeat rate while holding (in ms)
 
 static void wl_keyboard_leave(void* data, struct wl_keyboard* wl_keyboard, uint32_t serial,
                               struct wl_surface* surface)
@@ -25,7 +33,7 @@ static void wl_keyboard_modifiers(void* data, struct wl_keyboard* wl_keyboard, u
 static void wl_keyboard_repeat_info(void* data, struct wl_keyboard* wl_keyboard, int32_t rate,
                                     int32_t delay)
 {
-  /* Left as an exercise for the reader */
+  /* meh */
 }
 
 static void wl_keyboard_enter(void* data, struct wl_keyboard* wl_keyboard, uint32_t serial,
@@ -45,25 +53,106 @@ static void wl_keyboard_enter(void* data, struct wl_keyboard* wl_keyboard, uint3
   }
 }
 
+static long time_diff_ms(struct timespec* start, struct timespec* end)
+{
+  return (end->tv_sec - start->tv_sec) * 1000 + (end->tv_nsec - start->tv_nsec) / 1000000;
+}
+
+static void handle_backspace(struct client_state* client_state, bool ctrl_backspace)
+{
+  if (ctrl_backspace)
+  {
+    // Clear the entire password buffer
+    client_state->password_index = 0;
+  }
+  else if (client_state->password_index > 0)
+  {
+    // Remove one character
+    client_state->password_index--;
+  }
+  client_state->password[client_state->password_index] = '\0';
+
+  struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
+  if (!buffer)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+    return;
+  }
+
+  wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
+  wl_surface_commit(client_state->wl_surface);
+}
+
+static void handle_backspace_repeat(struct client_state* client_state)
+{
+  if (backspace_held)
+  {
+    struct timespec current_time;
+    clock_gettime(CLOCK_MONOTONIC, &current_time);
+
+    long time_since_last_backspace = time_diff_ms(&last_backspace_time, &current_time);
+
+    if (time_since_last_backspace >= BACKSPACE_REPEAT_RATE_MS)
+    {
+      handle_backspace(client_state, false);
+      last_backspace_time = current_time;
+    }
+  }
+}
+
 static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_t serial,
                             uint32_t time, uint32_t key, uint32_t state)
 {
   struct client_state* client_state = data;
-  char                 buf[128];
-  uint32_t             keycode = key + 8;
-  xkb_keysym_t         sym     = xkb_state_key_get_one_sym(client_state->xkb_state, keycode);
+  uint32_t             keycode      = key + 8;
+  xkb_keysym_t         sym          = xkb_state_key_get_one_sym(client_state->xkb_state, keycode);
 
-  const char* action = (state == WL_KEYBOARD_KEY_STATE_PRESSED) ? "PRESSED" : "RELEASED";
-
-  if (state == WL_KEYBOARD_KEY_STATE_RELEASED)
+  if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
   {
-    if (sym == XKB_KEY_Return)
+    if (sym == XKB_KEY_Control_L || sym == XKB_KEY_Control_R)
+    {
+      ctrl_held = true;
+    }
+    else if (sym == XKB_KEY_BackSpace)
+    {
+      handle_backspace(client_state, ctrl_held);
+      clock_gettime(CLOCK_MONOTONIC, &last_backspace_time);
+      backspace_held = true;
+    }
+    else if (sym >= XKB_KEY_space && sym <= XKB_KEY_asciitilde &&
+             client_state->password_index < sizeof(client_state->password) - 1)
+    {
+      client_state->password[client_state->password_index++] = (char)sym;
+      struct wl_buffer* buffer                               = draw_lock_screen(client_state, NULL);
+      if (!buffer)
+      {
+        log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
+        return;
+      }
+      wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
+      wl_surface_commit(client_state->wl_surface);
+    }
+  }
+  else if (state == WL_KEYBOARD_KEY_STATE_RELEASED)
+  {
+    if (sym == XKB_KEY_Control_L || sym == XKB_KEY_Control_R)
+    {
+      ctrl_held = false;
+    }
+    else if (sym == XKB_KEY_BackSpace)
+    {
+      backspace_held = false;
+      if (ctrl_held)
+      {
+        client_state->password_index = 0;
+      }
+    }
+    else if (sym == XKB_KEY_Return)
     {
       if (client_state->password_index > 0)
       {
-        client_state->password[client_state->password_index] = '\0'; // Null-terminate the password
+        client_state->password[client_state->password_index] = '\0';
 
-        // Attempt PAM authentication
         if (authenticate_user(client_state->username, client_state->password))
         {
           log_message(LOG_LEVEL_AUTH, "Authentication successful.");
@@ -72,8 +161,8 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
         else
         {
           log_message(LOG_LEVEL_AUTH, "Authentication failed. Try again.");
-          client_state->password_index                         = 0; // Reset the password input
-          client_state->password[client_state->password_index] = '\0';
+          client_state->password_index = 0;
+          client_state->password[0]    = '\0';
 
           struct wl_buffer* buffer =
             draw_lock_screen(client_state, "Authentication failed. Try again.");
@@ -82,36 +171,17 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
             log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
             return;
           }
-
           wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
           wl_surface_commit(client_state->wl_surface);
-          return;
         }
 
-        // Reset the flag to allow new input after an attempt
-        client_state->firstEnterPress = false; // Allow for new password entry
+        client_state->firstEnterPress = false;
       }
     }
-    else if (sym == XKB_KEY_BackSpace && client_state->password_index > 0)
-    {
-      client_state->password[--client_state->password_index] = '\0'; // Handle backspace
-    }
-    else if (sym >= XKB_KEY_space && sym <= XKB_KEY_asciitilde &&
-             client_state->password_index < sizeof(client_state->password) - 1)
-    {
-      // Capture character input
-      client_state->password[client_state->password_index++] = (char)sym;
-    }
-    struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
-    if (!buffer)
-    {
-      log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-      return;
-    }
-
-    wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
-    wl_surface_commit(client_state->wl_surface);
   }
+
+  // Always call handle_backspace_repeat to ensure smooth backspace repetition
+  handle_backspace_repeat(client_state);
 }
 
 static void wl_keyboard_keymap(void* data, struct wl_keyboard* wl_keyboard, uint32_t format,

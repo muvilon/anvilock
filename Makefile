@@ -1,8 +1,6 @@
-# Makefile for anvilock
-
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g
-LIBS = -lwayland-client -lwayland-server -lpam -lxkbcommon
+CFLAGS = -Wall -Wextra -Wpedantic -g $(shell pkg-config --cflags freetype2)
+LIBS = -lwayland-client -lwayland-server -lpam -lxkbcommon $(shell pkg-config --libs freetype2)
 TARGET = anvilock
 SRC = main.c
 
