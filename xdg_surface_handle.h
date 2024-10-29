@@ -1,6 +1,7 @@
 #ifndef XDG_SURFACE_HANDLER_H
 #define XDG_SURFACE_HANDLER_H
 
+#include "config.h"
 #include "log.h"
 #include "surface_colors.h"
 #include "unicode.h"
@@ -30,6 +31,12 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state, const char
 // Function implementations
 static int init_freetype()
 {
+  if (!load_config("config.toml"))
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to load config file");
+    return 0;
+  }
+
   int error = FT_Init_FreeType(&ft_library);
   if (error)
   {
@@ -37,7 +44,7 @@ static int init_freetype()
     return 0;
   }
 
-  error = FT_New_Face(ft_library, "/usr/share/fonts/SpaceMono-Regular.ttf", 0, &ft_face);
+  error = FT_New_Face(ft_library, font_path, 0, &ft_face);
   if (error)
   {
     log_message(LOG_LEVEL_ERROR, "Failed to load font");
