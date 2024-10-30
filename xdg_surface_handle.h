@@ -31,7 +31,7 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state, const char
 // Function implementations
 static int init_freetype()
 {
-  if (!load_config("config.toml"))
+  if (!load_config())
   {
     log_message(LOG_LEVEL_ERROR, "Failed to load config file");
     return 0;
@@ -231,6 +231,8 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state, const char
   close(fd);
   return buffer;
 }
+
+// **
 
 static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, uint32_t serial)
 {

@@ -180,8 +180,15 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
     }
   }
 
+  struct wl_buffer* buffer                               = draw_lock_screen(client_state, NULL);
+
+  wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
+  wl_surface_damage(client_state->wl_surface, 0, 0, client_state->output_state.width,
+                    client_state->output_state.height); // Notify the compositor
+  wl_surface_commit(client_state->wl_surface);
+
   // Always call handle_backspace_repeat to ensure smooth backspace repetition
-  handle_backspace_repeat(client_state);
+  // handle_backspace_repeat(client_state);
 }
 
 static void wl_keyboard_keymap(void* data, struct wl_keyboard* wl_keyboard, uint32_t format,

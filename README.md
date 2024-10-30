@@ -17,7 +17,8 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 1. [Project Structure](https://github.com/muvilon/anvilock?tab=readme-ov-file#1-project-structure)
 2. [Dependencies](https://github.com/muvilon/anvilock?tab=readme-ov-file#2-dependencies)
 3. [Building](https://github.com/muvilon/anvilock?tab=readme-ov-file#3-building)
-4. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#4-future)
+4. [Config](https://github.com/muvilon/anvilock?tab=readme-ov-file#4-configuration)
+4. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#5-future)
 
 ---
 
@@ -39,15 +40,15 @@ ANVILOCK
 ├── xdg_surface_handle.h
 ├── xdg_wm_base_handle.h
 ├── shared_mem_handle.h
+├── toml
+├   ├── toml.h
+├   └── toml.c
 └── protocols
     ├── xdg-shell-client-protocol.h
     ├── ext-session-lock-client-protocol.h
     └── src
-        └── xdg-shell-client-protocol.c
-        ├── ext-session-lock-client-protocol.c
-└── toml
-    ├── toml.h
-    └── toml.c
+        ├── xdg-shell-client-protocol.c
+        └── ext-session-lock-client-protocol.c
 ```
 
 ### File Descriptions
@@ -77,6 +78,8 @@ ANVILOCK
 
 - **toml/toml.h**: Header file for tomlc99 parser.
 - **toml/toml.c**: Implementation of tomlc99 parser.
+
+The TOML Parser being used in this repo is thanks to [tomlc99](https://github.com/cktan/tomlc99)
 
 ---
 
@@ -225,14 +228,24 @@ You can build the application using one of the following methods: Make, CMake, o
 
 ---
 
+## 4. Configuration
+
+All configurations are done through a `config.toml` file that will be generated if not present
+
+Currently the only aspect which is configurable is the **font** that is rendered by the **freetype2** package onto the lock surface
+
+As we progress and move from basic shell rendering to something more graphical like EGL, we will have more configurations available
+
 ### Conclusion
 
 Choose the build system that best fits your needs. Each method has its own advantages and potential pitfalls, so feel free to reach out if you encounter any issues or need further assistance!
 
 ---
 
-## 4. Future
+## 5. Future
 
 Stay tuned for more updates as we progress through development.
+
+Anvilock is an open source software licensed under the [BSD 3 Clause](https://github.com/muvilon/anvilock/blob/main/LICENSE) License.
 
 ---

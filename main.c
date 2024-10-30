@@ -153,7 +153,12 @@ int main(int argc, char* argv[])
 
   // Add listeners for seat (input devices like keyboard)
   wl_seat_add_listener(state.wl_seat, &wl_seat_listener, &state);
-  init_freetype();
+  int ft = init_freetype();
+
+  if (ft == 0) {
+    log_message(LOG_LEVEL_ERROR, "Something went wrong during freetype init. Exiting anvilock with code 1");
+    return 1;
+  }
 
   // Commit the surface to make it visible
   wl_surface_commit(state.wl_surface);
