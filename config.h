@@ -11,7 +11,7 @@
     const char* home = getenv("HOME");                                                             \
     home ? (snprintf(_config_path, sizeof(_config_path), "%s/.config/anvilock/config.toml", home), \
             _config_path)                                                                          \
-         : (fprintf(stderr, "HOME environment variable not set.\n"), NULL);                        \
+         : (log_message(LOG_LEVEL_ERROR, "HOME environment variable not set."), NULL);             \
   })
 
 // Buffer to hold config file path
@@ -31,7 +31,7 @@ static int load_config()
   FILE* config_file = fopen(config_path, "r");
   if (config_file == NULL)
   {
-    fprintf(stderr, "Failed to open config file: %s\n", config_path);
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to open config file: %s", config_path);
     return 0;
   }
 
@@ -40,14 +40,15 @@ static int load_config()
 
   if (!config)
   {
-    fprintf(stderr, "Failed to parse config file: %s\n", errbuf);
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to parse config file: %s", errbuf);
     return 0;
   }
 
   toml_table_t* font_table = toml_table_in(config, "font");
   if (!font_table)
   {
-    fprintf(stderr, "Failed to find font table in config file: %s\n", config_path);
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to find font table in config file: %s",
+                config_path);
     toml_free(config);
     return 0;
   }
@@ -56,7 +57,7 @@ static int load_config()
   char* font_path_str;
   if (toml_rtos(toml_raw_in(font_table, "path"), &font_path_str) == -1)
   {
-    fprintf(stderr, "Failed to find font path in config file: %s\n", config_path);
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to find font path in config file: %s", config_path);
     toml_free(config);
     return 0;
   }

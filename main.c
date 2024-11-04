@@ -155,8 +155,10 @@ int main(int argc, char* argv[])
   wl_seat_add_listener(state.wl_seat, &wl_seat_listener, &state);
   int ft = init_freetype();
 
-  if (ft == 0) {
-    log_message(LOG_LEVEL_ERROR, "Something went wrong during freetype init. Exiting anvilock with code 1");
+  if (ft == 0)
+  {
+    log_message(LOG_LEVEL_ERROR, "Initializating FreeType2 was unsuccessful. Check previous logs "
+                                 "to know more. Exiting with code 1");
     return 1;
   }
 
