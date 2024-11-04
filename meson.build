@@ -1,4 +1,5 @@
 project('anvilock', 'c',
+  version : '0.1',
   default_options : [
     'warning_level=3',
     'c_std=c11'
@@ -39,19 +40,29 @@ executable('anvilock',
 )
 
 # Custom target for config file generation
-config_file = 'config.toml'
+config_dir = '$HOME/.config/anvilock'
+config_file = config_dir / 'config.toml'
+
 run_command = find_program('sh')
 
 run_target('config',
   command: [
     run_command, '-c',
     '''
-    if [ ! -f @0@ ]; then
-      echo "[font]" > @0@
-      echo "name = \\"# your font name goes here\\"" >> @0@
-      echo "path = \\"# your font path goes here\\"" >> @0@
-      echo "Created config.toml with placeholder values."
+    CONFIG_DIR="$HOME/.config/anvilock"
+    CONFIG_FILE="$CONFIG_DIR/config.toml"
+    
+    # Exit if config file already exists
+    if [ -f "$CONFIG_FILE" ]; then
+      exit 0
     fi
-    '''.format(config_file)
+    
+    mkdir -p "$CONFIG_DIR"
+    
+    echo "[font]" > "$CONFIG_FILE"
+    echo "name = \\"# your font name goes here\\"" >> "$CONFIG_FILE"
+    echo "path = \\"# your font path goes here\\"" >> "$CONFIG_FILE"
+    echo "Created config.toml with placeholder values in $CONFIG_DIR"
+    '''
   ]
 )

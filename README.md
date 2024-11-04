@@ -18,7 +18,7 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 2. [Dependencies](https://github.com/muvilon/anvilock?tab=readme-ov-file#2-dependencies)
 3. [Building](https://github.com/muvilon/anvilock?tab=readme-ov-file#3-building)
 4. [Config](https://github.com/muvilon/anvilock?tab=readme-ov-file#4-configuration)
-4. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#5-future)
+5. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#5-future)
 
 ---
 
@@ -135,7 +135,7 @@ You can build the application using one of the following methods: Make, CMake, o
    make
    ```
 
-3. Modify the config.toml file to use your font
+3. Modify the `~/.config/anvilock/config.toml` file to use your font
 
 4. Run the application (ensure the compositor is Wayland-compatible):
 
@@ -176,7 +176,7 @@ You can build the application using one of the following methods: Make, CMake, o
    make
    ```
 
-5. Modify the config.toml file to use your font
+5. Modify the `~/.config/anvilock/config.toml` file to use your font
 
 6. Run the application:
 
@@ -212,7 +212,7 @@ You can build the application using one of the following methods: Make, CMake, o
    meson compile -C build [config]
    ```
 
-4. Modify the config.toml file to use your font
+4. Modify the `~/.config/anvilock/config.toml` file to use your font
 
 5. Run the application:
 
@@ -230,7 +230,7 @@ You can build the application using one of the following methods: Make, CMake, o
 
 ## 4. Configuration
 
-All configurations are done through a `config.toml` file that will be generated if not present
+All configurations are done through a `config.toml` file that will be generated in `~/.config/anvilock/` if not present
 
 Currently the only aspect which is configurable is the **font** that is rendered by the **freetype2** package onto the lock surface
 
