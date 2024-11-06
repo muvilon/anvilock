@@ -10,6 +10,9 @@ project('anvilock', 'c',
 freetype_dep = dependency('freetype2')
 wayland_client_dep = dependency('wayland-client')
 wayland_server_dep = dependency('wayland-server')
+wayland_egl_dep = dependency('wayland-egl')
+egl_dep = dependency('EGL')
+gles_dep = dependency('GLESv2')
 pam_dep = dependency('pam')
 xkbcommon_dep = dependency('xkbcommon')
 
@@ -33,6 +36,9 @@ executable('anvilock',
     freetype_dep,
     wayland_client_dep,
     wayland_server_dep,
+    wayland_egl_dep,
+    egl_dep,
+    gles_dep,
     pam_dep,
     xkbcommon_dep
   ],

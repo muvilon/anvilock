@@ -19,6 +19,9 @@ target_link_libraries(anvilock
         ${FREETYPE_LIBRARIES}
         wayland-client
         wayland-server
+        wayland-egl
+        EGL 
+        GLESv2
         pam
         xkbcommon
 )

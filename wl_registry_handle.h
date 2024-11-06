@@ -41,7 +41,7 @@ static void registry_global(void* data, struct wl_registry* wl_registry, uint32_
   }
   else if (strcmp(interface, ext_session_lock_manager_v1_interface.name) == 0)
   {
-    state->ext_session_lock_manager_v1 =
+    state->session_lock.ext_session_lock_manager =
       wl_registry_bind(wl_registry, name, &ext_session_lock_manager_v1_interface, 1);
     log_message(LOG_LEVEL_INFO, "ext_session_lock_manager interface bound.");
   }

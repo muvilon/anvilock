@@ -17,7 +17,7 @@
 static void ext_session_lock_v1_handle_locked(void* data, struct ext_session_lock_v1* lock)
 {
   struct client_state* state = data;
-  state->locked              = true;
+  state->pam.locked              = true;
 }
 
 static void ext_session_lock_v1_handle_finished(void* data, struct ext_session_lock_v1* lock)
@@ -72,7 +72,7 @@ ext_session_lock_surface_v1_handle_configure(void*                              
   ext_session_lock_surface_v1_ack_configure(lock_surface, serial);
 
   // Mark surface as dirty for re-rendering
-  state->surface_dirty = true;
+  state->session_lock.surface_dirty = true;
 
   // Render the lock screen once the surface is configured
   render_lock_screen(state);
@@ -98,12 +98,12 @@ static void create_lock_surface(struct client_state* state)
   }
 
   // Create the ext-session-lock surface
-  state->ext_session_lock_surface_v1 = ext_session_lock_v1_get_lock_surface(
-    state->ext_session_lock_v1, state->wl_surface, state->output_state.wl_output);
-  assert(state->ext_session_lock_surface_v1);
+  state->session_lock.ext_session_lock_surface = ext_session_lock_v1_get_lock_surface(
+    state->session_lock.ext_session_lock, state->wl_surface, state->output_state.wl_output);
+  assert(state->session_lock.ext_session_lock_surface);
 
   // Add listener for configure events
-  ext_session_lock_surface_v1_add_listener(state->ext_session_lock_surface_v1,
+  ext_session_lock_surface_v1_add_listener(state->session_lock.ext_session_lock_surface,
                                            &ext_session_lock_surface_v1_listener, state);
 
   // Use the existing keyboard listener
@@ -113,15 +113,15 @@ static void create_lock_surface(struct client_state* state)
   wl_pointer_add_listener(state->wl_pointer, &wl_pointer_listener, state);
 
   // Mark the surface as created
-  state->surface_created = true;
+  state->session_lock.surface_created = true;
 }
 
 // Function to initiate the session lock process
 static void initiate_session_lock(struct client_state* state)
 {
   // Lock the session
-  state->ext_session_lock_v1 = ext_session_lock_manager_v1_lock(state->ext_session_lock_manager_v1);
-  assert(state->ext_session_lock_v1);
+  state->session_lock.ext_session_lock = ext_session_lock_manager_v1_lock(state->session_lock.ext_session_lock_manager);
+  assert(state->session_lock.ext_session_lock);
 
   // Create the lock surface and trigger lock screen rendering
   create_lock_surface(state);
@@ -130,10 +130,10 @@ static void initiate_session_lock(struct client_state* state)
 // Function to unlock and destroy the session lock
 static void unlock_and_destroy_session_lock(struct client_state* state)
 {
-  if (state->ext_session_lock_v1)
+  if (state->session_lock.ext_session_lock)
   {
-    ext_session_lock_v1_unlock_and_destroy(state->ext_session_lock_v1);
-    state->ext_session_lock_v1 = NULL;
+    ext_session_lock_v1_unlock_and_destroy(state->session_lock.ext_session_lock);
+    state->session_lock.ext_session_lock = NULL;
     log_message(LOG_LEVEL_INFO, "Session unlocked and lock object destroyed.");
   }
 }

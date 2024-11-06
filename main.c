@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
 
   // Initialize and connect to the Wayland display
   state.wl_display = wl_display_connect(NULL);
-  state.username   = getlogin();
-  log_message(LOG_LEVEL_INFO, "Found User @ %s", state.username);
+  state.pam.username   = getlogin();
+  log_message(LOG_LEVEL_INFO, "Found User @ %s", state.pam.username);
 
   if (!state.wl_display)
   {
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
   state.xkb_state = xkb_state_new(state.xkb_keymap);
 
   // Initialize pointer and keyboard state
-  state.authenticated = false; // Initialize authentication state
+  state.pam.authenticated = false; // Initialize authentication state
 
   // Add listeners for seat (input devices like keyboard)
   wl_seat_add_listener(state.wl_seat, &wl_seat_listener, &state);
@@ -166,10 +166,10 @@ int main(int argc, char* argv[])
   wl_surface_commit(state.wl_surface);
 
   // Enter event loop for handling lock state and input
-  while (!state.authenticated && wl_display_dispatch(state.wl_display) != -1)
+  while (!state.pam.authenticated && wl_display_dispatch(state.wl_display) != -1)
   {
     // Check if the session needs to be locked
-    if (!state.surface_created)
+    if (!state.session_lock.surface_created)
     {
       initiate_session_lock(&state);
     }

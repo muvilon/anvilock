@@ -176,7 +176,7 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state, const char
   render_text(data, width, time_x, time_y, time_str, GRUVBOX_BLUE);
 
   // Draw username
-  const char* username   = state->username;
+  const char* username   = state->pam.username;
   int         username_x = (width - strlen(username) * CHAR_WIDTH) / 2;
   int         username_y = 30;
   render_text(data, width, username_x, username_y, username, GRUVBOX_WHITE);
@@ -196,7 +196,7 @@ static struct wl_buffer* draw_lock_screen(struct client_state* state, const char
   }
 
   // Draw the password input (as dots) with pulse effect
-  for (int i = 0; i < state->password_index; i++)
+  for (int i = 0; i < state->pam.password_index; i++)
   {
     uint32_t color  = GRUVBOX_BLUE;
     int      char_x = box_x + 10 + (i * 20);

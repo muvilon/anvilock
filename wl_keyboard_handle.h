@@ -63,14 +63,14 @@ static void handle_backspace(struct client_state* client_state, bool ctrl_backsp
   if (ctrl_backspace)
   {
     // Clear the entire password buffer
-    client_state->password_index = 0;
+    client_state->pam.password_index = 0;
   }
-  else if (client_state->password_index > 0)
+  else if (client_state->pam.password_index > 0)
   {
     // Remove one character
-    client_state->password_index--;
+    client_state->pam.password_index--;
   }
-  client_state->password[client_state->password_index] = '\0';
+  client_state->pam.password[client_state->pam.password_index] = '\0';
 
   struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
   if (!buffer)
@@ -120,9 +120,9 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
       backspace_held = true;
     }
     else if (sym >= XKB_KEY_space && sym <= XKB_KEY_asciitilde &&
-             client_state->password_index < sizeof(client_state->password) - 1)
+             client_state->pam.password_index < sizeof(client_state->pam.password) - 1)
     {
-      client_state->password[client_state->password_index++] = (char)sym;
+      client_state->pam.password[client_state->pam.password_index++] = (char)sym;
       struct wl_buffer* buffer                               = draw_lock_screen(client_state, NULL);
       if (!buffer)
       {
@@ -144,25 +144,25 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
       backspace_held = false;
       if (ctrl_held)
       {
-        client_state->password_index = 0;
+        client_state->pam.password_index = 0;
       }
     }
     else if (sym == XKB_KEY_Return)
     {
-      if (client_state->password_index > 0)
+      if (client_state->pam.password_index > 0)
       {
-        client_state->password[client_state->password_index] = '\0';
+        client_state->pam.password[client_state->pam.password_index] = '\0';
 
-        if (authenticate_user(client_state->username, client_state->password))
+        if (authenticate_user(client_state->pam.username, client_state->pam.password))
         {
           log_message(LOG_LEVEL_AUTH, "Authentication successful.");
-          client_state->authenticated = true;
+          client_state->pam.authenticated = true;
         }
         else
         {
           log_message(LOG_LEVEL_AUTH, "Authentication failed. Try again.");
-          client_state->password_index = 0;
-          client_state->password[0]    = '\0';
+          client_state->pam.password_index = 0;
+          client_state->pam.password[0]    = '\0';
 
           struct wl_buffer* buffer =
             draw_lock_screen(client_state, "Authentication failed. Try again.");
@@ -175,7 +175,7 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
           wl_surface_commit(client_state->wl_surface);
         }
 
-        client_state->firstEnterPress = false;
+        client_state->pam.first_enter_press = false;
       }
     }
   }
