@@ -1,11 +1,12 @@
 #ifndef CLIENT_STATE_H
 #define CLIENT_STATE_H
 
-#include <stdbool.h>
-#include <wayland-client.h>
-#include <xkbcommon/xkbcommon.h>
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
+#include <stdbool.h>
+#include <wayland-client.h>
+#include <wayland-egl.h>
+#include <xkbcommon/xkbcommon.h>
 
 // Structure for storing output-related information
 struct output_state
@@ -72,11 +73,12 @@ struct client_state
   struct wl_output*     wl_output;     // Output display
 
   /* Wayland Objects */
-  struct wl_surface*   wl_surface;   // Wayland surface
-  struct xdg_surface*  xdg_surface;  // XDG surface for window management
-  struct xdg_toplevel* xdg_toplevel; // Top-level window interface
-  struct wl_keyboard*  wl_keyboard;  // Keyboard interface
-  struct wl_pointer*   wl_pointer;   // Pointer interface
+  struct wl_surface*    wl_surface; // Wayland surface
+  struct wl_egl_window* egl_window;
+  struct xdg_surface*   xdg_surface;  // XDG surface for window management
+  struct xdg_toplevel*  xdg_toplevel; // Top-level window interface
+  struct wl_keyboard*   wl_keyboard;  // Keyboard interface
+  struct wl_pointer*    wl_pointer;   // Pointer interface
 
   /* Window State */
   int  width, height; // Dimensions of the window surface
@@ -104,10 +106,10 @@ struct client_state
   struct output_state output_state; // Current output information
 
   /* EGL and GLES State */
-  EGLDisplay egl_display;    // EGL display connection
-  EGLContext egl_context;    // EGL rendering context
-  EGLSurface egl_surface;    // EGL surface for rendering
-  EGLConfig  egl_config;     // EGL configuration
+  EGLDisplay egl_display; // EGL display connection
+  EGLContext egl_context; // EGL rendering context
+  EGLSurface egl_surface; // EGL surface for rendering
+  EGLConfig  egl_config;  // EGL configuration
 };
 
 #endif

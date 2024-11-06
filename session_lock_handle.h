@@ -2,6 +2,7 @@
 #define SESSION_LOCK_HANDLE_H
 
 #include "client_state.h"
+#include "egl.h"
 #include "log.h"
 #include "shared_mem_handle.h"
 #include "wl_buffer_handle.h"
@@ -17,7 +18,7 @@
 static void ext_session_lock_v1_handle_locked(void* data, struct ext_session_lock_v1* lock)
 {
   struct client_state* state = data;
-  state->pam.locked              = true;
+  state->pam.locked          = true;
 }
 
 static void ext_session_lock_v1_handle_finished(void* data, struct ext_session_lock_v1* lock)
@@ -31,31 +32,6 @@ static const struct ext_session_lock_v1_listener ext_session_lock_v1_listener = 
   .locked   = ext_session_lock_v1_handle_locked,
   .finished = ext_session_lock_v1_handle_finished,
 };
-
-// Function for rendering the lock screen
-void render_lock_screen(struct client_state* state)
-{
-  // Ensure surface exists
-  if (!state->wl_surface)
-  {
-    log_message(LOG_LEVEL_ERROR, "No surface to render lock screen");
-    return;
-  }
-
-  // Create and draw lock screen buffer
-  struct wl_buffer* buffer = draw_lock_screen(state, NULL);
-  if (!buffer)
-  {
-    log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-    return;
-  }
-
-  // Attach the buffer to the surface and commit
-  wl_surface_attach(state->wl_surface, buffer, 0, 0);
-  wl_surface_damage(state->wl_surface, 0, 0, state->output_state.width,
-                    state->output_state.height); // Notify the compositor
-  wl_surface_commit(state->wl_surface);
-}
 
 // Listener callback for ext-session-lock surface configuration
 static void
@@ -90,7 +66,6 @@ static void create_lock_surface(struct client_state* state)
   state->wl_surface = wl_compositor_create_surface(state->wl_compositor);
   assert(state->wl_surface);
 
-  // Ensure that output is set correctly in client_state
   if (!state->output_state.wl_output)
   {
     log_message(LOG_LEVEL_ERROR, "No output available for lock surface");
@@ -102,14 +77,13 @@ static void create_lock_surface(struct client_state* state)
     state->session_lock.ext_session_lock, state->wl_surface, state->output_state.wl_output);
   assert(state->session_lock.ext_session_lock_surface);
 
-  // Add listener for configure events
   ext_session_lock_surface_v1_add_listener(state->session_lock.ext_session_lock_surface,
                                            &ext_session_lock_surface_v1_listener, state);
 
-  // Use the existing keyboard listener
-  wl_keyboard_add_listener(state->wl_keyboard, &wl_keyboard_listener, state);
+  init_egl(state);
 
-  // Use the existing pointer listener
+  // Add Wayland listeners for input devices
+  wl_keyboard_add_listener(state->wl_keyboard, &wl_keyboard_listener, state);
   wl_pointer_add_listener(state->wl_pointer, &wl_pointer_listener, state);
 
   // Mark the surface as created
@@ -120,11 +94,13 @@ static void create_lock_surface(struct client_state* state)
 static void initiate_session_lock(struct client_state* state)
 {
   // Lock the session
-  state->session_lock.ext_session_lock = ext_session_lock_manager_v1_lock(state->session_lock.ext_session_lock_manager);
+  state->session_lock.ext_session_lock =
+    ext_session_lock_manager_v1_lock(state->session_lock.ext_session_lock_manager);
   assert(state->session_lock.ext_session_lock);
 
   // Create the lock surface and trigger lock screen rendering
   create_lock_surface(state);
+  render_lock_screen(state);
 }
 
 // Function to unlock and destroy the session lock

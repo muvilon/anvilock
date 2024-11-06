@@ -72,15 +72,8 @@ static void handle_backspace(struct client_state* client_state, bool ctrl_backsp
   }
   client_state->pam.password[client_state->pam.password_index] = '\0';
 
-  struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
-  if (!buffer)
-  {
-    log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-    return;
-  }
-
-  wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
-  wl_surface_commit(client_state->wl_surface);
+  // Render the updated lock screen here instead of using draw_lock_screen
+  render_lock_screen(client_state);
 }
 
 static void handle_backspace_repeat(struct client_state* client_state)
@@ -123,14 +116,8 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
              client_state->pam.password_index < sizeof(client_state->pam.password) - 1)
     {
       client_state->pam.password[client_state->pam.password_index++] = (char)sym;
-      struct wl_buffer* buffer                               = draw_lock_screen(client_state, NULL);
-      if (!buffer)
-      {
-        log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-        return;
-      }
-      wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
-      wl_surface_commit(client_state->wl_surface);
+      // Render the updated lock screen here instead of using draw_lock_screen
+      render_lock_screen(client_state);
     }
   }
   else if (state == WL_KEYBOARD_KEY_STATE_RELEASED)
@@ -164,15 +151,8 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
           client_state->pam.password_index = 0;
           client_state->pam.password[0]    = '\0';
 
-          struct wl_buffer* buffer =
-            draw_lock_screen(client_state, "Authentication failed. Try again.");
-          if (!buffer)
-          {
-            log_message(LOG_LEVEL_ERROR, "Failed to create buffer for lock screen");
-            return;
-          }
-          wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
-          wl_surface_commit(client_state->wl_surface);
+          // Render the updated lock screen here instead of using draw_lock_screen
+          render_lock_screen(client_state);
         }
 
         client_state->pam.first_enter_press = false;
@@ -180,15 +160,8 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
     }
   }
 
-  struct wl_buffer* buffer = draw_lock_screen(client_state, NULL);
-
-  wl_surface_attach(client_state->wl_surface, buffer, 0, 0);
-  wl_surface_damage(client_state->wl_surface, 0, 0, client_state->output_state.width,
-                    client_state->output_state.height); // Notify the compositor
-  wl_surface_commit(client_state->wl_surface);
-
-  // Always call handle_backspace_repeat to ensure smooth backspace repetition
-  // handle_backspace_repeat(client_state);
+  if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
+    render_lock_screen(client_state);
 }
 
 static void wl_keyboard_keymap(void* data, struct wl_keyboard* wl_keyboard, uint32_t format,

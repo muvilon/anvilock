@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

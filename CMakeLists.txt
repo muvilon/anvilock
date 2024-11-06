@@ -24,6 +24,7 @@ target_link_libraries(anvilock
         GLESv2
         pam
         xkbcommon
+        m
 )
 
 # Enable warnings
