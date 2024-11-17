@@ -207,7 +207,7 @@ static void cleanup(struct client_state* state)
   FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
 
-  log_message(LOG_LEVEL_ERROR, "Anvilock resources cleanup completed. Exiting...");
+  log_message(LOG_LEVEL_INFO, "Anvilock resources cleanup completed. Exiting...");
 }
 
 int main(int argc, char* argv[])

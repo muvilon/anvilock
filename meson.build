@@ -6,16 +6,18 @@ project('anvilock', 'c',
   ]
 )
 
+cc = meson.get_compiler('c')
+
 # Dependencies
 freetype_dep = dependency('freetype2')
 wayland_client_dep = dependency('wayland-client')
 wayland_server_dep = dependency('wayland-server')
 wayland_egl_dep = dependency('wayland-egl')
-egl_dep = dependency('EGL')
-gles_dep = dependency('GLESv2')
+egl_dep = dependency('egl')
+gles_dep = dependency('glesv2')
 pam_dep = dependency('pam')
 xkbcommon_dep = dependency('xkbcommon')
-maths_dep = dependency('m')
+maths_dep = cc.find_library('m', required: true)
 
 # Source files
 src_files = [
