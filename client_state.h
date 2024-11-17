@@ -49,24 +49,35 @@ struct session_lock
   struct ext_session_lock_surface_v1* ext_session_lock_surface; // Surface for lock
 };
 
+struct auth_state
+{
+  bool auth_failed;
+};
+
+struct user_configs
+{
+  char* background_path;
+};
+
 // Structure to store PAM-related state and authentication information
 struct pam_state
 {
-  bool  first_enter_press; // Tracks first Enter key press for authentication
-  char* username;          // Stores the username for authentication
-  char  password[256];     // Password buffer
-  int   password_index;    // Current index in the password buffer
-  bool  authenticated;     // Tracks if user is authenticated
-  bool  locked;            // Locks the session if authentication fails
+  bool              first_enter_press; // Tracks first Enter key press for authentication
+  char*             username;          // Stores the username for authentication
+  char              password[256];     // Password buffer
+  int               password_index;    // Current index in the password buffer
+  bool              authenticated;     // Tracks if user is authenticated
+  bool              locked;            // Locks the session if authentication fails
+  struct auth_state auth_state;        // the authentication state of the event loop
 };
 
 // Main structure for client state and interaction with Wayland
 struct client_state
 {
   /* Wayland Globals */
-  struct wl_display*    wl_display;    // Wayland display connection
-  struct wl_registry*   wl_registry;   // Global registry for Wayland objects
-  struct wl_shm*        wl_shm;        // Shared memory interface
+  struct wl_display*    wl_display;  // Wayland display connection
+  struct wl_registry*   wl_registry; // Global registry for Wayland objects
+  struct wl_shm*        wl_shm;      // Shared memory interface
   struct wl_shm_pool*   wl_shm_pool;
   struct wl_compositor* wl_compositor; // Wayland compositor
   struct xdg_wm_base*   xdg_wm_base;   // XDG shell for window management
@@ -105,6 +116,9 @@ struct client_state
 
   /* Output State */
   struct output_state output_state; // Current output information
+
+  /* user configs */
+  struct user_configs user_configs;
 
   /* EGL and GLES State */
   EGLDisplay egl_display; // EGL display connection

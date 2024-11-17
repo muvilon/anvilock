@@ -254,15 +254,13 @@ You can build the application using one of the following methods: Make, CMake, o
 
 All configurations are done through a `config.toml` file that will be generated in `~/.config/anvilock/` if not present
 
-Currently the only aspect which is configurable is the **font** that is rendered by the **freetype2** package onto the lock surface
-
-As we progress and move from basic shell rendering to something more graphical like EGL, we will have more configurations available
+Make sure to check out `~/.config/anvilock/config.toml` for more!
 
 > [!NOTE]
 > 
-> Currently, anvilock tries to display a hardcoded image path macro **TEMP_FILE_PATH** found in [egl.h](https://github.com/muvilon/anvilock/blob/main/egl.h)
+> Only the config for [bg] is customizable that lets you set the background of the lock screen 
 > 
-> In the near future we will integrate our `config.h`'s toml parsing to ensure that user can pick the background image from `~/.config/anvilock/config.toml`
+> More configurations and customizations are to come!
 > 
 
 ### Conclusion

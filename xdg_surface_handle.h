@@ -39,14 +39,16 @@ static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, u
 
     // Surface commit to ensure Wayland knows of the new state
     wl_surface_commit(state->wl_surface);
-    if (!eglSwapBuffers(state->egl_display, state->egl_surface)) {
-        log_message(LOG_LEVEL_ERROR, "Failed to swap EGL buffers");
+    if (!eglSwapBuffers(state->egl_display, state->egl_surface))
+    {
+      log_message(LOG_LEVEL_ERROR, "Failed to swap EGL buffers");
     }
   }
   else
   {
     // If EGL resources are not ready, defer processing
-    log_message(LOG_LEVEL_WARN, "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
+    log_message(LOG_LEVEL_WARN,
+                "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
   }
 }
 

@@ -152,7 +152,9 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
           client_state->pam.password[0]    = '\0';
 
           // Render the updated lock screen here instead of using draw_lock_screen
+          client_state->pam.auth_state.auth_failed = true;
           render_lock_screen(client_state);
+          client_state->pam.auth_state.auth_failed = false;
         }
 
         client_state->pam.first_enter_press = false;

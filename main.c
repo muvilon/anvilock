@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "client_state.h"
+#include "config.h"
 #include "freetype.h"
 #include "log.h"
 #include "pam.h"
@@ -167,6 +168,33 @@ static int initialize_freetype(struct client_state* state)
   return -1;
 }
 
+static int initialize_bg(struct client_state* state)
+{
+  const char* background_path =
+    get_bg_path(); // Get the background path from the loaded TOML config
+  if (!background_path || background_path == NULL)
+  {
+    log_message(LOG_LEVEL_ERROR, "Background path not found in config");
+    return -1;
+  }
+
+  // Check if the file exists and can be accessed
+  FILE* file = fopen(background_path, "r");
+  if (!file)
+  {
+    log_message(LOG_LEVEL_ERROR, "Background file does not exist or cannot be accessed: %s",
+                background_path);
+    return -1;
+  }
+
+  // Close the file after checking
+  fclose(file);
+
+  log_message(LOG_LEVEL_INFO, "Found bg path through config.toml ==> %s", background_path);
+  state->user_configs.background_path = strdup(background_path);
+  return 0;
+}
+
 static void cleanup(struct client_state* state)
 {
   unlock_and_destroy_session_lock(state);
@@ -178,6 +206,8 @@ static void cleanup(struct client_state* state)
 
   FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
+
+  log_message(LOG_LEVEL_ERROR, "Anvilock resources cleanup completed. Exiting...");
 }
 
 int main(int argc, char* argv[])
@@ -209,17 +239,24 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  if (initialize_bg(&state) != 0)
+  {
+    cleanup(&state);
+    return 1;
+  }
+
   // Commit the surface to make it visible
   wl_surface_commit(state.wl_surface);
 
   // Event loop to handle input and manage session state
   while (!state.pam.authenticated && wl_display_dispatch(state.wl_display) != -1)
   {
-    render_lock_screen(&state);
+    state.pam.auth_state.auth_failed = false;
     if (!state.session_lock.surface_created)
     {
       initiate_session_lock(&state);
     }
+    render_lock_screen(&state);
   }
 
   // Cleanup after exiting the event loop

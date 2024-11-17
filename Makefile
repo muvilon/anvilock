@@ -19,6 +19,10 @@ $(CONFIG_FILE):
 		echo "[font]" > $(CONFIG_FILE); \
 		echo "name = \"# your font name goes here\"" >> $(CONFIG_FILE); \
 		echo "path = \"# your font path goes here\"" >> $(CONFIG_FILE); \
+		echo "\n"; \
+		echo "[bg]" >> $(CONFIG_FILE); \
+		echo "name = \"# your background name goes here\"" >> $(CONFIG_FILE); \
+		echo "path = \"# your background path goes here\"" >> $(CONFIG_FILE); \
 		echo "Created $(CONFIG_FILE) with placeholder values."; \
 	else \
 		echo "$(CONFIG_FILE) already exists, skipping creation."; \

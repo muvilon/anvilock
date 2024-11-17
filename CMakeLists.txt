@@ -41,6 +41,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo "[font]" > ${CONFIG_FILE}
     COMMAND ${CMAKE_COMMAND} -E echo "name = \"# your font name goes here\"" >> ${CONFIG_FILE}
     COMMAND ${CMAKE_COMMAND} -E echo "path = \"# your font path goes here\"" >> ${CONFIG_FILE}
+    COMMAND ${CMAKE_COMMAND} -E echo "\n" >> ${CONFIG_FILE}
+    COMMAND ${CMAKE_COMMAND} -E echo "[bg]" >> ${CONFIG_FILE}
+    COMMAND ${CMAKE_COMMAND} -E echo "name = \"# your background name goes here\"" >> ${CONFIG_FILE}
+    COMMAND ${CMAKE_COMMAND} -E echo "path = \"# your background path goes here\"" >> ${CONFIG_FILE}
     COMMENT "Creating config.toml with placeholder values."
 )
 
