@@ -130,11 +130,18 @@ static void render_triangle(struct client_state* state)
    *
    */
   GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  if (state->pam.password_index != 0)
+  if (state->pam.password_index != 0 && !state->pam.authenticated)
   {
     const char* fragment_shader_source_1 =
       "void main() {\n"
       "    gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);\n" // Red color output
+      "}\n";
+    glShaderSource(fragment_shader, 1, &fragment_shader_source_1, NULL);
+  }
+  else if (state->pam.authenticated) {
+    const char* fragment_shader_source_1 =
+      "void main() {\n"
+      "    gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);\n" // Red color output
       "}\n";
     glShaderSource(fragment_shader, 1, &fragment_shader_source_1, NULL);
   }
@@ -146,7 +153,7 @@ static void render_triangle(struct client_state* state)
       "}\n";
     glShaderSource(fragment_shader, 1, &fragment_shader_source_2, NULL);
   }
-
+  
   glCompileShader(fragment_shader);
 
   // Check for fragment shader compile errors
@@ -174,6 +181,7 @@ static void render_triangle(struct client_state* state)
 
   // Swap buffers (render the triangle on the screen)
   eglSwapBuffers(state->egl_display, state->egl_surface);
+  if (state->pam.authenticated) sleep(1); // to let the user know we have authenticated successfully
 }
 
 #endif

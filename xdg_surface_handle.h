@@ -12,9 +12,6 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 
-// Function declarations
-static uint32_t blend_colors(uint32_t bg, uint32_t fg, unsigned char alpha);
-
 // Function for rendering the lock screen
 void render_lock_screen(struct client_state* state)
 {
@@ -29,23 +26,6 @@ void render_lock_screen(struct client_state* state)
   render_triangle(state);
 
   eglSwapBuffers(state->egl_display, state->egl_surface);
-}
-
-static uint32_t blend_colors(uint32_t bg, uint32_t fg, unsigned char alpha)
-{
-  uint32_t bg_r = (bg >> 16) & 0xFF;
-  uint32_t bg_g = (bg >> 8) & 0xFF;
-  uint32_t bg_b = bg & 0xFF;
-
-  uint32_t fg_r = (fg >> 16) & 0xFF;
-  uint32_t fg_g = (fg >> 8) & 0xFF;
-  uint32_t fg_b = fg & 0xFF;
-
-  uint32_t r = (alpha * fg_r + (255 - alpha) * bg_r) / 255;
-  uint32_t g = (alpha * fg_g + (255 - alpha) * bg_g) / 255;
-  uint32_t b = (alpha * fg_b + (255 - alpha) * bg_b) / 255;
-
-  return (r << 16) | (g << 8) | b;
 }
 
 static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, uint32_t serial)
@@ -71,13 +51,18 @@ static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, u
     // Render the lock screen (if not done in another function) and commit
     render_lock_screen(state); // Assuming render_lock_screen calls eglSwapBuffers
 
+    state->session_lock.surface_dirty = true;
+
     // Surface commit to ensure Wayland knows of the new state
     wl_surface_commit(state->wl_surface);
+    if (!eglSwapBuffers(state->egl_display, state->egl_surface)) {
+        log_message(LOG_LEVEL_ERROR, "Failed to swap EGL buffers");
+    }
   }
   else
   {
     // If EGL resources are not ready, defer processing
-    log_message(LOG_LEVEL_ERROR, "EGL display or surfaces not ready in xdg_surface_configure");
+    log_message(LOG_LEVEL_ERROR, "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
   }
 }
 

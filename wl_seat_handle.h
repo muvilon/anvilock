@@ -37,7 +37,7 @@ static void wl_seat_capabilities(void* data, struct wl_seat* wl_seat, uint32_t c
 
 static void wl_seat_name(void* data, struct wl_seat* wl_seat, const char* name)
 {
-  log_message(LOG_LEVEL_INFO, "seat name: %s", name);
+  log_message(LOG_LEVEL_INFO, "Seat name ==> %s", name);
 }
 
 static const struct wl_seat_listener wl_seat_listener = {

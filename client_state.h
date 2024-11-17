@@ -67,6 +67,7 @@ struct client_state
   struct wl_display*    wl_display;    // Wayland display connection
   struct wl_registry*   wl_registry;   // Global registry for Wayland objects
   struct wl_shm*        wl_shm;        // Shared memory interface
+  struct wl_shm_pool*   wl_shm_pool;
   struct wl_compositor* wl_compositor; // Wayland compositor
   struct xdg_wm_base*   xdg_wm_base;   // XDG shell for window management
   struct wl_seat*       wl_seat;       // Wayland seat (input device manager)

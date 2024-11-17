@@ -215,6 +215,7 @@ int main(int argc, char* argv[])
   // Event loop to handle input and manage session state
   while (!state.pam.authenticated && wl_display_dispatch(state.wl_display) != -1)
   {
+    render_lock_screen(&state);
     if (!state.session_lock.surface_created)
     {
       initiate_session_lock(&state);
