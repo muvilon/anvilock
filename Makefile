@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -g $(shell pkg-config --cflags freetype2) -Itoml
-LIBS = -lwayland-client -lwayland-server -lwayland-egl -lEGL -lGLESv2 -lpam -lxkbcommon $(shell pkg-config --libs freetype2)
+LIBS = -lwayland-client -lwayland-server -lwayland-egl -lEGL -lGLESv2 -lpam -lxkbcommon -lm $(shell pkg-config --libs freetype2)
 TARGET = anvilock
 SRC = main.c toml/toml.c
 CONFIG_DIR = $(HOME)/.config/anvilock

@@ -15,6 +15,7 @@ egl_dep = dependency('EGL')
 gles_dep = dependency('GLESv2')
 pam_dep = dependency('pam')
 xkbcommon_dep = dependency('xkbcommon')
+maths_dep = dependency('m')
 
 # Source files
 src_files = [
@@ -40,7 +41,8 @@ executable('anvilock',
     egl_dep,
     gles_dep,
     pam_dep,
-    xkbcommon_dep
+    xkbcommon_dep,
+    maths_dep
   ],
   include_directories: include_directories('toml')
 )

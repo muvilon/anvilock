@@ -12,22 +12,6 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 
-// Function for rendering the lock screen
-void render_lock_screen(struct client_state* state)
-{
-  // Bind the context to ensure it's current
-  if (!eglMakeCurrent(state->egl_display, state->egl_surface, state->egl_surface,
-                      state->egl_context))
-  {
-    log_message(LOG_LEVEL_ERROR, "Failed to make EGL context current for rendering");
-    return;
-  }
-
-  render_triangle(state);
-
-  eglSwapBuffers(state->egl_display, state->egl_surface);
-}
-
 static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, uint32_t serial)
 {
   struct client_state* state = data;
@@ -62,7 +46,7 @@ static void xdg_surface_configure(void* data, struct xdg_surface* xdg_surface, u
   else
   {
     // If EGL resources are not ready, defer processing
-    log_message(LOG_LEVEL_ERROR, "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
+    log_message(LOG_LEVEL_WARN, "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
   }
 }
 

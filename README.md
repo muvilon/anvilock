@@ -26,23 +26,39 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 
 ```
 ANVILOCK
-├── main.c
+├── CHANGELOG/
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── VERSION
 ├── client_state.h
+├── CMakeLists.txt
+├── config.h
+├── egl.h
+├── freetype.h
 ├── log.h
-├── password_buffer.h
+├── main.c
+├── Makefile
+├── meson.build
 ├── pam.h
-├── wl_registry_handle.h
-├── wl_buffer_handle.h
-├── wl_seat_handle.h
-├── surface_colors.h
-├── wl_keyboard_handle.h
-├── wl_pointer_handle.h
-├── xdg_surface_handle.h
-├── xdg_wm_base_handle.h
+├── password_buffer.h
+├── session_lock_handle.h
 ├── shared_mem_handle.h
+├── stb_image.h
+├── stb_image_write.h
+├── surface_colors.h
 ├── toml
 ├   ├── toml.h
 ├   └── toml.c
+├── unicode.h
+├── wl_buffer_handle.h
+├── wl_keyboard_handle.h
+├── wl_output_handle.h
+├── wl_pointer_handle.h
+├── wl_registry_handle.h
+├── wl_seat_handle.h
+├── xdg_surface_handle.h
+├── xdg_wm_base_handle.h
 └── protocols
     ├── xdg-shell-client-protocol.h
     ├── ext-session-lock-client-protocol.h
@@ -80,6 +96,12 @@ ANVILOCK
 - **toml/toml.c**: Implementation of tomlc99 parser.
 
 The TOML Parser being used in this repo is thanks to [tomlc99](https://github.com/cktan/tomlc99)
+
+#### stb Files:
+
+Headers used to draw and write images which are then loaded into an EGL texture for rendering 
+
+`stb_image.h` and `stb_image_write.h` are thanks to [stb](https://github.com/nothings/stb)
 
 ---
 
@@ -236,9 +258,30 @@ Currently the only aspect which is configurable is the **font** that is rendered
 
 As we progress and move from basic shell rendering to something more graphical like EGL, we will have more configurations available
 
+> [!NOTE]
+> 
+> Currently, anvilock tries to display a hardcoded image path macro **TEMP_FILE_PATH** found in [egl.h](https://github.com/muvilon/anvilock/blob/main/egl.h)
+> 
+> In the near future we will integrate our `config.h`'s toml parsing to ensure that user can pick the background image from `~/.config/anvilock/config.toml`
+> 
+
 ### Conclusion
 
-Choose the build system that best fits your needs. Each method has its own advantages and potential pitfalls, so feel free to reach out if you encounter any issues or need further assistance!
+This project is far from over and has very active **BREAKING** changes so build and use with caution.
+
+#### FAQ
+
+1. Will this work for KDE or GNOME? 
+
+Short Answer is NO. They have their own implementations of the Wayland Protocol so unless we attempt to abide by both the general `ext-session-lock-v1` and their protocols, it will NOT work on those DEs 
+
+2. Where can I use this?
+
+Any WM/DE that does not have custom implementations of the Wayland Protocol and has the `ext-session-lock-v1` protocol 
+
+Few examples: Hyprland, Sway, Wayfire, Cosmic, etc. 
+
+-> This will not work for compositors like Weston which lack the `ext-session-lock-v1` protocol needed for anvilock to work.
 
 ---
 
