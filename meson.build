@@ -70,7 +70,7 @@ run_target('config',
     echo "[font]" > "$CONFIG_FILE"
     echo "name = \\"# your font name goes here\\"" >> "$CONFIG_FILE"
     echo "path = \\"# your font path goes here\\"" >> "$CONFIG_FILE"
-    echo "\n" >> "$CONFIG_FILE"
+    echo "\\n" >> "$CONFIG_FILE"
     echo "[bg]" >> "$CONFIG_FILE"
     echo "name = \\"# your background name goes here\\"" >> "$CONFIG_FILE"
     echo "path = \\"# your background path goes here\\"" >> "$CONFIG_FILE"

@@ -164,7 +164,7 @@ static int initialize_freetype(struct client_state* state)
   {
     return 0;
   }
-  log_message(LOG_LEVEL_ERROR, "Initializing FreeType2 was unsuccessful.\n");
+  log_message(LOG_LEVEL_ERROR, "Initializing FreeType2 was unsuccessful.");
   return -1;
 }
 
