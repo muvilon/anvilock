@@ -19,11 +19,7 @@ install_dependencies() {
 }
 
 install_missing_libs() {
-  missing_libs=("$@")
-  for lib in "${missing_libs[@]}"; do
-    echo "Installing missing pkg-config dependency: $lib"
-    sudo apt install -y "$lib"
-  done
+  sudo apt install -y libwayland-dev libxkbcommon libpam0g libgles2-mesa-dev libfreetype6-dev
 }
 
 # Check for required dependencies (gum, curl, wget)
@@ -54,7 +50,7 @@ done
 
 if [ ${#missing_libs[@]} -ne 0 ]; then
   echo "Error: Missing dependencies: ${missing_libs[*]}. Trying to install..."
-  install_missing_libs "${missing_libs[@]}"
+  install_missing_libs
 else
   echo "All dependencies are met."
 fi
