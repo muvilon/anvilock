@@ -18,12 +18,16 @@ install_dependencies() {
   fi
 }
 
+# Function to install specific libraries
 install_missing_libs() {
   sudo apt install -y libwayland-dev libxkbcommon-dev libpam0g libgles2-mesa-dev libfreetype6-dev
 }
 
-# Check for required dependencies (gum, curl, wget)
+# Install dependencies
 install_dependencies curl wget pkg-config wayland-protocols
+
+# Install additional libraries if missing
+install_missing_libs
 
 # Function to check pkg-config dependencies
 echo "Checking for required pkg-config dependencies..."
@@ -50,10 +54,10 @@ done
 
 if [ ${#missing_libs[@]} -ne 0 ]; then
   echo "Error: Missing dependencies: ${missing_libs[*]}. Trying to install..."
-  # install_missing_libs
-else
-  echo "All dependencies are met."
+  install_missing_libs
 fi
+
+echo "All dependencies are met."
 
 # Download stb_image.h
 STB_URL="https://raw.githubusercontent.com/nothings/stb/master/stb_image.h"
@@ -102,10 +106,11 @@ else
   exit 1
 fi
 
-# Ask user for build system choice (this part is adjusted for GitHub Actions)
+# Select build system (automatically use Make for simplicity in CI)
 echo "Selecting build system: Make"
 build_system="Make"
 cd ../..
+
 case "$build_system" in
   "Make")
     echo "Building project with Make..."
