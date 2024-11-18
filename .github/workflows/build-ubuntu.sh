@@ -50,7 +50,7 @@ done
 
 if [ ${#missing_libs[@]} -ne 0 ]; then
   echo "Error: Missing dependencies: ${missing_libs[*]}. Trying to install..."
-  install_missing_libs
+  # install_missing_libs
 else
   echo "All dependencies are met."
 fi
