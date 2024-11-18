@@ -32,7 +32,7 @@ jobs:
     - name: Run build.sh script
       run: |
         cd .github/workflows/
-        chmod +x ./build.sh
+        chmod +x ./build-ubuntu.sh
         ./build.sh
 
     - name: Perform CodeQL Analysis
