@@ -49,8 +49,10 @@ struct session_lock
   struct ext_session_lock_surface_v1* ext_session_lock_surface; // Surface for lock
 };
 
+// Structure to hold the authentication state of the lock surface
 struct auth_state
 {
+  bool auth_success;
   bool auth_failed;
 };
 
@@ -66,7 +68,6 @@ struct pam_state
   char*             username;          // Stores the username for authentication
   char              password[256];     // Password buffer
   int               password_index;    // Current index in the password buffer
-  bool              authenticated;     // Tracks if user is authenticated
   bool              locked;            // Locks the session if authentication fails
   struct auth_state auth_state;        // the authentication state of the event loop
 };

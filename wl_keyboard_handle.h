@@ -143,7 +143,7 @@ static void wl_keyboard_key(void* data, struct wl_keyboard* wl_keyboard, uint32_
         if (authenticate_user(client_state->pam.username, client_state->pam.password))
         {
           log_message(LOG_LEVEL_AUTH, "Authentication successful.");
-          client_state->pam.authenticated = true;
+          client_state->pam.auth_state.auth_success = true;
         }
         else
         {

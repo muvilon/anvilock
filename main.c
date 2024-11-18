@@ -249,7 +249,8 @@ int main(int argc, char* argv[])
   wl_surface_commit(state.wl_surface);
 
   // Event loop to handle input and manage session state
-  while (!state.pam.authenticated && wl_display_dispatch(state.wl_display) != -1)
+  state.pam.auth_state.auth_success = false;
+  while (!state.pam.auth_state.auth_success && wl_display_dispatch(state.wl_display) != -1)
   {
     state.pam.auth_state.auth_failed = false;
     if (!state.session_lock.surface_created)
