@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 
   // Initialize logging
   state.pam.username = getlogin();
-  log_message(LOG_LEVEL_INFO, "Found User @ %s", state.pam.username);
+  log_message(LOG_LEVEL_INFO, "Session found for user @ [%s]", state.pam.username);
 
   // Initialize Wayland
   if (initialize_wayland(&state) != 0)

@@ -33,13 +33,12 @@ static const GLfloat tex_coords[] = {
   1.0f, 1.0f  // Bottom right
 };
 
-// Add these new vertex arrays for the password field
+// New vertex array for the password field
 static const GLfloat password_field_vertices[] = {
-  // Main rectangle (x, y coordinates for two triangles forming a rectangle)
-  -0.4f, 0.1f,  // Top left
-  -0.4f, -0.1f, // Bottom left
-  0.4f,  0.1f,  // Top right
-  0.4f,  -0.1f  // Bottom right
+  -0.4f,  0.1f,  // Top left
+  -0.4f, -0.1f,  // Bottom left
+   0.4f,  0.1f,  // Top right
+   0.4f, -0.1f   // Bottom right
 };
 
 // Define vertices for a single dot (small square)
@@ -279,10 +278,22 @@ static void render_password_field(struct client_state* state)
   GLint color_location    = glGetUniformLocation(program, "color");
   GLint offset_location   = glGetUniformLocation(program, "offset");
   GLint position_location = glGetAttribLocation(program, "position");
+  
+  // Compute bottom-center offset for password field
+  float screen_width = 1.0f;  // Assuming normalized coordinates ([-1, 1] for both axes)
+  float screen_height = 1.0f;
+  
+  // Width and height of the password field
+  float field_width = 0.7f; // Adjusted width for the field
+  float field_height = 0.15f; // Adjusted height for the field
 
-  // Draw main field background with rounded corners (using GL_TRIANGLE_STRIP)
-  glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.95f); // light background with transparency
-  glUniform2f(offset_location, 0.0f, 0.0f);
+  // Position offset to center at the bottom of the screen
+  float offset_x = 0; // Horizontally center the field
+  float offset_y = -0.8f + field_height / 2.0f;  // Vertically align it at the bottom
+
+  // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
+  glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
+  glUniform2f(offset_location, offset_x, offset_y);
 
   glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, password_field_vertices);
   glEnableVertexAttribArray(position_location);
@@ -294,19 +305,18 @@ static void render_password_field(struct client_state* state)
   glUniform4f(color_location, 0.8f, 0.8f, 0.8f, 1.0f);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-  // Draw password dots with a nicer visual
-  glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 1.0f); // gray dots
+  // Draw password dots
+  glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
 
   // Set up vertices for dots
   glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, dot_vertices);
 
   // Adjust dot positions based on password input
-  float field_width = 0.7f; // Width of the password field (can be adjusted)
   float dot_spacing = field_width / (state->pam.password_index + 1);
   for (int i = 0; i < state->pam.password_index; i++)
   {
-    float x_position = -0.35f + (i + 1) * dot_spacing; // Position the dots dynamically
-    glUniform2f(offset_location, x_position, 0.0f);
+    float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
+    glUniform2f(offset_location, x_position, offset_y);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
 
@@ -315,24 +325,18 @@ static void render_password_field(struct client_state* state)
   {
     float failColor[] = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
 
-    // Add a pulsing effect (optional, can be enhanced with animations)
     glUniform4fv(color_location, 1, failColor);
-    glUniform2f(offset_location, 0.0f, 0.0f);
+    glUniform2f(offset_location, offset_x, offset_y);
     glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with failure color
-
-    // Optionally add a blinking effect here by alternating between red and white for a short
-    // period.
   }
 
   // Handle Authentication Success (Green border for success)
   if (!state->pam.auth_state.auth_failed && state->pam.password_index > 0)
   {
-    // Animation or color change to indicate success (e.g., green border)
     float successColor[] = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
 
-    // Animate the border to show success
     glUniform4fv(color_location, 1, successColor);
-    glUniform2f(offset_location, 0.0f, 0.0f);
+    glUniform2f(offset_location, offset_x, offset_y);
     glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with success color
   }
 

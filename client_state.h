@@ -39,26 +39,59 @@ struct pointer_event
   uint32_t            axis_source; // Source of the axis event (e.g., finger, wheel)
 };
 
-// Structure to handle session locking states
-struct session_lock
+// Structure to handle animation states and timings
+struct animation_state
 {
-  bool                                surface_created;          // Is the lock surface created?
-  bool                                surface_dirty;            // Is the surface marked as dirty?
-  struct ext_session_lock_manager_v1* ext_session_lock_manager; // Manager for session lock
-  struct ext_session_lock_v1*         ext_session_lock;         // Session lock object
-  struct ext_session_lock_surface_v1* ext_session_lock_surface; // Surface for lock
+  uint64_t frame_count;      // Current frame number for animations
+  uint64_t last_key_frame;   // Frame number when last key was pressed
+  uint64_t auth_fail_frame;  // Frame number when authentication failed
+  float    current_time;     // Current animation time in seconds
+  float    dot_bounce_phase; // Phase offset for dot bounce animations
+  float    background_alpha; // Background transparency animation
+  struct
+  {
+    float    x;           // Current shake offset X
+    float    y;           // Current shake offset Y
+    float    intensity;   // Current shake intensity
+    uint64_t start_frame; // When shake animation started
+  } shake;
 };
 
-// Structure to hold the authentication state of the lock surface
+struct session_lock
+{
+  bool                                surface_created;
+  bool                                surface_dirty;
+  struct ext_session_lock_manager_v1* ext_session_lock_manager;
+  struct ext_session_lock_v1*         ext_session_lock;
+  struct ext_session_lock_surface_v1* ext_session_lock_surface;
+};
+
 struct auth_state
 {
-  bool auth_success;
-  bool auth_failed;
+  bool  auth_success;
+  bool  auth_failed;
+  float fail_effect_intensity;    // Intensity of failure effect (0.0 - 1.0)
+  float success_effect_intensity; // Intensity of success effect (0.0 - 1.0)
 };
 
 struct user_configs
 {
   char* background_path;
+  struct
+  {
+    float background_opacity; // Background opacity (0.0 - 1.0)
+    float dot_size;           // Size of password dots
+    float corner_radius;      // Radius for rounded corners
+    struct
+    {
+      float r, g, b, a; // Background color
+    } background_color;
+    struct
+    {
+      float r, g, b, a; // Dot color
+    } dot_color;
+    bool enable_animations; // Toggle for animations
+  } ui_settings;
 };
 
 // Structure to store PAM-related state and authentication information
@@ -72,60 +105,73 @@ struct pam_state
   struct auth_state auth_state;        // the authentication state of the event loop
 };
 
-// Main structure for client state and interaction with Wayland
+// Main structure for client state
 struct client_state
 {
   /* Wayland Globals */
-  struct wl_display*    wl_display;  // Wayland display connection
-  struct wl_registry*   wl_registry; // Global registry for Wayland objects
-  struct wl_shm*        wl_shm;      // Shared memory interface
+  struct wl_display*    wl_display;
+  struct wl_registry*   wl_registry;
+  struct wl_shm*        wl_shm;
   struct wl_shm_pool*   wl_shm_pool;
-  struct wl_compositor* wl_compositor; // Wayland compositor
-  struct xdg_wm_base*   xdg_wm_base;   // XDG shell for window management
-  struct wl_seat*       wl_seat;       // Wayland seat (input device manager)
-  struct wl_output*     wl_output;     // Output display
+  struct wl_compositor* wl_compositor;
+  struct xdg_wm_base*   xdg_wm_base;
+  struct wl_seat*       wl_seat;
+  struct wl_output*     wl_output;
 
   /* Wayland Objects */
-  struct wl_surface*    wl_surface; // Wayland surface
+  struct wl_surface*    wl_surface;
   struct wl_egl_window* egl_window;
-  struct xdg_surface*   xdg_surface;  // XDG surface for window management
-  struct xdg_toplevel*  xdg_toplevel; // Top-level window interface
-  struct wl_keyboard*   wl_keyboard;  // Keyboard interface
-  struct wl_pointer*    wl_pointer;   // Pointer interface
+  struct xdg_surface*   xdg_surface;
+  struct xdg_toplevel*  xdg_toplevel;
+  struct wl_keyboard*   wl_keyboard;
+  struct wl_pointer*    wl_pointer;
 
   /* Window State */
-  int  width, height; // Dimensions of the window surface
-  bool closed;        // Window close flag
+  int  width, height;
+  bool closed;
 
   /* Input and Pointer State */
-  struct pointer_event pointer_event; // Holds the current pointer event
+  struct pointer_event pointer_event;
 
   /* XKB Keyboard State */
-  struct xkb_state*   xkb_state;   // Keyboard state for XKB
-  struct xkb_context* xkb_context; // XKB context
-  struct xkb_keymap*  xkb_keymap;  // Keymap for XKB keyboard
+  struct xkb_state*   xkb_state;
+  struct xkb_context* xkb_context;
+  struct xkb_keymap*  xkb_keymap;
 
-  /* Offset and Frame Data */
-  float    offset;     // Offset for rendering or transformations
-  uint32_t last_frame; // Last rendered frame number
+  /* Animation and Rendering State */
+  struct animation_state animation;
+  float                  offset;
+  uint32_t               last_frame;
 
   /* PAM and Authentication State */
-  struct pam_state pam; // PAM state and authentication handling
+  struct pam_state pam;
 
   /* Session Lock State */
-  struct session_lock session_lock; // Session lock management
+  struct session_lock session_lock;
 
   /* Output State */
-  struct output_state output_state; // Current output information
+  struct output_state output_state;
 
-  /* user configs */
+  /* User Configs */
   struct user_configs user_configs;
 
   /* EGL and GLES State */
-  EGLDisplay egl_display; // EGL display connection
-  EGLContext egl_context; // EGL rendering context
-  EGLSurface egl_surface; // EGL surface for rendering
-  EGLConfig  egl_config;  // EGL configuration
+  EGLDisplay egl_display;
+  EGLContext egl_context;
+  EGLSurface egl_surface;
+  EGLConfig  egl_config;
+
+  /* Shader Program State */
+  struct
+  {
+    GLuint program;
+    GLint  color_location;
+    GLint  offset_location;
+    GLint  time_location;
+    GLint  resolution_location;
+    GLint  radius_location;
+    GLint  position_location;
+  } shader_state;
 };
 
 #endif
