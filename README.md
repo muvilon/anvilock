@@ -84,6 +84,15 @@ ANVILOCK
 
 #### Protocol Files:
 
+> [!IMPORTANT]
+> 
+> For more information regarding Wayland Protocol generation and its working,
+> 
+> Read [PROTOCOLS.md](https://github.com/muvilon/anvilock/blob/main/protocols/PROTOCOLS.md)
+> 
+> It gives a better understanding of generating protocol headers and source code along with details of what protocols to abide by to compile anvilock.
+> 
+
 - **protocols/xdg-shell-client-protocol.h**: Protocol definitions for XDG shell clients, managing surfaces and windows.
 - **protocols/src/xdg-shell-client-protocol.c**: Implementation of the XDG shell client protocol.
 

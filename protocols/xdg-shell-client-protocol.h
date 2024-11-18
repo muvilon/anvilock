@@ -167,7 +167,8 @@ extern const struct wl_interface xdg_positioner_interface;
  * manipulate a buffer prior to the first xdg_surface.configure call must
  * also be treated as errors.
  *
- * After creating a role-specific object and setting it up, the client must
+ * After creating a role-specific object and setting it up (e.g. by sending
+ * the title, app ID, size constraints, parent, etc), the client must
  * perform an initial commit without any buffer attached. The compositor
  * will reply with initial wl_surface state such as
  * wl_surface.preferred_buffer_scale followed by an xdg_surface.configure
@@ -220,7 +221,8 @@ extern const struct wl_interface xdg_positioner_interface;
  * manipulate a buffer prior to the first xdg_surface.configure call must
  * also be treated as errors.
  *
- * After creating a role-specific object and setting it up, the client must
+ * After creating a role-specific object and setting it up (e.g. by sending
+ * the title, app ID, size constraints, parent, etc), the client must
  * perform an initial commit without any buffer attached. The compositor
  * will reply with initial wl_surface state such as
  * wl_surface.preferred_buffer_scale followed by an xdg_surface.configure
