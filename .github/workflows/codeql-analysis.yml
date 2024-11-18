@@ -36,11 +36,13 @@ jobs:
 
     - name: Create CodeQL database
       run: |
-        ${{ github.workspace }}/codeql/codeql database create db --language=c
+        # Make sure CodeQL has been initialized and is on PATH
+        codeql database create db --language=c --source-root $GITHUB_WORKSPACE
 
     - name: Perform CodeQL Analysis
       run: |
-        ${{ github.workspace }}/codeql/codeql analyze db --format=sarif-latest --output=codeql-results.sarif
+        # Run the analysis using the CodeQL database
+        codeql analyze db --format=sarif-latest --output=codeql-results.sarif
 
     - name: Upload SARIF results
       uses: github/codeql-action/upload-sarif@v2
