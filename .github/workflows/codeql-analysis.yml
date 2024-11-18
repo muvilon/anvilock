@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "main" ]  # Trigger on push to the 'main' branch
   pull_request:
+    # The branches below must be a subset of the branches above
     branches: [ "main" ]  # Trigger on pull requests to the 'main' branch
 
 jobs:
@@ -28,23 +29,11 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Run build.sh script
+    - name: Run build-ubuntu.sh script
       run: |
         cd .github/workflows/
         chmod +x ./build-ubuntu.sh
         ./build-ubuntu.sh
 
-    - name: Create CodeQL database
-      run: |
-        # Make sure CodeQL has been initialized and is on PATH
-        codeql database create db --language=c --source-root $GITHUB_WORKSPACE
-
     - name: Perform CodeQL Analysis
-      run: |
-        # Run the analysis using the CodeQL database
-        codeql analyze db --format=sarif-latest --output=codeql-results.sarif
-
-    - name: Upload SARIF results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: codeql-results.sarif
+      uses: github/codeql-action/analyze@v2
