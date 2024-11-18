@@ -61,13 +61,14 @@ echo "All dependencies are met."
 
 # Download stb_image.h
 STB_URL="https://raw.githubusercontent.com/nothings/stb/master/stb_image.h"
-STB_PATH="include/stb_image.h"
+STB_PATH="stb_image.h"
 
 mkdir -p include
 if [ ! -f "$STB_PATH" ]; then
   echo "Downloading stb_image.h..."
   if command -v wget &> /dev/null; then
     wget -q -O "$STB_PATH" "$STB_URL"
+    mv "$STB_PATH" ../..
     echo "stb_image.h downloaded using wget."
   elif command -v curl &> /dev/null; then
     curl -s -o "$STB_PATH" "$STB_URL"
