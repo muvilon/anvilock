@@ -18,6 +18,14 @@ install_dependencies() {
   fi
 }
 
+install_missing_libs() {
+  missing_libs=("$@")
+  for lib in "${missing_libs[@]}"; do
+    echo "Installing missing pkg-config dependency: $lib"
+    sudo apt install -y "$lib"
+  done
+}
+
 # Check for required dependencies (gum, curl, wget)
 install_dependencies curl wget pkg-config wayland-protocols
 
