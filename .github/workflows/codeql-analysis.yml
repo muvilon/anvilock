@@ -36,13 +36,11 @@ jobs:
 
     - name: Create CodeQL database
       run: |
-        # Assuming your project builds correctly using `build-ubuntu.sh`, create a CodeQL database
-        codeql database create db --language=c
+        ${{ github.workspace }}/codeql/codeql database create db --language=c
 
     - name: Perform CodeQL Analysis
       run: |
-        # Perform analysis using the CodeQL database
-        codeql analyze db --format=sarif-latest --output=codeql-results.sarif
+        ${{ github.workspace }}/codeql/codeql analyze db --format=sarif-latest --output=codeql-results.sarif
 
     - name: Upload SARIF results
       uses: github/codeql-action/upload-sarif@v2
