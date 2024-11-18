@@ -105,7 +105,7 @@ fi
 # Ask user for build system choice (this part is adjusted for GitHub Actions)
 echo "Selecting build system: Make"
 build_system="Make"
-
+cd ../..
 case "$build_system" in
   "Make")
     echo "Building project with Make..."
