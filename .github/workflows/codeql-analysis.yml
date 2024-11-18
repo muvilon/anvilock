@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]  # Trigger on push to the 'main' branch
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "main" ]  # Trigger on pull requests to the 'main' branch
 
 jobs:
@@ -35,5 +34,17 @@ jobs:
         chmod +x ./build-ubuntu.sh
         ./build-ubuntu.sh
 
+    - name: Create CodeQL database
+      run: |
+        # Assuming your project builds correctly using `build-ubuntu.sh`, create a CodeQL database
+        codeql database create db --language=c
+
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      run: |
+        # Perform analysis using the CodeQL database
+        codeql analyze db --format=sarif-latest --output=codeql-results.sarif
+
+    - name: Upload SARIF results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: codeql-results.sarif
