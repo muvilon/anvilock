@@ -161,7 +161,7 @@ Simply run this in your terminal:
 
 The build script will take care of dependencies list, loading `stb_image.h` from github and loading the required wayland protocols for anvilock to run
 
-## Build Instructions (Mantual)
+## Build Instructions (Manual)
 
 ### 1. Cloning the Repository
 
