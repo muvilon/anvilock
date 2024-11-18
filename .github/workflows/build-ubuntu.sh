@@ -45,8 +45,8 @@ for lib in "${REQUIRED_LIBS[@]}"; do
 done
 
 if [ ${#missing_libs[@]} -ne 0 ]; then
-  echo "Error: Missing dependencies: ${missing_libs[*]}"
-  exit 1
+  echo "Error: Missing dependencies: ${missing_libs[*]}. Trying to install..."
+  install_missing_libs "${missing_libs[@]}"
 else
   echo "All dependencies are met."
 fi
