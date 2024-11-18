@@ -112,6 +112,13 @@ Headers used to draw and write images which are then loaded into an EGL texture 
 
 `stb_image.h` and `stb_image_write.h` are thanks to [stb](https://github.com/nothings/stb)
 
+> [!NOTE]
+> 
+> If you want to manually build anvilock without using `build.sh`
+> 
+> You will have to download `stb_image.h` header file from the stb repo mentioned above and place it in the anvilock directory.
+> 
+
 ---
 
 ## 2. Dependencies
@@ -119,9 +126,20 @@ Headers used to draw and write images which are then loaded into an EGL texture 
 ANVILOCK relies on the following dependencies:
 
 - **libwayland-client**: Handles Wayland client communication.
+- **libwayland-server**: Communication with the display server is possible through this library.
+- **libwayland-egl**: An interfacing library with OpenEGL ES 2.0 API binding for Wayland.
+- **glesv2**: Used for rendering 2D and 3D graphics on embedded systems and low-power devices, ensuring efficient graphics performance.
+- **freetype2**: Facilitates high-quality text rendering by processing and rasterizing font files in applications. (NOT BEING USED CURRENTLY)
 - **libxkbcommon**: Provides keyboard keymap compilation and handling.
 - **libpam**: Integration with the PAM authentication framework.
 - **libc**: Standard C library for memory handling, I/O, and other essential operations.
+- **libm**: Mathematical operations required by `stb_image.h` header.
+
+### Build dependencies:
+
+- **pkg-config**: To find and locate the required libraries.
+- **CMake** / **Make** / **Meson**: Any one is enough to locate and compile anvilock with default configurations.
+- **gcc** / **clang**: Any one compiler is enough to compile the source code.
 
 All dependencies must be installed on your system before building.
 
@@ -131,14 +149,19 @@ All dependencies must be installed on your system before building.
 
 ### Prerequisites
 
-Ensure that the following are installed:
+Ensure that the dependencies listed in [Dependencies](https://github.com/muvilon/anvilock?tab=readme-ov-file#2-dependencies) are installed.
 
-- **Wayland development libraries**
-- **PAM development libraries**
-- **CMake** (if building with CMake) or **Meson** (if building with Meson)
-- **gcc** or **clang** for compiling the project
+## Build Instructions:
 
-## Build Instructions
+Simply run this in your terminal:
+
+```bash
+[anvilock]$ ./build.sh
+```
+
+The build script will take care of dependencies list, loading `stb_image.h` from github and loading the required wayland protocols for anvilock to run
+
+## Build Instructions (Mantual)
 
 ### 1. Cloning the Repository
 
