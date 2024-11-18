@@ -19,7 +19,7 @@ install_dependencies() {
 }
 
 install_missing_libs() {
-  sudo apt install -y libwayland-dev libxkbcommon libpam0g libgles2-mesa-dev libfreetype6-dev
+  sudo apt install -y libwayland-dev libxkbcommon-dev libpam0g libgles2-mesa-dev libfreetype6-dev
 }
 
 # Check for required dependencies (gum, curl, wget)
