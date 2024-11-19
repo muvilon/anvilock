@@ -23,7 +23,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Docker environment for Fedora
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: CodeQL Analysis in Fedora (Docker)
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
         dnf update -y &&
