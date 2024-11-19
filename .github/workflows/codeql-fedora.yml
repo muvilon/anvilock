@@ -1,0 +1,35 @@
+name: "CodeQL Analysis for Anvilock in Fedora"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ "c" ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker environment for Fedora
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
+        dnf update -y &&
+        dnf install -y gcc make cmake &&
+        chmod +x .github/workflows/build-fedora.sh &&
+        ./.github/workflows/build-fedora.sh"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
