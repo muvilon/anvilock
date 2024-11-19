@@ -8,13 +8,6 @@
 #include <wayland-egl.h>
 #include <xkbcommon/xkbcommon.h>
 
-#define SHADERS_INIT_EGL_VERTEX             "shaders/egl/init/vertex_shader.glsl"
-#define SHADERS_INIT_EGL_FRAG               "shaders/egl/init/fragment_shader.glsl"
-#define SHADERS_RENDER_PWD_FIELD_EGL_VERTEX "shaders/egl/render_password_field/vertex_shader.glsl"
-#define SHADERS_RENDER_PWD_FIELD_EGL_FRAG   "shaders/egl/render_password_field/fragment_shader.glsl"
-#define SHADERS_TEXTURE_EGL_VERTEX          "shaders/egl/texture/vertex_shader.glsl"
-#define SHADERS_TEXTURE_EGL_FRAG            "shaders/egl/texture/fragment_shader.glsl"
-
 // Structure for storing output-related information
 struct output_state
 {

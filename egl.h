@@ -4,6 +4,7 @@
 #include "client_state.h"
 #include "config.h"
 #include "log.h"
+#include "shaders.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <wayland-client.h>
@@ -48,34 +49,6 @@ static const GLfloat dot_vertices[] = {
   0.015f,  0.015f,  // Top right
   0.015f,  -0.015f  // Bottom right
 };
-
-static char* load_shader_source(const char* filepath)
-{
-  FILE* file = fopen(filepath, "r");
-  if (!file)
-  {
-    log_message(LOG_LEVEL_ERROR, "Failed to open shader file: %s", filepath);
-    exit(EXIT_FAILURE);
-  }
-
-  fseek(file, 0, SEEK_END);
-  size_t length = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char* source = malloc(length + 1);
-  if (!source)
-  {
-    log_message(LOG_LEVEL_ERROR, "Failed to allocate memory for shader source");
-    fclose(file);
-    exit(EXIT_FAILURE);
-  }
-
-  fread(source, 1, length, file);
-  source[length] = '\0';
-
-  fclose(file);
-  return source;
-}
 
 static GLuint load_texture(const char* filepath)
 {

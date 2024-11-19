@@ -16,6 +16,7 @@
 #include "wl_seat_handle.h"
 #include "xdg_surface_handle.h"
 #include "xdg_wm_base_handle.h"
+#include "shaders.h"
 
 /**********************************************
  * @HOW ANVILOCK WORKS
@@ -196,30 +197,26 @@ static int initialize_bg(struct client_state* state)
   return 0;
 }
 
-static void shader_exist(const char* filepath)
-{
-  FILE* file = fopen(filepath, "r");
-  if (!file)
-  {
-      log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
-      exit(EXIT_FAILURE);
-  }
-
-  log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loaded shader %s.", filepath);
+// Check if the shader file exists
+static void shader_exist(const char* filepath) {
+    FILE* file = fopen(filepath, "r");
+    if (!file) {
+        log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
+        exit(EXIT_FAILURE);
+    }
 }
 
-static void initialize_shaders()
-{
-  shader_exist(SHADERS_INIT_EGL_VERTEX);
-  shader_exist(SHADERS_INIT_EGL_FRAG);
+// Initialize shaders by checking all of them
+static void initialize_shaders() {
+    // Iterate over all shader paths and check if they exist
+    #define X(name, path) \
+        log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loading shader %s.", path); \
+        shader_exist(path);
 
-  shader_exist(SHADERS_RENDER_PWD_FIELD_EGL_VERTEX);
-  shader_exist(SHADERS_RENDER_PWD_FIELD_EGL_FRAG);
+    SHADER_PATHS  // Expands to all shaders
+    #undef X
 
-  shader_exist(SHADERS_TEXTURE_EGL_VERTEX);
-  shader_exist(SHADERS_TEXTURE_EGL_FRAG);
-
-  log_message(LOG_LEVEL_TRACE, "Found all shader files.");
+    log_message(LOG_LEVEL_TRACE, "Found all shader files.");
 }
 
 static void cleanup(struct client_state* state)
