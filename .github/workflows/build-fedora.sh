@@ -21,7 +21,8 @@ install_missing_libs() {
 }
 
 # Install dependencies
-install_dependencies curl wget pkg-config wayland-protocols wayland-scanner
+install_dependencies curl wget pkg-config wayland-protocols-devel wayland-scanner
+echo "[FEDORA SCRIPT] Downloaded dependencies successfully"
 
 # Install additional libraries if missing
 install_missing_libs
