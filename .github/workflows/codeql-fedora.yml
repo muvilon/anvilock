@@ -28,10 +28,11 @@ jobs:
      run: |
        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
        dnf update -y &&
-       dnf install -y gcc make cmake wget unzip &&
+       dnf install -y gcc make cmake wget unzip git &&
        wget https://github.com/github/codeql-cli-binaries/releases/download/v2.19.3/codeql-linux64.zip &&
        unzip codeql-linux64.zip &&
        export PATH=\$PATH:/workspace/codeql &&
+       git clone https://github.com/github/codeql.git &&
        cd .github/workflows/ &&
        chmod +x build-fedora.sh &&
        ./build-fedora.sh &&
