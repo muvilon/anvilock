@@ -28,8 +28,9 @@ jobs:
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
         dnf update -y &&
         dnf install -y gcc make cmake &&
-        chmod +x .github/workflows/build-fedora.sh &&
-        ./.github/workflows/build-fedora.sh"
+        cd .github/workflows/ &&
+        chmod +x build-fedora.sh &&
+        ./build-fedora.sh"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
