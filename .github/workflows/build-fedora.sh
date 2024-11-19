@@ -108,7 +108,6 @@ fi
 # Select build system (automatically use Make for simplicity in CI)
 echo "Selecting build system: Make"
 build_system="Make"
-cd ../..
 
 case "$build_system" in
   "Make")
