@@ -32,7 +32,7 @@ fi
 
 # Download stb_image.h
 STB_URL="https://raw.githubusercontent.com/nothings/stb/master/stb_image.h"
-STB_PATH="include/stb_image.h"
+STB_PATH="stb_image.h"
 
 mkdir -p include
 if [ ! -f "$STB_PATH" ]; then

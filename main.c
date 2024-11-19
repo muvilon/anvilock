@@ -16,11 +16,12 @@
 #include "wl_seat_handle.h"
 #include "xdg_surface_handle.h"
 #include "xdg_wm_base_handle.h"
-#include <unistd.h>
 
 /**********************************************
  * @HOW ANVILOCK WORKS
  **********************************************
+ *
+ * $ THIS IS OUTDATED WILL UPDATE SOON
  *
  * This program implements a simple screen lock feature using the Wayland
  * protocol and the XDG Shell extension. It connects to a Wayland server,
@@ -190,9 +191,35 @@ static int initialize_bg(struct client_state* state)
   // Close the file after checking
   fclose(file);
 
-  log_message(LOG_LEVEL_INFO, "Found bg path through config.toml ==> %s", background_path);
+  log_message(LOG_LEVEL_TRACE, "Found bg path through config.toml ==> %s", background_path);
   state->user_configs.background_path = strdup(background_path);
   return 0;
+}
+
+static void shader_exist(const char* filepath)
+{
+  FILE* file = fopen(filepath, "r");
+  if (!file)
+  {
+      log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
+      exit(EXIT_FAILURE);
+  }
+
+  log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loaded shader %s.", filepath);
+}
+
+static void initialize_shaders()
+{
+  shader_exist(SHADERS_INIT_EGL_VERTEX);
+  shader_exist(SHADERS_INIT_EGL_FRAG);
+
+  shader_exist(SHADERS_RENDER_PWD_FIELD_EGL_VERTEX);
+  shader_exist(SHADERS_RENDER_PWD_FIELD_EGL_FRAG);
+
+  shader_exist(SHADERS_TEXTURE_EGL_VERTEX);
+  shader_exist(SHADERS_TEXTURE_EGL_FRAG);
+
+  log_message(LOG_LEVEL_TRACE, "Found all shader files.");
 }
 
 static void cleanup(struct client_state* state)
@@ -207,7 +234,7 @@ static void cleanup(struct client_state* state)
   FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
 
-  log_message(LOG_LEVEL_INFO, "Anvilock resources cleanup completed. Exiting...");
+  log_message(LOG_LEVEL_TRACE, "Anvilock resources cleanup completed. Exiting...");
 }
 
 int main(int argc, char* argv[])
@@ -216,7 +243,9 @@ int main(int argc, char* argv[])
 
   // Initialize logging
   state.pam.username = getlogin();
-  log_message(LOG_LEVEL_INFO, "Session found for user @ [%s]", state.pam.username);
+  log_message(LOG_LEVEL_TRACE, "Session found for user @ [%s]", state.pam.username); 
+
+  initialize_shaders();
 
   // Initialize Wayland
   if (initialize_wayland(&state) != 0)

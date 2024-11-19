@@ -103,7 +103,7 @@ static void wl_pointer_frame(void* data, struct wl_pointer* wl_pointer)
 
   if (event->event_mask & POINTER_EVENT_LEAVE)
   {
-    log_message(LOG_LEVEL_WARN, "pointer on leave");
+    log_message(LOG_LEVEL_DEBUG, "pointer on leave");
   }
 
   if (event->event_mask & POINTER_EVENT_MOTION)

@@ -35,10 +35,10 @@ static const GLfloat tex_coords[] = {
 
 // New vertex array for the password field
 static const GLfloat password_field_vertices[] = {
-  -0.4f,  0.1f,  // Top left
-  -0.4f, -0.1f,  // Bottom left
-   0.4f,  0.1f,  // Top right
-   0.4f, -0.1f   // Bottom right
+  -0.4f, 0.1f,  // Top left
+  -0.4f, -0.1f, // Bottom left
+  0.4f,  0.1f,  // Top right
+  0.4f,  -0.1f  // Bottom right
 };
 
 // Define vertices for a single dot (small square)
@@ -48,6 +48,34 @@ static const GLfloat dot_vertices[] = {
   0.015f,  0.015f,  // Top right
   0.015f,  -0.015f  // Bottom right
 };
+
+static char* load_shader_source(const char* filepath)
+{
+  FILE* file = fopen(filepath, "r");
+  if (!file)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to open shader file: %s", filepath);
+    exit(EXIT_FAILURE);
+  }
+
+  fseek(file, 0, SEEK_END);
+  size_t length = ftell(file);
+  fseek(file, 0, SEEK_SET);
+
+  char* source = malloc(length + 1);
+  if (!source)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to allocate memory for shader source");
+    fclose(file);
+    exit(EXIT_FAILURE);
+  }
+
+  fread(source, 1, length, file);
+  source[length] = '\0';
+
+  fclose(file);
+  return source;
+}
 
 static GLuint load_texture(const char* filepath)
 {
@@ -159,7 +187,7 @@ static void init_egl(struct client_state* state)
   glViewport(0, 0, width, height);
 
   // Load the image and create a texture
-  GLuint texture = load_texture(state->user_configs.background_path); // Use the bg path here
+  GLuint texture = load_texture(state->user_configs.background_path);
 
   // Use the texture for rendering
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -168,13 +196,7 @@ static void init_egl(struct client_state* state)
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Render the quad with the texture
-  const char* vertex_shader_source = "attribute vec2 position;\n"
-                                     "attribute vec2 texCoord;\n"
-                                     "varying vec2 vTexCoord;\n"
-                                     "void main() {\n"
-                                     "    vTexCoord = texCoord;\n"
-                                     "    gl_Position = vec4(position, 0.0, 1.0);\n"
-                                     "}\n";
+  const char* vertex_shader_source = load_shader_source(SHADERS_INIT_EGL_VERTEX);
   GLuint      vertex_shader        = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
   glCompileShader(vertex_shader);
@@ -188,12 +210,7 @@ static void init_egl(struct client_state* state)
     exit(EXIT_FAILURE);
   }
 
-  const char* fragment_shader_source = "precision mediump float;\n"
-                                       "varying vec2 vTexCoord;\n"
-                                       "uniform sampler2D uTexture;\n"
-                                       "void main() {\n"
-                                       "    gl_FragColor = texture2D(uTexture, vTexCoord);\n"
-                                       "}\n";
+  const char* fragment_shader_source = load_shader_source(SHADERS_INIT_EGL_FRAG);
   GLuint      fragment_shader        = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
   glCompileShader(fragment_shader);
@@ -239,18 +256,9 @@ static void init_egl(struct client_state* state)
 
 static void render_password_field(struct client_state* state)
 {
-  const char* vertex_shader_source = "attribute vec2 position;\n"
-                                     "uniform vec2 offset;\n"
-                                     "void main() {\n"
-                                     "    vec2 pos = position + offset;\n"
-                                     "    gl_Position = vec4(pos, 0.0, 1.0);\n"
-                                     "}\n";
+  const char* vertex_shader_source = load_shader_source(SHADERS_RENDER_PWD_FIELD_EGL_VERTEX);
 
-  const char* fragment_shader_source = "precision mediump float;\n"
-                                       "uniform vec4 color;\n"
-                                       "void main() {\n"
-                                       "    gl_FragColor = color;\n"
-                                       "}\n";
+  const char* fragment_shader_source = load_shader_source(SHADERS_RENDER_PWD_FIELD_EGL_FRAG);
 
   // Create and compile shaders
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -278,18 +286,18 @@ static void render_password_field(struct client_state* state)
   GLint color_location    = glGetUniformLocation(program, "color");
   GLint offset_location   = glGetUniformLocation(program, "offset");
   GLint position_location = glGetAttribLocation(program, "position");
-  
+
   // Compute bottom-center offset for password field
-  float screen_width = 1.0f;  // Assuming normalized coordinates ([-1, 1] for both axes)
+  float screen_width  = 1.0f; // Assuming normalized coordinates ([-1, 1] for both axes)
   float screen_height = 1.0f;
-  
+
   // Width and height of the password field
-  float field_width = 0.7f; // Adjusted width for the field
+  float field_width  = 0.7f;  // Adjusted width for the field
   float field_height = 0.15f; // Adjusted height for the field
 
   // Position offset to center at the bottom of the screen
-  float offset_x = 0; // Horizontally center the field
-  float offset_y = -0.8f + field_height / 2.0f;  // Vertically align it at the bottom
+  float offset_x = 0;                           // Horizontally center the field
+  float offset_y = -0.8f + field_height / 2.0f; // Vertically align it at the bottom
 
   // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
   glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
@@ -355,20 +363,9 @@ static void render_password_field(struct client_state* state)
 
 static GLuint create_texture_shader_program()
 {
-  const char* vertex_shader_source = "attribute vec2 position;\n"
-                                     "attribute vec2 texCoord;\n"
-                                     "varying vec2 vTexCoord;\n"
-                                     "void main() {\n"
-                                     "    vTexCoord = texCoord;\n"
-                                     "    gl_Position = vec4(position, 0.0, 1.0);\n"
-                                     "}\n";
+  const char* vertex_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_VERTEX);
 
-  const char* fragment_shader_source = "precision mediump float;\n"
-                                       "varying vec2 vTexCoord;\n"
-                                       "uniform sampler2D uTexture;\n"
-                                       "void main() {\n"
-                                       "    gl_FragColor = texture2D(uTexture, vTexCoord);\n"
-                                       "}\n";
+  const char* fragment_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_FRAG);
 
   // Create and compile vertex shader
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);

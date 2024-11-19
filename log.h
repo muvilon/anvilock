@@ -30,9 +30,9 @@ enum log_importance
   LOG_LEVEL_INFO,
   LOG_LEVEL_AUTH,
   LOG_LEVEL_SUCCESS,
-  LOG_LEVEL_DEBUG,
   LOG_LEVEL_TRACE,    // New level for detailed tracing
   LOG_LEVEL_ALERT,    // New level for alerts
+  LOG_LEVEL_DEBUG,
   LOG_IMPORTANCE_LAST // Keep this as the last element to define the range
 };
 
@@ -64,7 +64,7 @@ void log_init(enum log_importance verbosity)
 /* Logging function */
 void log_message(enum log_importance verbosity, const char* fmt, ...)
 {
-  if (verbosity > log_importance)
+  if (verbosity > log_importance || verbosity == LOG_LEVEL_DEBUG)
   {
     return;
   }

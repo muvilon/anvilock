@@ -18,7 +18,7 @@ static struct timespec last_backspace_time;
 static void wl_keyboard_leave(void* data, struct wl_keyboard* wl_keyboard, uint32_t serial,
                               struct wl_surface* surface)
 {
-  log_message(LOG_LEVEL_WARN, "keyboard leave");
+  log_message(LOG_LEVEL_DEBUG, "keyboard leave");
 }
 
 static void wl_keyboard_modifiers(void* data, struct wl_keyboard* wl_keyboard, uint32_t serial,
