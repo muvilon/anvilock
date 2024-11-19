@@ -8,7 +8,7 @@ on:
 
 jobs:
   codeql:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # GitHub Actions runner (Ubuntu, but we will use Fedora inside Docker)
     permissions:
       actions: read
       contents: read
@@ -21,21 +21,31 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
+      uses: actions/checkout@v3 
 
     - name: CodeQL Analysis in Fedora (Docker)
       run: |
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
-        dnf update -y &&
-        dnf install -y gcc make cmake &&
-        cd .github/workflows/ &&
-        chmod +x build-fedora.sh &&
-        ./build-fedora.sh"
+          # Update and install necessary dependencies
+          dnf update -y &&
+          dnf install -y gcc make cmake wget curl git &&
+          
+          # Install CodeQL CLI inside the container
+          wget https://github.com/github/codeql-action/releases/download/v2.6.0/codeql-linux64.tar.gz &&
+          tar -xzf codeql-linux64.tar.gz &&
+          export PATH=\$PWD/codeql-linux64/codeql:\$PATH &&
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+          # Run the build script
+          cd .github/workflows/ &&
+          chmod +x build-fedora.sh &&
+          ./build-fedora.sh &&
+
+          # Initialize and run CodeQL analysis
+          codeql database init --language=c --db-dir=codeql-database &&
+          codeql database analyze --db-dir=codeql-database --format=sarif-latest --output=codeql-results.sarif"
+          
+    - name: Upload CodeQL results
+      uses: github/codeql-action/upload-results@v2
+      with:
+        results-file: codeql-results.sarif
+
