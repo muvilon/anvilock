@@ -7,6 +7,7 @@
 #include "protocols/src/xdg-shell-client-protocol.c"
 #include "protocols/xdg-shell-client-protocol.h"
 #include "session_lock_handle.h"
+#include "shaders.h"
 #include "shared_mem_handle.h"
 #include "wl_buffer_handle.h"
 #include "wl_keyboard_handle.h"
@@ -16,7 +17,6 @@
 #include "wl_seat_handle.h"
 #include "xdg_surface_handle.h"
 #include "xdg_wm_base_handle.h"
-#include "shaders.h"
 
 /**********************************************
  * @HOW ANVILOCK WORKS
@@ -170,7 +170,7 @@ static int initialize_freetype(struct client_state* state)
   return -1;
 }
 
-static int initialize_bg(struct client_state* state)
+static int initialize_configs(struct client_state* state)
 {
   const char* background_path =
     get_bg_path(); // Get the background path from the loaded TOML config
@@ -194,27 +194,40 @@ static int initialize_bg(struct client_state* state)
 
   log_message(LOG_LEVEL_TRACE, "Found bg path through config.toml ==> %s", background_path);
   state->user_configs.background_path = strdup(background_path);
+
+  const char* debug_option_str = get_debug_log_option();
+  if (!debug_option_str)
+  {
+    log_message(LOG_LEVEL_ERROR, "Debug option not set");
+    return -1;
+  }
+
+  state->user_configs.debug_log_option = strdup(debug_option_str);
+
   return 0;
 }
 
 // Check if the shader file exists
-static void shader_exist(const char* filepath) {
-    FILE* file = fopen(filepath, "r");
-    if (!file) {
-        log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
-        exit(EXIT_FAILURE);
-    }
+static void shader_exist(const char* filepath)
+{
+  FILE* file = fopen(filepath, "r");
+  if (!file)
+  {
+    log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
+    exit(EXIT_FAILURE);
+  }
 }
 
 // Initialize shaders by checking all of them
-static void initialize_shaders() {
-    // Iterate over all shader paths and check if they exist
-    #define X(name, path) \
-        log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loading shader %s.", path); \
-        shader_exist(path);
+static void initialize_shaders()
+{
+// Iterate over all shader paths and check if they exist
+#define X(name, path)                                                 \
+  log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loading shader %s.", path); \
+  shader_exist(path);
 
-    SHADER_PATHS  // Expands to all shaders
-    #undef X
+  SHADER_PATHS // Expands to all shaders
+#undef X
 
     log_message(LOG_LEVEL_TRACE, "Found all shader files.");
 }
@@ -240,9 +253,7 @@ int main(int argc, char* argv[])
 
   // Initialize logging
   state.pam.username = getlogin();
-  log_message(LOG_LEVEL_TRACE, "Session found for user @ [%s]", state.pam.username); 
-
-  initialize_shaders();
+  log_message(LOG_LEVEL_TRACE, "Session found for user @ [%s]", state.pam.username);
 
   // Initialize Wayland
   if (initialize_wayland(&state) != 0)
@@ -265,11 +276,15 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (initialize_bg(&state) != 0)
+  if (initialize_configs(&state) != 0)
   {
     cleanup(&state);
     return 1;
   }
+
+  init_debug(&state);
+
+  initialize_shaders();
 
   // Commit the surface to make it visible
   wl_surface_commit(state.wl_surface);

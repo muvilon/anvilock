@@ -17,9 +17,10 @@
 
 // Buffer to hold config file path
 static char  _config_path[256];
-static char* font_path = NULL;
-static char* bg_name   = NULL; // New variable for bg name
-static char* bg_path   = NULL; // New variable for bg path
+static char* font_path        = NULL;
+static char* bg_name          = NULL; // New variable for bg name
+static char* bg_path          = NULL; // New variable for bg path
+static char* debug_log_enable = NULL;
 static char  errbuf[200];
 
 // 1 - Success, 0 - Failure
@@ -102,6 +103,27 @@ static int load_config()
   bg_path = strdup(bg_path_str);
   free(bg_path_str);
 
+  toml_table_t* debug_table = toml_table_in(config, "debug");
+  if (!debug_table)
+  {
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to find debug table in config file: %s",
+                config_path);
+    toml_free(config);
+    return 0;
+  }
+
+  char* debug_option_str;
+  if (toml_rtos(toml_raw_in(debug_table, "debug_log_enable"), &debug_option_str) == -1)
+  {
+    log_message(LOG_LEVEL_ERROR, "[TOML] Failed to find debug_log_enable in config file: %s",
+                config_path);
+    toml_free(config);
+    return 0;
+  }
+
+  debug_log_enable = strdup(debug_option_str);
+  free(debug_option_str);
+
   toml_free(config);
   return 1;
 }
@@ -109,6 +131,7 @@ static int load_config()
 static const char* get_font_path() { return font_path; }
 static const char* get_bg_name() { return bg_name; }
 static const char* get_bg_path() { return bg_path; }
+static const char* get_debug_log_option() { return debug_log_enable; }
 
 static void free_config()
 {

@@ -76,6 +76,7 @@ struct auth_state
 
 struct user_configs
 {
+  char* background_name;
   char* background_path;
   struct
   {
@@ -92,6 +93,8 @@ struct user_configs
     } dot_color;
     bool enable_animations; // Toggle for animations
   } ui_settings;
+  char* font_path;
+  char* debug_log_option;
 };
 
 // Structure to store PAM-related state and authentication information

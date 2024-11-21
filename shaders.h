@@ -4,13 +4,13 @@
 #include <stdio.h>
 
 // Define the list of shaders using an X Macro
-#define SHADER_PATHS \
-    X(INIT_EGL_VERTEX, "shaders/egl/init/vertex_shader.glsl") \
-    X(INIT_EGL_FRAG, "shaders/egl/init/fragment_shader.glsl") \
-    X(RENDER_PWD_FIELD_EGL_VERTEX, "shaders/egl/render_password_field/vertex_shader.glsl") \
-    X(RENDER_PWD_FIELD_EGL_FRAG, "shaders/egl/render_password_field/fragment_shader.glsl") \
-    X(TEXTURE_EGL_VERTEX, "shaders/egl/texture/vertex_shader.glsl") \
-    X(TEXTURE_EGL_FRAG, "shaders/egl/texture/fragment_shader.glsl")
+#define SHADER_PATHS                                                                     \
+  X(INIT_EGL_VERTEX, "shaders/egl/init/vertex_shader.glsl")                              \
+  X(INIT_EGL_FRAG, "shaders/egl/init/fragment_shader.glsl")                              \
+  X(RENDER_PWD_FIELD_EGL_VERTEX, "shaders/egl/render_password_field/vertex_shader.glsl") \
+  X(RENDER_PWD_FIELD_EGL_FRAG, "shaders/egl/render_password_field/fragment_shader.glsl") \
+  X(TEXTURE_EGL_VERTEX, "shaders/egl/texture/vertex_shader.glsl")                        \
+  X(TEXTURE_EGL_FRAG, "shaders/egl/texture/fragment_shader.glsl")
 
 // Declare extern const char* for each shader path (for future use)
 #define X(name, path) extern const char* SHADER_##name;
@@ -50,10 +50,11 @@ static char* load_shader_source(const char* filepath)
   return source;
 }
 // Function to load all shaders (iterating through all SHADER_PATHS)
-static inline void load_all_shaders() {
-    #define X(name, path) load_shader_source(SHADER_##name);
-    SHADER_PATHS
-    #undef X
+static inline void load_all_shaders()
+{
+#define X(name, path) load_shader_source(SHADER_##name);
+  SHADER_PATHS
+#undef X
 }
 
 #endif // SHADERS_H

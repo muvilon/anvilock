@@ -1,6 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include "client_state.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -30,14 +31,16 @@ enum log_importance
   LOG_LEVEL_INFO,
   LOG_LEVEL_AUTH,
   LOG_LEVEL_SUCCESS,
-  LOG_LEVEL_TRACE,    // New level for detailed tracing
-  LOG_LEVEL_ALERT,    // New level for alerts
+  LOG_LEVEL_TRACE, // New level for detailed tracing
+  LOG_LEVEL_ALERT, // New level for alerts
   LOG_LEVEL_DEBUG,
   LOG_IMPORTANCE_LAST // Keep this as the last element to define the range
 };
 
 /* Current log importance level */
 static enum log_importance log_importance = LOG_LEVEL_DEBUG;
+static char*               debug_option   = NULL;
+static bool                debug_on       = false;
 
 /* Define verbosity colors using macros */
 static const char* verbosity_colors[] = {
@@ -53,18 +56,24 @@ static const char* verbosity_colors[] = {
 };
 
 /* Function to initialize logging with a specified verbosity level */
-void log_init(enum log_importance verbosity)
+static void init_debug(struct client_state* state)
 {
-  if (verbosity < LOG_IMPORTANCE_LAST)
+  if (!debug_option)
   {
-    log_importance = verbosity;
+    debug_option = strdup(state->user_configs.debug_log_option);
+  }
+
+  if (debug_option != NULL && strcmp(debug_option, "true") == 0)
+  {
+    fprintf(stderr, "%s", "[LOG] DEBUG LOGS ENABLED\n");
+    debug_on = true;
   }
 }
 
 /* Logging function */
 void log_message(enum log_importance verbosity, const char* fmt, ...)
 {
-  if (verbosity > log_importance || verbosity == LOG_LEVEL_DEBUG)
+  if (verbosity > log_importance || (verbosity == LOG_LEVEL_DEBUG && !debug_on))
   {
     return;
   }
