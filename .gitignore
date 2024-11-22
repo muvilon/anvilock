@@ -1,6 +1,5 @@
 test
 build/
 anvilock
-config.toml
 .cache/
 stb_image.h

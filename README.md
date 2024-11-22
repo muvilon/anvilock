@@ -294,6 +294,8 @@ Make sure to check out `~/.config/anvilock/config.toml` for more!
 > 
 > More configurations and customizations are to come!
 > 
+> An example config file is explained in [config.toml](https://github.com/muvilon/anvilock/blob/main/assets/examples/config.toml)
+> 
 
 ### Conclusion
 
