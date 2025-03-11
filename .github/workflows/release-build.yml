@@ -2,30 +2,51 @@ name: Release Build for Anvilock
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches: [ "main" ]  # Trigger on push to the 'main' branch
+  pull_request:
+    branches: [ "main" ]  # Trigger on pull requests to the 'main' branch
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get install -y ninja-build gcc clang libwayland-dev libxkbcommon-dev libpam0g-dev libegl1-mesa-dev libgles2-mesa-dev libfreetype6-dev
-
-      - name: Build
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DUSE_NINJA=ON
-          ninja -C build
+          sudo apt-get update
+          sudo apt-get install -y ninja-build gcc clang libwayland-dev \
+            libxkbcommon-dev libpam0g-dev libegl1-mesa-dev libgles2-mesa-dev \
+            libfreetype6-dev
+
+      - name: Build Release Version of Anvilock in Ubuntu
+        run: |
+          make release
 
       - name: Create Tarball
         run: |
           cd build
-          tar -czvf anvilock.tar.gz anvilock
+          tar -czvf ../anvilock.tar.gz anvilock
+          cd ..
 
       - name: Upload Release for Anvilock
         uses: softprops/action-gh-release@v2
         with:
-          files: build/anvilock.tar.gz
+          files: |
+            anvilock.tar.gz
+          tag_name: v0.1.6  # Change this to dynamically use tags
+          name: "Anvilock v0.1.6 - Release"
+          body: |
+            **Anvilock v0.1.6 - Release Notes**
+            
+            ### How to Install:
+            ```
+            tar -xvzf anvilock.tar.gz
+            ./anvilock
+            ```
+
+            _Thanks for using Anvilock!_
