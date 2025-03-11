@@ -1,0 +1,31 @@
+name: Release Build for Anvilock
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y ninja-build gcc clang libwayland-dev libxkbcommon-dev libpam0g-dev libegl1-mesa-dev libgles2-mesa-dev libfreetype6-dev
+
+      - name: Build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DUSE_NINJA=ON
+          ninja -C build
+
+      - name: Create Tarball
+        run: |
+          cd build
+          tar -czvf anvilock.tar.gz anvilock
+
+      - name: Upload Release for Anvilock
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/anvilock.tar.gz

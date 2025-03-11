@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.22)
 project(anvilock VERSION 1.5 LANGUAGES C)
 
+# Option to use Ninja as the build system
+option(USE_NINJA "Use Ninja build system" OFF)
+
+if(USE_NINJA)
+    message(STATUS "Using Ninja as the build system...")
+    if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
+        set(CMAKE_GENERATOR "Ninja" CACHE STRING "Build system generator" FORCE)
+    endif()
+endif()
+
+if(USE_CLANG)
+    message(STATUS "Using Clang as the compiler...")
+    set(CMAKE_C_COMPILER clang CACHE STRING "C Compiler" FORCE)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -136,6 +151,7 @@ message(STATUS "\n\n-- Building anvilock v${PROJECT_VERSION} --")
 message(STATUS "┌─ Configuration ────────────────────────")
 message(STATUS "│ OS:              ${CMAKE_SYSTEM_NAME}")
 message(STATUS "│ Build Type:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "│ Build Generator: ${CMAKE_GENERATOR}")
 message(STATUS "│ Compiler:        ${CMAKE_C_COMPILER}")
 message(STATUS "│ Compiler Flags:  ${COMPILE_OPTIONS}")
 message(STATUS "│ Executable Name: ${EXECUTABLE_NAME}")
