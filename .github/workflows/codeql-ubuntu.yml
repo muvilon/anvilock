@@ -29,11 +29,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Build Anvilock in Ubuntu
+    - name: Install dependencies for Anvilock
       run: |
-        cd .github/workflows/
-        chmod +x ./build-ubuntu.sh
-        ./build-ubuntu.sh
+        sudo apt-get update
+        sudo apt-get install -y \
+          libwayland-dev libxkbcommon-dev libpam0g-dev \
+          libgles2-mesa-dev libfreetype6-dev cmake make \
+          clang wget pkg-config wayland-protocols
+
+    - name: Build Release Version of Anvilock (x86-64 arch) - GCC
+      run: |
+        make release
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
