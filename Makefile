@@ -31,7 +31,7 @@ tsan:
 	@cd $(TSAN_BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug-TSan .. && $(MAKE)
 
 format:
-	@find src include -name "*.c" -o -name "*.h" | xargs clang-format -i
+	@find src include \( -name "*.c" -o -name "*.h" \) -exec clang-format -i {} +
 
 tidy:
 	@find src include -name "*.c" -o -name "*.h" | xargs clang-tidy 
@@ -44,5 +44,8 @@ install:
 
 uninstall:
 	@xargs rm -f < install_manifest.txt
+
+run:
+	./$(BUILD_DIR)/$(EXECUTABLE_NAME)
 
 .PHONY: all debug release asan tsan format clean install uninstall
