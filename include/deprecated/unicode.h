@@ -5,6 +5,15 @@
 #include <stdint.h>
 #include <string.h>
 
+/*
+ * THIS HEADER IS NOT USED IN THE PROJECT
+ *
+ * IDK WHAT TO DO WITH IT
+ *
+ * WILL BE REMOVED SHORTLY
+ *
+ */
+
 #define CHAR_HEIGHT 20 // Height of characters
 #define CHAR_WIDTH  10 // Width of characters
 

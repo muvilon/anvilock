@@ -1,7 +1,8 @@
 #ifndef WL_PTR_HANDLER_H
 #define WL_PTR_HANDLER_H
 
-#include "client_state.h"
+#include "../client_state.h"
+#include "../log.h"
 #include <wayland-client.h>
 
 enum pointer_event_mask
@@ -158,7 +159,7 @@ static void wl_pointer_frame(void* data, struct wl_pointer* wl_pointer)
     }
   }
 
-  memset(event, 0, sizeof(*event));
+  ANVIL_MEMZERO(event, sizeof(*event));
 }
 
 static const struct wl_pointer_listener wl_pointer_listener = {

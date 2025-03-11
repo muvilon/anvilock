@@ -8,6 +8,8 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 >
 > ANVILOCK is a [WIP] - Work in Progress
 >
+> **This project is undergoing a massive revamp!!**
+> 
 > Stay tuned for more updates!
 
 ---

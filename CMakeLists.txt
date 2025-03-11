@@ -1,52 +1,152 @@
-cmake_minimum_required(VERSION 3.10)
-project(anvilock)
+cmake_minimum_required(VERSION 3.22)
+project(anvilock VERSION 1.5 LANGUAGES C)
 
-# Set C standard
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Find Freetype
-find_package(Freetype REQUIRED)
+string(ASCII 27 ESC)
+set(RESET "${ESC}[0m")
+set(GREEN "${ESC}[32m")  # Success messages
+set(YELLOW "${ESC}[33m") # Warning messages
+set(BLUE   "${ESC}[34m")  # Information messages
 
-# Include directories
-include_directories(${FREETYPE_INCLUDE_DIRS} toml)
-
-# Add executable
-add_executable(anvilock main.c toml/toml.c)
-
-# Link libraries
-target_link_libraries(anvilock
-    PRIVATE
-        ${FREETYPE_LIBRARIES}
-        wayland-client
-        wayland-server
-        wayland-egl
-        EGL 
-        GLESv2
-        pam
-        xkbcommon
-        m
-)
-
-# Enable warnings
-target_compile_options(anvilock PRIVATE -Wall -Wextra -Wpedantic -g)
-
-# Define the config path
+# Define paths
 set(CONFIG_DIR "$ENV{HOME}/.config/anvilock")
 set(CONFIG_FILE "${CONFIG_DIR}/config.toml")
 
-# Create config.toml if it doesn't exist
-add_custom_command(
-    OUTPUT ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CONFIG_DIR}
-    COMMAND ${CMAKE_COMMAND} -E echo "[font]" > ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "name = \"# your font name goes here\"" >> ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "path = \"# your font path goes here\"" >> ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "[bg]" >> ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "name = \"# your background name goes here\"" >> ${CONFIG_FILE}
-    COMMAND ${CMAKE_COMMAND} -E echo "path = \"# your background path goes here\"" >> ${CONFIG_FILE}
-    COMMENT "Creating config.toml with placeholder values."
+# Enable Debugging and Sanitizer Builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug-ASan")
+    set(EXECUTABLE_NAME "anvilock-DBG-ASan")
+    message(STATUS "Enabling AddressSanitizer")
+    set(SANITIZER_FLAGS "-fsanitize=address -fsanitize=undefined -g")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug-TSan")
+    set(EXECUTABLE_NAME "anvilock-DBG-TSan")
+    message(STATUS "Enabling ThreadSanitizer")
+    set(SANITIZER_FLAGS "-fsanitize=thread -fsanitize=undefined -g")
+else()
+    set(CMAKE_BUILD_TYPE "Release")
+    set(EXECUTABLE_NAME "anvilock")
+    message(STATUS "Skipping Sanitizers for Release build")
+endif()
+
+# Enable Warnings
+set(COMPILE_OPTIONS "-Wall -Wextra -Wpedantic -Wno-unused-parameter ${SANITIZER_FLAGS}")
+
+# Find Required Packages
+find_package(Freetype REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+# Find Wayland dependencies
+pkg_check_modules(WAYLAND REQUIRED wayland-client wayland-server wayland-egl)
+pkg_check_modules(XKBCOMMON REQUIRED xkbcommon)
+pkg_check_modules(PAM REQUIRED pam)
+pkg_check_modules(OPENGL REQUIRED gl)
+pkg_check_modules(GLES REQUIRED glesv2)
+
+# Ensure all required headers exist
+set(TOML_HEADER "toml/toml.h")
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/${TOML_HEADER}")
+    message(FATAL_ERROR "** TOML header not found. Expected at: ${TOML_HEADER} **")
+endif()
+
+message(STATUS "Found TOML header: ${TOML_HEADER}")
+
+# Include directories
+include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
+
+# Add Executable
+add_executable(${EXECUTABLE_NAME} src/main.c toml/toml.c)
+
+# Link Libraries
+target_link_libraries(${EXECUTABLE_NAME}
+    PRIVATE ${FREETYPE_LIBRARIES}
+    PRIVATE ${WAYLAND_LIBRARIES}
+    PRIVATE ${XKBCOMMON_LIBRARIES}
+    PRIVATE ${PAM_LIBRARIES}
+    PRIVATE EGL GLESv2 m
 )
 
-add_custom_target(create_config ALL DEPENDS ${CONFIG_FILE})
-add_dependencies(anvilock create_config)
+# Apply Compiler Flags
+target_compile_options(${EXECUTABLE_NAME} PRIVATE -Wall -Wextra -Wpedantic ${SANITIZER_FLAGS})
+target_link_options(${EXECUTABLE_NAME} PRIVATE ${SANITIZER_FLAGS})
+
+# Global Installation Support
+option(BUILD_GLOBAL "Build globally and install" OFF)
+
+if(BUILD_GLOBAL)
+    message(STATUS "Starting GLOBAL_BUILD for anvilock...")
+    install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
+    install(FILES assets/anvilock.desktop DESTINATION share/applications)
+    install(FILES assets/logo/anvilock.png DESTINATION share/icons/hicolor/256x256/apps)
+    install(FILES assets/manpage/anvilock.1 DESTINATION share/man/man1)
+    install(FILES ./VERSION DESTINATION share/anvilock/)
+else()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
+    message(STATUS "Building locally, binaries will be in ./build/")
+endif()
+
+# Ensure `config.toml` Exists
+if (NOT EXISTS ${CONFIG_FILE})
+    message(STATUS "Creating default config.toml...")
+    file(MAKE_DIRECTORY ${CONFIG_DIR})
+    file(WRITE ${CONFIG_FILE} 
+        "[font]\nname = \"# your font name\"\npath = \"# your font path\"\n\n"
+        "[bg]\nname = \"# your background name\"\npath = \"# your background path\"\n"
+    )
+endif()
+
+include(CheckIncludeFiles)
+
+set(STANDARD_HEADERS
+    "assert.h"
+    "ctype.h"
+    "errno.h"
+    "fcntl.h"
+    "float.h"
+    "inttypes.h"
+    "limits.h"
+    "math.h"
+    "setjmp.h"
+    "signal.h"
+    "stdarg.h"
+    "stddef.h"
+    "stdio.h"
+    "stdlib.h"
+    "string.h"
+    "time.h"
+    "unistd.h"
+    "stdbool.h"
+)
+
+message(STATUS "${BLUE}Checking Standard C Headers...${RESET}")
+foreach(header ${STANDARD_HEADERS})
+    check_include_files(${header} HAS_${header})
+    if(HAS_${header})
+      message(STATUS "${GREEN}✔ Found header: ${header}${RESET}")
+    else()
+      message(WARNING "${YELLOW}✘ Missing header: ${header}${RESET}")
+    endif()
+endforeach()
+
+# Print Build Info
+message(STATUS "\n\n-- Building anvilock v${PROJECT_VERSION} --")
+message(STATUS "┌─ Configuration ────────────────────────")
+message(STATUS "│ OS:              ${CMAKE_SYSTEM_NAME}")
+message(STATUS "│ Build Type:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "│ Compiler:        ${CMAKE_C_COMPILER}")
+message(STATUS "│ Compiler Flags:  ${COMPILE_OPTIONS}")
+message(STATUS "│ Executable Name: ${EXECUTABLE_NAME}")
+message(STATUS "│ C Standard:      ${CMAKE_C_STANDARD}")
+message(STATUS "│ Install Prefix:  ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "│ Local Build Dir: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+message(STATUS "│ Freetype:        YES (${FREETYPE_LIBRARIES})")
+message(STATUS "│ Wayland:         YES (${WAYLAND_LIBRARIES})")
+message(STATUS "│ XKBCommon:       YES (${XKBCOMMON_LIBRARIES})")
+message(STATUS "│ PAM:             YES (${PAM_LIBRARIES})")
+message(STATUS "│ GLESv2:          YES (${GLES_LIBRARIES})")
+message(STATUS "│ Config File:     ${CONFIG_FILE}")
+message(STATUS "│ Global Install:  ${BUILD_GLOBAL}")
+message(STATUS "└───────────────────────────────────────\n")

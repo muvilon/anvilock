@@ -1,10 +1,10 @@
 #ifndef XDG_SURFACE_HANDLER_H
 #define XDG_SURFACE_HANDLER_H
 
-#include "config.h"
-#include "egl.h"
-#include "log.h"
-#include "surface_colors.h"
+#include "../../protocols/xdg-shell-client-protocol.h"
+#include "../config/config.h"
+#include "../graphics/egl.h"
+#include "../log.h"
 #include <EGL/egl.h>
 #include <string.h>
 #include <time.h>

@@ -1,9 +1,9 @@
 #ifndef WL_REG_HANDLER_H
 #define WL_REG_HANDLER_H
 
-#include "log.h"
-#include "protocols/ext-session-lock-client-protocol.h"
-#include "protocols/src/ext-session-lock-client-protocol.c"
+#include "../../protocols/ext-session-lock-client-protocol.h"
+#include "../../protocols/src/ext-session-lock-client-protocol.c"
+#include "../log.h"
 #include "wl_output_handle.h"
 #include "wl_seat_handle.h"
 #include "xdg_wm_base_handle.h"

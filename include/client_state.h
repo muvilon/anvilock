@@ -18,6 +18,15 @@ struct output_state
   struct wl_output* wl_output;
 };
 
+typedef struct
+{
+  char* font_path;
+  char* bg_name;
+  char* bg_path;
+  char* debug_log_enable;
+  char* time_format;
+} TOMLConfig;
+
 // Structure to represent pointer events and their associated state
 struct pointer_axes
 {
@@ -72,29 +81,6 @@ struct auth_state
   bool  auth_failed;
   float fail_effect_intensity;    // Intensity of failure effect (0.0 - 1.0)
   float success_effect_intensity; // Intensity of success effect (0.0 - 1.0)
-};
-
-struct user_configs
-{
-  char* background_name;
-  char* background_path;
-  struct
-  {
-    float background_opacity; // Background opacity (0.0 - 1.0)
-    float dot_size;           // Size of password dots
-    float corner_radius;      // Radius for rounded corners
-    struct
-    {
-      float r, g, b, a; // Background color
-    } background_color;
-    struct
-    {
-      float r, g, b, a; // Dot color
-    } dot_color;
-    bool enable_animations; // Toggle for animations
-  } ui_settings;
-  char* font_path;
-  char* debug_log_option;
 };
 
 // Structure to store PAM-related state and authentication information
@@ -156,13 +142,14 @@ struct client_state
   struct output_state output_state;
 
   /* User Configs */
-  struct user_configs user_configs;
+  TOMLConfig global_config;
 
   /* EGL and GLES State */
   EGLDisplay egl_display;
   EGLContext egl_context;
   EGLSurface egl_surface;
   EGLConfig  egl_config;
+  GLuint     time_texture;
 
   /* Shader Program State */
   struct

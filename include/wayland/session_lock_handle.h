@@ -1,9 +1,15 @@
 #ifndef SESSION_LOCK_HANDLE_H
 #define SESSION_LOCK_HANDLE_H
 
-#include "client_state.h"
-#include "egl.h"
-#include "log.h"
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
+#include "../client_state.h"
+#include "../graphics/egl.h"
+#include "../log.h"
 #include "shared_mem_handle.h"
 #include "wl_buffer_handle.h"
 #include "wl_keyboard_handle.h" // Include the keyboard handler

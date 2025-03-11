@@ -1,7 +1,7 @@
 #ifndef TEST_PAM_H
 #define TEST_PAM_H
 
-#include "log.h"
+#include "../log.h"
 #include "password_buffer.h"
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>

@@ -1,8 +1,8 @@
 #ifndef WL_OUTPUT_HANDLE_H
 #define WL_OUTPUT_HANDLE_H
 
-#include "client_state.h"
-#include "log.h"
+#include "../client_state.h"
+#include "../log.h"
 #include <stdio.h>
 #include <wayland-client.h>
 

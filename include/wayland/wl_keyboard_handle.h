@@ -1,7 +1,7 @@
 #ifndef WL_KB_HANDLER_H
 #define WL_KB_HANDLER_H
 
-#include "client_state.h"
+#include "../client_state.h"
 #include "xdg_surface_handle.h"
 #include <assert.h>
 #include <time.h>

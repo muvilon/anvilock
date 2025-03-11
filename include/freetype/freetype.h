@@ -1,8 +1,8 @@
 #ifndef FREETYPE_H
 #define FREETYPE_H
 
-#include "config.h"
-#include "log.h"
+#include "../config/config.h"
+#include "../log.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -13,7 +13,7 @@
 FT_Library ft_library;
 FT_Face    ft_face;
 
-static int init_freetype()
+static int init_freetype(void)
 {
   if (!load_config())
   {
@@ -28,7 +28,7 @@ static int init_freetype()
     return 0;
   }
 
-  error = FT_New_Face(ft_library, font_path, 0, &ft_face);
+  error = FT_New_Face(ft_library, global_config.font_path, 0, &ft_face);
   if (error)
   {
     log_message(LOG_LEVEL_ERROR, "Failed to load font");

@@ -1,6 +1,8 @@
 #ifndef SHADERS_H
 #define SHADERS_H
 
+#include "../log.h"
+#include "../memory/anvil_mem.h"
 #include <stdio.h>
 
 // Define the list of shaders using an X Macro
@@ -9,6 +11,8 @@
   X(INIT_EGL_FRAG, "shaders/egl/init/fragment_shader.glsl")                              \
   X(RENDER_PWD_FIELD_EGL_VERTEX, "shaders/egl/render_password_field/vertex_shader.glsl") \
   X(RENDER_PWD_FIELD_EGL_FRAG, "shaders/egl/render_password_field/fragment_shader.glsl") \
+  X(RENDER_TIME_FIELD_EGL_VERTEX, "shaders/egl/render_time_box/vertex_shader.glsl")      \
+  X(RENDER_TIME_FIELD_EGL_FRAG, "shaders/egl/render_time_box/fragment_shader.glsl")      \
   X(TEXTURE_EGL_VERTEX, "shaders/egl/texture/vertex_shader.glsl")                        \
   X(TEXTURE_EGL_FRAG, "shaders/egl/texture/fragment_shader.glsl")
 
@@ -35,7 +39,9 @@ static char* load_shader_source(const char* filepath)
   size_t length = ftell(file);
   fseek(file, 0, SEEK_SET);
 
-  char* source = malloc(length + 1);
+  char* source;
+  ANVIL_SAFE_ALLOC(source, char, length + 1);
+
   if (!source)
   {
     log_message(LOG_LEVEL_ERROR, "Failed to allocate memory for shader source");
@@ -50,7 +56,7 @@ static char* load_shader_source(const char* filepath)
   return source;
 }
 // Function to load all shaders (iterating through all SHADER_PATHS)
-static inline void load_all_shaders()
+static inline void load_all_shaders(void)
 {
 #define X(name, path) load_shader_source(SHADER_##name);
   SHADER_PATHS

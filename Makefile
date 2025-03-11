@@ -1,34 +1,48 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g $(shell pkg-config --cflags freetype2) -Itoml
-LIBS = -lwayland-client -lwayland-server -lwayland-egl -lEGL -lGLESv2 -lpam -lxkbcommon -lm $(shell pkg-config --libs freetype2)
-TARGET = anvilock
-SRC = main.c toml/toml.c
-CONFIG_DIR = $(HOME)/.config/anvilock
-CONFIG_FILE = $(CONFIG_DIR)/config.toml
+# Set default build directory
+BUILD_DIR = build
+EXECUTABLE_NAME = anvilock
 
-all: $(TARGET) $(CONFIG_FILE)
+# Compiler and Flags
+CMAKE = cmake
+CMAKE_FLAGS = -DCMAKE_BUILD_TYPE=Release
+MAKE = make
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) $(LIBS) -o $(TARGET)
+# Sanitized Builds
+ASAN_BUILD_DIR = build-asan
+TSAN_BUILD_DIR = build-tsan
 
-$(CONFIG_FILE):
-	@if [ ! -d $(CONFIG_DIR) ]; then \
-		mkdir -p $(CONFIG_DIR); \
-	fi
-	@if [ ! -f $(CONFIG_FILE) ]; then \
-		echo "[font]" > $(CONFIG_FILE); \
-		echo "name = \"# your font name goes here\"" >> $(CONFIG_FILE); \
-		echo "path = \"# your font path goes here\"" >> $(CONFIG_FILE); \
-		echo "\n"; \
-		echo "[bg]" >> $(CONFIG_FILE); \
-		echo "name = \"# your background name goes here\"" >> $(CONFIG_FILE); \
-		echo "path = \"# your background path goes here\"" >> $(CONFIG_FILE); \
-		echo "Created $(CONFIG_FILE) with placeholder values."; \
-	else \
-		echo "$(CONFIG_FILE) already exists, skipping creation."; \
-	fi
+# Targets
+all: release
+
+debug:
+	@mkdir -p $(BUILD_DIR)
+	@cd $(BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug .. && $(MAKE)
+
+release:
+	@mkdir -p $(BUILD_DIR)
+	@cd $(BUILD_DIR) && $(CMAKE) $(CMAKE_FLAGS) .. && $(MAKE)
+
+asan:
+	@mkdir -p $(ASAN_BUILD_DIR)
+	@cd $(ASAN_BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug-ASan .. && $(MAKE)
+
+tsan:
+	@mkdir -p $(TSAN_BUILD_DIR)
+	@cd $(TSAN_BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug-TSan .. && $(MAKE)
+
+format:
+	@find src include -name "*.c" -o -name "*.h" | xargs clang-format -i
+
+tidy:
+	@find src include -name "*.c" -o -name "*.h" | xargs clang-tidy 
 
 clean:
-	rm -f $(TARGET)
+	@rm -rf $(BUILD_DIR) $(ASAN_BUILD_DIR) $(TSAN_BUILD_DIR)
 
-.PHONY: all clean
+install:
+	@cd $(BUILD_DIR) && $(MAKE) install
+
+uninstall:
+	@xargs rm -f < install_manifest.txt
+
+.PHONY: all debug release asan tsan format clean install uninstall

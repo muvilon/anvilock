@@ -1,6 +1,8 @@
 #ifndef XDG_WM_BASE_HANDLER_H
 #define XDG_WM_BASE_HANDLER_H
 
+#include "../../protocols/src/xdg-shell-client-protocol.c"
+#include "../../protocols/xdg-shell-client-protocol.h"
 #include <wayland-client.h>
 
 static void xdg_wm_base_ping(void* data, struct xdg_wm_base* xdg_wm_base, uint32_t serial)

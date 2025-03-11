@@ -1,54 +1,224 @@
 #ifndef EGL_H
 #define EGL_H
 
-#include "client_state.h"
-#include "config.h"
-#include "log.h"
-#include "shaders.h"
+#include "../client_state.h"
+#include "../config/config.h"
+#include "../freetype/freetype.h"
+#include "../global_funcs.h"
+#include "../graphics/shaders.h"
+#include "../log.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "../stb_image.h"
+
+static GLuint create_texture_shader_program(void)
+{
+  const char* vertex_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_VERTEX);
+
+  const char* fragment_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_FRAG);
+
+  // Create and compile vertex shader
+  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+  glCompileShader(vertex_shader);
+
+  // Create and compile fragment shader
+  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+  glCompileShader(fragment_shader);
+
+  // Create and link shader program
+  GLuint program = glCreateProgram();
+  glAttachShader(program, vertex_shader);
+  glAttachShader(program, fragment_shader);
+  glLinkProgram(program);
+
+  // Clean up shaders
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
+
+  return program;
+}
 
 static void render_password_field(struct client_state* state);
 
-static const GLfloat quad_vertices[] = {
-  -1.0f, 1.0f,  // Top left
-  -1.0f, -1.0f, // Bottom left
-  1.0f,  1.0f,  // Top right
-  1.0f,  -1.0f  // Bottom right
-};
+GLuint create_text_texture(const char* text)
+{
+  if (!text || !*text)
+  {
+    log_message(LOG_LEVEL_ERROR, "Invalid text string for texture.");
+    return 0;
+  }
 
-static const GLfloat triangle_vertices[] = {
-  0.0f,  0.5f,  // Top vertex
-  -0.5f, -0.5f, // Bottom left vertex
-  0.5f,  -0.5f  // Bottom right vertex
-};
+  FT_GlyphSlot slot = ft_face->glyph;
 
-static const GLfloat tex_coords[] = {
-  0.0f, 0.0f, // Top left
-  0.0f, 1.0f, // Bottom left
-  1.0f, 0.0f, // Top right
-  1.0f, 1.0f  // Bottom right
-};
+  // First pass: measure dimensions
+  int width         = 0;
+  int max_height    = 0;
+  int max_bearing_y = 0;
 
-// New vertex array for the password field
-static const GLfloat password_field_vertices[] = {
-  -0.4f, 0.1f,  // Top left
-  -0.4f, -0.1f, // Bottom left
-  0.4f,  0.1f,  // Top right
-  0.4f,  -0.1f  // Bottom right
-};
+  for (const char* p = text; *p; p++)
+  {
+    if (FT_Load_Char(ft_face, *p, FT_LOAD_RENDER))
+    {
+      log_message(LOG_LEVEL_ERROR, "Failed to load glyph.");
+      continue;
+    }
 
-// Define vertices for a single dot (small square)
-static const GLfloat dot_vertices[] = {
-  -0.015f, 0.015f,  // Top left
-  -0.015f, -0.015f, // Bottom left
-  0.015f,  0.015f,  // Top right
-  0.015f,  -0.015f  // Bottom right
-};
+    // Add proper spacing between characters
+    width += slot->bitmap.width + 1; // +1 for spacing
+    max_height    = ANVIL_MAX_UINT(max_height, slot->bitmap.rows);
+    max_bearing_y = ANVIL_MAX_UINT(max_bearing_y, slot->bitmap_top);
+  }
+
+  int height = ANVIL_MAX_UINT(CHAR_HEIGHT, max_height);
+
+  // Convert width and height into powers of two (check global_funcs.h for more docs)
+  width  = next_power_of_two(width);
+  height = next_power_of_two(height);
+
+  // Allocate image buffer
+  /*unsigned char* image = calloc(width * height, sizeof(unsigned char));*/
+  unsigned char* image;
+  ANVIL_SAFE_CALLOC(image, unsigned char, width* height);
+
+  if (!image)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to allocate image buffer.");
+    return 0;
+  }
+
+  // Second pass: render glyphs
+  int x_offset = 0;
+  for (const char* p = text; *p; p++)
+  {
+    if (FT_Load_Char(ft_face, *p, FT_LOAD_RENDER))
+      continue;
+
+    // Calculate vertical position for baseline alignment
+    int y_offset = (max_bearing_y - slot->bitmap_top) + (height - max_height) / 2;
+
+    for (unsigned int row = 0; row < slot->bitmap.rows; row++)
+    {
+      for (unsigned int col = 0; col < slot->bitmap.width; col++)
+      {
+        int dst_row = row + y_offset;
+        if (dst_row >= 0 && dst_row < height)
+        {
+          image[(dst_row * width) + x_offset + col] =
+            slot->bitmap.buffer[row * slot->bitmap.width + col];
+        }
+      }
+    }
+
+    x_offset += slot->bitmap.width + 1; // +1 for spacing
+  }
+
+  // Create OpenGL texture
+  GLuint texture;
+  glGenTextures(1, &texture);
+  if (texture == 0)
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to generate OpenGL texture.");
+    ANVIL_SAFE_FREE(image);
+    return 0;
+  }
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, image);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  ANVIL_SAFE_FREE(image);
+  log_message(LOG_LEVEL_DEBUG, "Text texture successfully created.");
+  return texture;
+}
+
+void update_time_texture(struct client_state* state)
+{
+  char time_str[16];
+  get_time_string(time_str, sizeof(time_str), global_config.time_format);
+
+  static char last_time_str[16] = "";
+  if (strcmp(last_time_str, time_str) != 0)
+  {
+    strcpy(last_time_str, time_str);
+
+    if (state->time_texture)
+    {
+      glDeleteTextures(1, &state->time_texture);
+      state->time_texture = 0;
+      log_message(LOG_LEVEL_DEBUG, "Old time texture deleted.");
+    }
+    state->time_texture = create_text_texture(time_str);
+  }
+}
+
+void render_time_box(struct client_state* state)
+{
+  if (!state->time_texture)
+  {
+    log_message(LOG_LEVEL_ERROR, "No valid texture for rendering.");
+    return;
+  }
+
+  // Use a VBO for better performance
+  static GLuint vbo = 0;
+  if (vbo == 0)
+  {
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_with_texcoords), vertices_with_texcoords,
+                 GL_STATIC_DRAW);
+  }
+
+  log_message(LOG_LEVEL_DEBUG, "Rendering time box...");
+
+  // Set up blending for text rendering
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // Bind the VBO
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+  // Set up position attribute
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
+
+  // Set up texture coordinate attribute
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                        (void*)(2 * sizeof(GLfloat)));
+
+  // Bind the texture
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, state->time_texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // Draw the quad
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR)
+  {
+    log_message(LOG_LEVEL_ERROR, "OpenGL error: 0x%x", error);
+  }
+
+  // Clean up
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_BLEND);
+
+  log_message(LOG_LEVEL_DEBUG, "Time box rendered successfully.");
+}
 
 static GLuint load_texture(const char* filepath)
 {
@@ -130,8 +300,10 @@ static void init_egl(struct client_state* state)
   wl_display_roundtrip(state->wl_display);
 
   // Validate output dimensions and create EGL window surface
-  int width         = state->output_state.width > 0 ? state->output_state.width : 1920;
-  int height        = state->output_state.height > 0 ? state->output_state.height : 1080;
+  int width =
+    state->output_state.width > 0 ? state->output_state.width : __ANVIL_FALLBACK_SCREEN_WIDTH__;
+  int height =
+    state->output_state.height > 0 ? state->output_state.height : __ANVIL_FALLBACK_SCREEN_HEIGHT__;
   state->egl_window = wl_egl_window_create(state->wl_surface, width, height);
   if (!state->egl_window)
   {
@@ -160,7 +332,7 @@ static void init_egl(struct client_state* state)
   glViewport(0, 0, width, height);
 
   // Load the image and create a texture
-  GLuint texture = load_texture(state->user_configs.background_path);
+  GLuint texture = load_texture(state->global_config.bg_path);
 
   // Use the texture for rendering
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -222,6 +394,8 @@ static void init_egl(struct client_state* state)
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+  update_time_texture(state);
+  render_time_box(state);
   render_password_field(state);
 
   eglSwapBuffers(state->egl_display, state->egl_surface);
@@ -259,10 +433,6 @@ static void render_password_field(struct client_state* state)
   GLint color_location    = glGetUniformLocation(program, "color");
   GLint offset_location   = glGetUniformLocation(program, "offset");
   GLint position_location = glGetAttribLocation(program, "position");
-
-  // Compute bottom-center offset for password field
-  float screen_width  = 1.0f; // Assuming normalized coordinates ([-1, 1] for both axes)
-  float screen_height = 1.0f;
 
   // Width and height of the password field
   float field_width  = 0.7f;  // Adjusted width for the field
@@ -334,35 +504,6 @@ static void render_password_field(struct client_state* state)
     sleep(1);
 }
 
-static GLuint create_texture_shader_program()
-{
-  const char* vertex_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_VERTEX);
-
-  const char* fragment_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_FRAG);
-
-  // Create and compile vertex shader
-  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-  glCompileShader(vertex_shader);
-
-  // Create and compile fragment shader
-  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-  glCompileShader(fragment_shader);
-
-  // Create and link shader program
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vertex_shader);
-  glAttachShader(program, fragment_shader);
-  glLinkProgram(program);
-
-  // Clean up shaders
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
-
-  return program;
-}
-
 void render_lock_screen(struct client_state* state)
 {
   // Bind the context to ensure it's current
@@ -382,7 +523,7 @@ void render_lock_screen(struct client_state* state)
   {
     // Load the background image path from the TOML configuration
     log_message(LOG_LEVEL_WARN, "EGL not initialized.");
-    texture = load_texture(state->user_configs.background_path); // Use the bg path here
+    texture = load_texture(state->global_config.bg_path); // Use the bg path here
     // Create shader program for texture
     texture_shader_program = create_texture_shader_program();
     initialized            = 1;
@@ -412,6 +553,8 @@ void render_lock_screen(struct client_state* state)
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   // Then render the triangle
+  update_time_texture(state);
+  render_time_box(state);
   render_password_field(state);
 }
 

@@ -4,6 +4,7 @@
 #include "client_state.h"
 #include <errno.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,7 +61,7 @@ static void init_debug(struct client_state* state)
 {
   if (!debug_option)
   {
-    debug_option = strdup(state->user_configs.debug_log_option);
+    debug_option = strdup(state->global_config.debug_log_enable);
   }
 
   if (debug_option != NULL && strcmp(debug_option, "true") == 0)
