@@ -2,9 +2,7 @@ name: Release Build for Anvilock
 
 on:
   push:
-    branches: [ "main" ]  # Trigger on push to the 'main' branch
-  pull_request:
-    branches: [ "main" ]  # Trigger on pull requests to the 'main' branch
+    branches: [ "main" ]  # Trigger on push to 'main' (but only release if version changes)
 
 jobs:
   release:
@@ -18,6 +16,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Pre-install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl \
+
+      - name: Get current version from repo
+        id: get_version
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
+      - name: Get latest release version
+        id: get_latest_release
+        run: |
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+          if [[ "$LATEST_VERSION" == "null" ]]; then
+            LATEST_VERSION="0.0.0"  # Default if no previous release exists
+          fi
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+
+      - name: Compare versions
+        id: check_version
+        run: |
+          if [[ "${{ env.VERSION }}" == "${{ env.LATEST_VERSION }}" ]]; then
+            echo "No version change detected. Skipping release."
+            exit 1
+          fi
+          echo "New version detected: ${{ env.VERSION }}"
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -25,7 +50,7 @@ jobs:
             libxkbcommon-dev libpam0g-dev libegl1-mesa-dev libgles2-mesa-dev \
             libfreetype6-dev
 
-      - name: Build Release Version of Anvilock in Ubuntu
+      - name: Build Release Version of Anvilock
         run: |
           make release
 
@@ -40,10 +65,10 @@ jobs:
         with:
           files: |
             anvilock.tar.gz
-          tag_name: v0.1.6  # Change this to dynamically use tags
-          name: "Anvilock v0.1.6 - Release"
+          tag_name: ${{ env.VERSION }}
+          name: "Anvilock ${{ env.VERSION }} - Release"
           body: |
-            **Anvilock v0.1.6 - Release Notes**
+            **Anvilock ${{ env.VERSION }} - Release Notes**
             
             ### How to Install:
             ```
@@ -52,3 +77,4 @@ jobs:
             ```
 
             _Thanks for using Anvilock!_
+

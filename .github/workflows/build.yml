@@ -2,13 +2,15 @@ name: "Building Anvilock in Ubuntu (x86-64 arch - GCC/Clang)"
 
 on:
   push:
-    branches: [ "main" ]  # Trigger on push to the 'main' branch
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]  # Trigger on pull requests to the 'main' branch
+    branches: [ "main" ]
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
 
@@ -29,6 +31,6 @@ jobs:
         make release
 
     - name: Build Release Version of Anvilock (x86-64 arch) - Clang
-       run: |
-         make clean
-         make release FLAGS="-DUSE_CLANG=ON"
+      run: |
+        make clean
+        make release FLAGS="-DUSE_CLANG=ON"
