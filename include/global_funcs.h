@@ -43,11 +43,11 @@ void get_time_string(char* buffer, size_t size, const char* format)
   }
 
   // Determine format based on input
-  if (strcmp(format, "H:M:S") == 0)
+  if (strcmp(format, "H:M:S") == 0 || strcmp(format, "h:m:s") == 0)
   {
     strftime(buffer, size, "%H:%M:%S", local);
   }
-  else if (strcmp(format, "H:M") == 0)
+  else if (strcmp(format, "H:M") == 0 || strcmp(format, "h:m") == 0)
   {
     strftime(buffer, size, "%H:%M", local);
   }
