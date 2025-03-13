@@ -1,11 +1,15 @@
-#version 300 es
-layout(location = 0) in vec2 aPos;
-layout(location = 1) in vec2 aTexCoord;
-uniform mat4 uTransform;  // Use this to apply scaling
+#version 320 es
+precision mediump float;
 
-out vec2 TexCoord;
+layout (location = 0) in vec2 in_pos;
+layout (location = 1) in vec2 in_texcoord;
 
-void main() {
-    gl_Position = uTransform * vec4(aPos, 0.0, 1.0);
-    TexCoord = aTexCoord;
+out vec2 texcoord;
+
+uniform mat4 projection;  // Projection matrix for proper positioning
+
+void main()
+{
+    texcoord = in_texcoord;
+    gl_Position = projection * vec4(in_pos, 0.0, 1.0);
 }

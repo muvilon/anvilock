@@ -6,7 +6,7 @@ EXECUTABLE_NAME = anvilock
 
 # Compiler and Flags
 CMAKE = cmake
-CMAKE_FLAGS = -DCMAKE_BUILD_TYPE=Release
+CMAKE_RELEASE_FLAGS = -DCMAKE_BUILD_TYPE=Release
 MAKE = make
 
 FLAGS ?=
@@ -78,7 +78,7 @@ init:
 release:
 	$(MAKE) init
 	@mkdir -p $(BUILD_DIR)
-	@cd $(BUILD_DIR) && $(CMAKE) $(CMAKE_FLAGS) $(FLAGS) .. && $(MAKE)
+	@cd $(BUILD_DIR) && $(CMAKE) $(CMAKE_RELEASE_FLAGS) $(FLAGS) .. && $(MAKE)
 
 asan:
 	@mkdir -p $(ASAN_BUILD_DIR)

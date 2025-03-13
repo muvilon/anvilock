@@ -11,3 +11,9 @@ debug_log_enable = "false" # Will display a LOT of pointer, keyboard, shader, et
 
 [time]
 time_format = "H:M:S" # Can currently set to H:M or H:M:S 
+
+[time_box]
+top_left  = [-0.15, 0.9]
+top_right = [ 0.15, 0.9]
+bottom_left  = [-0.15, 0.7]
+bottom_right = [ 0.15, 0.7]

@@ -12,6 +12,10 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 > 
 > Stay tuned for more updates!
 
+## Understanding Anvilock 
+
+To further understand how we created a Wayland based screen locker from scratch, check out this **[blog](https://s1dd.is-a.dev/blog/anvilock-blog)**
+
 ---
 
 ## List of Contents
@@ -33,34 +37,49 @@ ANVILOCK
 ├── README.md
 ├── SECURITY.md
 ├── VERSION
-├── client_state.h
-├── CMakeLists.txt
-├── config.h
-├── egl.h
-├── freetype.h
-├── log.h
-├── main.c
+├── include/
+│   ├── config/
+│   │   ├── config.h
+│   ├── deprecated/
+│   │   ├── surface_colors.h
+│   │   ├── unicode.h
+│   │   └── NOTE.md
+│   ├── freetype/
+│   │   └── freetype.h
+│   ├── graphics/
+│   │   ├── egl.h
+│   │   └── shaders.h
+│   ├── memory/
+│   │   └── anvil_mem.h
+│   ├── pam/
+│   │   ├── pam.h
+│   │   └── password_buffer.h
+│   ├── wayland/
+│   │   ├── session_lock_handle.h
+│   │   ├── shared_mem_handle.h
+│   │   ├── wl_buffer_handle.h
+│   │   ├── wl_keyboard_handle.h
+│   │   ├── wl_output_handle.h
+│   │   ├── wl_pointer_handle.h
+│   │   ├── wl_registry_handle.h
+│   │   ├── wl_seat_handle.h
+│   │   ├── xdg_surface_handle.h
+│   │   └── xdg_wm_base_handle.h
+│   ├── global_funcs.h 
+│   ├── client_state.h 
+│   ├── log.h 
+│   └── NOTE.md 
+├── src/
+│   ├── main.c 
+│   └── main.h
+├── toml
+│   ├── toml.h
+│   └── toml.c
+├── shaders/
 ├── Makefile
 ├── meson.build
-├── pam.h
-├── password_buffer.h
-├── session_lock_handle.h
-├── shared_mem_handle.h
+├── CMakeLists.txt
 ├── stb_image.h
-├── stb_image_write.h
-├── surface_colors.h
-├── toml
-├   ├── toml.h
-├   └── toml.c
-├── unicode.h
-├── wl_buffer_handle.h
-├── wl_keyboard_handle.h
-├── wl_output_handle.h
-├── wl_pointer_handle.h
-├── wl_registry_handle.h
-├── wl_seat_handle.h
-├── xdg_surface_handle.h
-├── xdg_wm_base_handle.h
 └── protocols
     ├── xdg-shell-client-protocol.h
     ├── ext-session-lock-client-protocol.h
@@ -68,21 +87,6 @@ ANVILOCK
         ├── xdg-shell-client-protocol.c
         └── ext-session-lock-client-protocol.c
 ```
-
-### File Descriptions
-
-- **client_state.h**: Handles the overall state of the client, including tracking of surfaces, input, and buffer states.
-- **log.h**: Centralized logging mechanism to track operations and errors.
-- **password_buffer.h**: Secure handling of password storage, using memory sanitization techniques.
-- **pam.h**: Integration with Pluggable Authentication Modules (PAM) for user authentication.
-- **wl_registry_handle.h**: Handles Wayland registry interface, responsible for connecting to the Wayland compositor.
-- **wl_buffer_handle.h**: Deals with buffer management for rendering lock screens.
-- **wl_seat_handle.h**: Handles Wayland seat interface, used to manage input devices like keyboards and pointers.
-- **wl_keyboard_handle.h**: Manages keyboard input and event handling.
-- **wl_pointer_handle.h**: Manages pointer input and event handling.
-- **xdg_surface_handle.h**: Handles XDG surface protocols to create and manage window surfaces.
-- **xdg_wm_base_handle.h**: Deals with the XDG window manager base protocol for interacting with compositor windowing systems.
-- **shared_mem_handle.h**: Manages shared memory to allow efficient communication between processes.
 
 #### Protocol Files:
 
@@ -116,9 +120,17 @@ Headers used to draw and write images which are then loaded into an EGL texture 
 
 > [!NOTE]
 > 
-> If you want to manually build anvilock without using `build.sh`
+> You can either you `build.sh` to install stb_image.h:
+> ```bash 
+> ./build.sh
+> ```
 > 
-> You will have to download `stb_image.h` header file from the stb repo mentioned above and place it in the anvilock directory.
+> Or if you want, you can use **Makefile** to do the same:
+> 
+> ```bash 
+> make init # to just initialize the repository (does NOT build)
+> make release # runs make init and make protocols before building with apt file checking
+> ```
 > 
 
 ---
@@ -158,7 +170,7 @@ Ensure that the dependencies listed in [Dependencies](https://github.com/muvilon
 Simply run this in your terminal:
 
 ```bash
-[anvilock]$ ./build.sh
+./build.sh
 ```
 
 The build script will take care of dependencies list, loading `stb_image.h` from github and loading the required wayland protocols for anvilock to run
@@ -175,36 +187,94 @@ git clone https://github.com/muvilon/anvilock.git
 
 ### 2. Building the Application
 
-You can build the application using one of the following methods: Make, CMake, or Meson. Choose one based on your preference or environment.
+You can build the application using one of the following methods: Make (using CMake), CMake, or Meson. Choose one based on your preference or environment.
+
+> [!IMPORTANT]
+> 
+> It is to be noted that building Anvilock using `Makefile` is the most advised 
+> way of using the build system.
+> 
+> Other ways may work but they are outdated (OR) are undergoing an overhaul.
+> 
 
 #### Method 1: Building with Make
 
-1. Navigate to the project directory:
+1. Run this command to build the **RELEASE** version of Anvilock:
 
-   ```bash
-   cd anvilock
-   ```
+    ```bash 
+    make release
+    ``` 
 
-2. Build the application:
+There are a **LOT** of targets that can be used using Makefile! Here is a comprehensive list of them all that will make you life much easier:
 
-   ```bash
-   make
-   ```
+**MAKEFILE TARGETS:**
 
-3. Modify the `~/.config/anvilock/config.toml` file to use your font
+### Build Targets  
 
-4. Run the application (ensure the compositor is Wayland-compatible):
+#### `all` (Default)  
+Runs the `release` target to compile the project in **Release mode**.  
 
-   ```bash
-   ./anvilock
-   ```
+#### `release`  
+- Runs `init` (downloads `stb_image.h` if needed).  
+- Creates the `build/` directory.  
+- Configures the project using `CMake` with `-DCMAKE_BUILD_TYPE=Release`.  
+- Compiles the project using `make`.  
 
-**Caveats for Make:**
+#### `debug`  
+- Creates the `build/` directory.  
+- Configures the project for **Debug mode** (`-DCMAKE_BUILD_TYPE=Debug`).  
+- Compiles the project using `make`.  
 
-- Ensure that the `Makefile` is configured properly to find all necessary libraries and dependencies.
-- The Make build may not automatically handle out-of-source builds, so you might want to keep your source directory clean.
+#### `asan`  
+- Creates `build-asan/` for AddressSanitizer builds.  
+- Configures the project with `-DCMAKE_BUILD_TYPE=Debug-ASan`.  
+- Compiles the project.  
 
----
+#### `tsan`  
+- Creates `build-tsan/` for ThreadSanitizer builds.  
+- Configures the project with `-DCMAKE_BUILD_TYPE=Debug-TSan`.  
+- Compiles the project.  
+
+### Protocol Generation  
+
+#### `protocols`  
+Generates headers and source files for Wayland protocols:  
+- `ext-session-lock-client-protocol.h` and `ext-session-lock-client-protocol.c`.  
+- `xdg-shell-client-protocol.h` and `xdg-shell-client-protocol.c`.  
+
+It uses `wayland-scanner` to generate these files from the system protocol XML files.  
+
+### Initialization
+
+#### `init`  
+- Downloads `stb_image.h` if it does not exist.  
+- Runs `make protocols` to generate Wayland protocol files.
+
+### Code Quality  
+
+#### `format`  
+Runs `clang-format` on all `.c` and `.h` files in `src/` and `include/`.  
+
+#### `tidy`  
+Runs `clang-tidy` on all `.c` and `.h` files in `src/` and `include/`.
+
+### Cleanup  
+
+#### `clean`  
+Removes `build/`, `build-asan/`, and `build-tsan/` directories.
+
+### Installation  
+
+#### `install`  
+Installs the compiled binaries and resources using `make install` from the build directory.  
+
+#### `uninstall`  
+Reads `install_manifest.txt` and removes installed files.  
+
+### Running  
+
+#### `run`  
+Runs the compiled executable from the `build/` directory.
 
 #### Method 2: Building with CMake
 
@@ -223,7 +293,8 @@ You can build the application using one of the following methods: Make, CMake, o
 3. Configure the project:
 
    ```bash
-   cmake ..
+   cmake .. -DCMAKE_BUILD_TYPE=Release # build type can be release, debug, Debug-ASan or Debug-TSan
+   # You can add other flags here as you wish, refer to CMakeLists.txt for more build options!
    ```
 
 4. Build the application:
@@ -242,9 +313,8 @@ You can build the application using one of the following methods: Make, CMake, o
 
 **Caveats for CMake:**
 
-- Ensure that you have the necessary CMake version (3.10 or later).
-- You may need to install `cmake` and `pkg-config` if they are not already available.
-- CMake supports out-of-source builds, keeping the source directory clean.
+- Ensure that you have the necessary CMake version (3.22 or later).
+- You **NEED** to install `cmake` and `pkg-config` if they are not already available.
 
 ---
 
@@ -284,20 +354,45 @@ You can build the application using one of the following methods: Make, CMake, o
 
 ---
 
-## 4. Configuration
+## 4. Configuration  
 
-All configurations are done through a `config.toml` file that will be generated in `~/.config/anvilock/` if not present
+All configurations are done through a `config.toml` file that will be generated in `~/.config/anvilock/` if not present.  
 
-Make sure to check out `~/.config/anvilock/config.toml` for more!
+Make sure to check out `~/.config/anvilock/config.toml` for more!  
 
-> [!NOTE]
-> 
-> Only the config for [bg] is customizable that lets you set the background of the lock screen 
-> 
-> More configurations and customizations are to come!
-> 
-> An example config file is explained in [config.toml](https://github.com/muvilon/anvilock/blob/main/assets/examples/config.toml)
-> 
+> [!NOTE]  
+> More configurations and customizations are to come!  
+>  
+> An example config file is explained in [config.toml](https://github.com/muvilon/anvilock/blob/main/assets/examples/config.toml).  
+
+### Available Configuration Fields  
+
+#### `[font]`  
+Configures the font used for text rendering on the lock screen.  
+- `name` – A custom name for the font (optional).  
+- `path` – Absolute path to the font file (e.g., `.ttf`, `.otf`).  
+
+#### `[bg]`  
+Configures the background image for the lock screen.  
+- `name` – A custom name for the background (optional).  
+- `path` – Absolute path to the image file.  
+
+#### `[debug]`  
+Controls debug logging.  
+- `debug_log_enable` – Enables (`"true"`) or disables (`"false"`) detailed logging for pointers, keyboards, shaders, and other interfaces.  
+
+#### `[time]`  
+Controls the time format displayed on the lock screen.  
+- `time_format` – Defines the format of the clock display. Options:  
+  - `"H:M"` → Hours & Minutes  
+  - `"H:M:S"` → Hours, Minutes & Seconds  
+
+#### `[time_box]`  
+Defines the position of the time display on the screen. Each key specifies a corner of the time box in **normalized coordinates** (where `-1.0` is the left/bottom and `1.0` is the right/top).  
+- `top_left` – Coordinates of the top-left corner.  
+- `top_right` – Coordinates of the top-right corner.  
+- `bottom_left` – Coordinates of the bottom-left corner.  
+- `bottom_right` – Coordinates of the bottom-right corner.
 
 ### Conclusion
 

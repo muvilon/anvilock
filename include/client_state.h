@@ -20,11 +20,17 @@ struct output_state
 
 typedef struct
 {
-  char* font_path;
-  char* bg_name;
-  char* bg_path;
-  char* debug_log_enable;
-  char* time_format;
+  float x, y, u, v;
+} Vertex;
+
+typedef struct
+{
+  char*  font_path;
+  char*  bg_name;
+  char*  bg_path;
+  char*  debug_log_enable;
+  char*  time_format;
+  Vertex time_box_vertices[4];
 } TOMLConfig;
 
 // Structure to represent pointer events and their associated state

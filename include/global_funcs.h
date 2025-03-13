@@ -86,12 +86,25 @@ void check_program_link_status(GLuint program)
   }
 }
 
+void print_shader_log(GLuint shader)
+{
+  GLint log_length = 0;
+  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+  if (log_length > 1)
+  {
+    char* log = (char*)malloc(log_length);
+    glGetShaderInfoLog(shader, log_length, NULL, log);
+    log_message(LOG_LEVEL_ERROR, "Shader Log: %s", log);
+    free(log);
+  }
+}
+
 static const GLfloat vertices_with_texcoords[] = {
   // Position      // Texture coords
-  -0.3f, 0.9f, 0.0f, 0.0f, // Top left
-  0.3f,  0.9f, 1.0f, 0.0f, // Top right
-  -0.3f, 0.7f, 0.0f, 1.0f, // Bottom left
-  0.3f,  0.7f, 1.0f, 1.0f  // Bottom right
+  -0.27f, 0.9f, 0.0f, 0.0f, // Top left
+  0.27f,  0.9f, 1.0f, 0.0f, // Top right
+  -0.27f, 0.7f, 0.0f, 1.0f, // Bottom left
+  0.27f,  0.7f, 1.0f, 1.0f  // Bottom right
 };
 
 // OpenGL Vertex Data

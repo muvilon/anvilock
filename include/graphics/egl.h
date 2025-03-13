@@ -165,43 +165,27 @@ void render_time_box(struct client_state* state)
     return;
   }
 
-  // Use a VBO for better performance
   static GLuint vbo = 0;
   if (vbo == 0)
   {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_with_texcoords), vertices_with_texcoords,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(state->global_config.time_box_vertices),
+                 state->global_config.time_box_vertices, GL_STATIC_DRAW);
   }
 
-  log_message(LOG_LEVEL_DEBUG, "Rendering time box...");
-
-  // Set up blending for text rendering
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  // Bind the VBO
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-  // Set up position attribute
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
-
-  // Set up texture coordinate attribute
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
                         (void*)(2 * sizeof(GLfloat)));
 
-  // Bind the texture
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, state->time_texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  // Draw the quad
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   GLenum error = glGetError();
@@ -210,7 +194,6 @@ void render_time_box(struct client_state* state)
     log_message(LOG_LEVEL_ERROR, "OpenGL error: 0x%x", error);
   }
 
-  // Clean up
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
