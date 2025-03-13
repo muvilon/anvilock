@@ -16,8 +16,6 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 
 To further understand how we created a Wayland based screen locker from scratch, check out this **[blog](https://s1dd.is-a.dev/blog/anvilock-blog)**
 
----
-
 ## List of Contents
 
 1. [Project Structure](https://github.com/muvilon/anvilock?tab=readme-ov-file#1-project-structure)
@@ -25,8 +23,6 @@ To further understand how we created a Wayland based screen locker from scratch,
 3. [Building](https://github.com/muvilon/anvilock?tab=readme-ov-file#3-building)
 4. [Config](https://github.com/muvilon/anvilock?tab=readme-ov-file#4-configuration)
 5. [Future](https://github.com/muvilon/anvilock?tab=readme-ov-file#5-future)
-
----
 
 ## 1. Project Structure
 
@@ -133,8 +129,6 @@ Headers used to draw and write images which are then loaded into an EGL texture 
 > ```
 > 
 
----
-
 ## 2. Dependencies
 
 ANVILOCK relies on the following dependencies:
@@ -156,8 +150,6 @@ ANVILOCK relies on the following dependencies:
 - **gcc** / **clang**: Any one compiler is enough to compile the source code.
 
 All dependencies must be installed on your system before building.
-
----
 
 ## Building
 
@@ -316,8 +308,6 @@ Runs the compiled executable from the `build/` directory.
 - Ensure that you have the necessary CMake version (3.22 or later).
 - You **NEED** to install `cmake` and `pkg-config` if they are not already available.
 
----
-
 #### Method 3: Building with Meson
 
 1. Navigate to the project directory:
@@ -351,8 +341,6 @@ Runs the compiled executable from the `build/` directory.
 - Ensure that you have Meson installed (you can usually install it via your package manager).
 - Meson defaults to an out-of-source build, which helps keep the project directory clean.
 - If you encounter issues with dependencies, you may need to install `ninja` (the default backend for Meson).
-
----
 
 ## 4. Configuration  
 
@@ -412,12 +400,8 @@ Few examples: Hyprland, Sway, Wayfire, Cosmic, etc.
 
 -> This will not work for compositors like Weston which lack the `ext-session-lock-v1` protocol needed for anvilock to work.
 
----
-
 ## 5. Future
 
 Stay tuned for more updates as we progress through development.
 
 Anvilock is an open source software licensed under the [BSD 3 Clause](https://github.com/muvilon/anvilock/blob/main/LICENSE) License.
-
----
