@@ -10,6 +10,8 @@ CMAKE_RELEASE_FLAGS = -DCMAKE_BUILD_TYPE=Release
 MAKE = make
 
 FLAGS ?=
+GLOBAL_FLAG := -DBUILD_GLOBAL
+INSTALL_MANIFEST := $(BUILD_DIR)/install_manifest.txt
 
 STB_URL = "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h"
 STB_PATH= "stb_image.h"
@@ -97,8 +99,21 @@ tidy:
 clean:
 	@rm -rf $(BUILD_DIR) $(ASAN_BUILD_DIR) $(TSAN_BUILD_DIR)
 
-install:
-	@cd $(BUILD_DIR) && $(MAKE) install
+build-global:
+	@echo "==> Building Anvilock GLOBALLY and installing..."
+	$(CMAKE) -S . -B $(BUILD_DIR) $(TESTING_FLAG)=OFF $(GLOBAL_FLAG)=ON $(CMAKE_EXTRA_FLAGS)
+	$(CMAKE) --build $(BUILD_DIR)
+	cd $(BUILD_DIR) && sudo $(MAKE) install
+
+build-global-uninstall:
+	@echo "==> Uninstalling Anvilock from the GLOBAL build..."
+	@if [ -f "$(INSTALL_MANIFEST)" ]; then \
+		xargs -a $(INSTALL_MANIFEST) sudo rm -v; \
+		echo "--> Uninstallation complete."; \
+	else \
+		echo "**Error: No install_manifest.txt found. Please ensure the project was installed.**"; \
+		exit 1; \
+	fi
 
 uninstall:
 	@xargs rm -f < install_manifest.txt
@@ -106,4 +121,4 @@ uninstall:
 run:
 	./$(BUILD_DIR)/$(EXECUTABLE_NAME)
 
-.PHONY: all debug release asan tsan format clean install uninstall
+.PHONY: all debug release asan tsan format clean install uninstall build-global build-global-uninstall
