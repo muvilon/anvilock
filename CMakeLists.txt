@@ -3,6 +3,7 @@ project(anvilock VERSION 1.5 LANGUAGES C)
 
 # Option to use Ninja as the build system
 option(USE_NINJA "Use Ninja build system" OFF)
+option(BUILD_GLOBAL "Build Anvilock globally" OFF)
 
 if(USE_NINJA)
     message(STATUS "Using Ninja as the build system...")
@@ -15,6 +16,7 @@ if(USE_CLANG)
     message(STATUS "Using Clang as the compiler...")
     set(CMAKE_C_COMPILER clang CACHE STRING "C Compiler" FORCE)
 endif()
+
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -91,13 +93,13 @@ target_link_options(${EXECUTABLE_NAME} PRIVATE ${SANITIZER_FLAGS})
 # Global Installation Support
 option(BUILD_GLOBAL "Build globally and install" OFF)
 
-if(BUILD_GLOBAL)
-    message(STATUS "Starting GLOBAL_BUILD for anvilock...")
-    install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
-    install(FILES assets/anvilock.desktop DESTINATION share/applications)
-    install(FILES assets/logo/anvilock.png DESTINATION share/icons/hicolor/256x256/apps)
-    install(FILES assets/manpage/anvilock.1 DESTINATION share/man/man1)
-    install(FILES ./VERSION DESTINATION share/anvilock/)
+# --- Handle Global Build ---------------------------------------------------------
+if(DEFINED BUILD_GLOBAL AND BUILD_GLOBAL)
+  set(CMAKE_BUILD_TYPE "Global")
+  set(CMAKE_INSTALL_PREFIX "/usr/")
+  message(STATUS "Starting GLOBAL_BUILD for Anvilock...")
+
+  install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
 else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
     message(STATUS "Building locally, binaries will be in ./build/")
