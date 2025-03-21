@@ -128,7 +128,23 @@ int main(int argc, char* argv[])
 
   init_debug(&state);
 
-  initialize_shaders();
+  // Set the home directory
+  state.homeDir = ANVIL_GET_HOME_DIR();
+  log_message(LOG_LEVEL_TRACE, "Found @HOME at: %s", state.homeDir);
+
+  state.shaderRuntimeDir = find_shader_runtime(state.homeDir);
+
+  log_message(LOG_LEVEL_INFO, "[SHADERS] Setting shader runtime directory to: '%s'",
+              state.shaderRuntimeDir);
+
+  if (!state.shaderRuntimeDir)
+  {
+    log_message(LOG_LEVEL_ERROR, "[SHADERS] Could not find shaders runtime. Exiting with code 1.");
+    cleanup(&state);
+    return 1;
+  }
+
+  initialize_shaders(state.shaderRuntimeDir);
 
   // Commit the surface to make it visible
   wl_surface_commit(state.wl_surface);

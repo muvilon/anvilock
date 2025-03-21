@@ -14,33 +14,63 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"
 
-static GLuint create_texture_shader_program(void)
+static GLuint create_texture_shader_program(const char* shader_runtime_dir)
 {
-  const char* vertex_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_VERTEX);
 
-  const char* fragment_shader_source = load_shader_source(SHADERS_TEXTURE_EGL_FRAG);
+  /*
+   * @UNDERSTANDING SHADER RUNTIME:
+   *
+   * Currently to account for shader runtime directory,
+   * we prepend (concatenate) shader runtime dir and the SHADERS_xx macros.
+   *
+   * Then perform a sanity check if the strings exist (concatenated string) and
+   * the shader source is loaded with the absolute path of the shader.
+   *
+   * NOTE:- shaderRuntimeDir is a member of ClientState struct in `client_state.h`
+   *
+   * The process is quite repetitive I agree, but I have not found a better way of
+   * implementing this yet.
+   *
+   */
 
-  // Create and compile vertex shader
-  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-  glCompileShader(vertex_shader);
+  char* vertex_shader_str   = ANVIL_SAFE_STR_JOIN(shader_runtime_dir, SHADERS_TEXTURE_EGL_VERTEX);
+  char* fragment_shader_str = ANVIL_SAFE_STR_JOIN(shader_runtime_dir, SHADERS_TEXTURE_EGL_FRAG);
 
-  // Create and compile fragment shader
-  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-  glCompileShader(fragment_shader);
+  if (vertex_shader_str && fragment_shader_str)
+  {
 
-  // Create and link shader program
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vertex_shader);
-  glAttachShader(program, fragment_shader);
-  glLinkProgram(program);
+    const char* vertex_shader_source   = load_shader_source(vertex_shader_str);
+    const char* fragment_shader_source = load_shader_source(fragment_shader_str);
 
-  // Clean up shaders
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
+    // Create and compile vertex shader
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+    glCompileShader(vertex_shader);
 
-  return program;
+    // Create and compile fragment shader
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+    glCompileShader(fragment_shader);
+
+    // Create and link shader program
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    // Clean up shaders
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+
+    return program;
+  }
+  else
+  {
+    log_message(LOG_LEVEL_ERROR, "Failed to create texture shader program.");
+  }
+
+  return GL_RET_CODE_FAIL; // Always ensure that we return this when we are returning a fail for
+                           // OpenGL functions with return type GLuint
 }
 
 static void render_password_field(struct client_state* state);
@@ -88,7 +118,7 @@ GLuint create_text_texture(const char* text)
   if (!image)
   {
     log_message(LOG_LEVEL_ERROR, "Failed to allocate image buffer.");
-    return 0;
+    return GL_RET_CODE_FAIL;
   }
 
   // Second pass: render glyphs
@@ -124,7 +154,7 @@ GLuint create_text_texture(const char* text)
   {
     log_message(LOG_LEVEL_ERROR, "Failed to generate OpenGL texture.");
     ANVIL_SAFE_FREE(image);
-    return 0;
+    return GL_RET_CODE_FAIL;
   }
 
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -324,167 +354,191 @@ static void init_egl(struct client_state* state)
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Render the quad with the texture
-  const char* vertex_shader_source = load_shader_source(SHADERS_INIT_EGL_VERTEX);
-  GLuint      vertex_shader        = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-  glCompileShader(vertex_shader);
+  char* vertex_shader_str   = ANVIL_SAFE_STR_JOIN(state->shaderRuntimeDir, SHADERS_INIT_EGL_VERTEX);
+  char* fragment_shader_str = ANVIL_SAFE_STR_JOIN(state->shaderRuntimeDir, SHADERS_INIT_EGL_FRAG);
 
-  // Check for vertex shader compile errors
-  GLint compile_status;
-  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compile_status);
-  if (compile_status == GL_FALSE)
+  if (vertex_shader_str && fragment_shader_str)
   {
-    log_message(LOG_LEVEL_ERROR, "Vertex shader compilation failed");
-    exit(EXIT_FAILURE);
+    const char* vertex_shader_source = load_shader_source(vertex_shader_str);
+    GLuint      vertex_shader        = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+    glCompileShader(vertex_shader);
+
+    // Check for vertex shader compile errors
+    GLint compile_status;
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compile_status);
+    if (compile_status == GL_FALSE)
+    {
+      log_message(LOG_LEVEL_ERROR, "Vertex shader compilation failed");
+      exit(EXIT_FAILURE);
+    }
+
+    const char* fragment_shader_source = load_shader_source(fragment_shader_str);
+    GLuint      fragment_shader        = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+    glCompileShader(fragment_shader);
+
+    // Check for fragment shader compile errors
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compile_status);
+    if (compile_status == GL_FALSE)
+    {
+      log_message(LOG_LEVEL_ERROR, "Fragment shader compilation failed");
+      exit(EXIT_FAILURE);
+    }
+
+    GLuint shader_program = glCreateProgram();
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    glLinkProgram(shader_program);
+
+    GLint link_status;
+    glGetProgramiv(shader_program, GL_LINK_STATUS, &link_status);
+    if (link_status == GL_FALSE)
+    {
+      log_message(LOG_LEVEL_ERROR, "Shader program linking failed");
+      exit(EXIT_FAILURE);
+    }
+
+    glUseProgram(shader_program);
+
+    GLint position_location = glGetAttribLocation(shader_program, "position");
+    GLint texCoord_location = glGetAttribLocation(shader_program, "texCoord");
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, quad_vertices);
+    glEnableVertexAttribArray(position_location);
+    glVertexAttribPointer(texCoord_location, 2, GL_FLOAT, GL_FALSE, 0, tex_coords);
+    glEnableVertexAttribArray(texCoord_location);
+
+    glUniform1i(glGetUniformLocation(shader_program, "uTexture"), 0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    update_time_texture(state);
+    render_time_box(state);
+    render_password_field(state);
+
+    eglSwapBuffers(state->egl_display, state->egl_surface);
   }
-
-  const char* fragment_shader_source = load_shader_source(SHADERS_INIT_EGL_FRAG);
-  GLuint      fragment_shader        = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-  glCompileShader(fragment_shader);
-
-  // Check for fragment shader compile errors
-  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compile_status);
-  if (compile_status == GL_FALSE)
+  else
   {
-    log_message(LOG_LEVEL_ERROR, "Fragment shader compilation failed");
-    exit(EXIT_FAILURE);
+    log_message(LOG_LEVEL_ERROR, "Failed to allocate memory, causing texture load errors.");
   }
-
-  GLuint shader_program = glCreateProgram();
-  glAttachShader(shader_program, vertex_shader);
-  glAttachShader(shader_program, fragment_shader);
-  glLinkProgram(shader_program);
-
-  GLint link_status;
-  glGetProgramiv(shader_program, GL_LINK_STATUS, &link_status);
-  if (link_status == GL_FALSE)
-  {
-    log_message(LOG_LEVEL_ERROR, "Shader program linking failed");
-    exit(EXIT_FAILURE);
-  }
-
-  glUseProgram(shader_program);
-
-  GLint position_location = glGetAttribLocation(shader_program, "position");
-  GLint texCoord_location = glGetAttribLocation(shader_program, "texCoord");
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, quad_vertices);
-  glEnableVertexAttribArray(position_location);
-  glVertexAttribPointer(texCoord_location, 2, GL_FLOAT, GL_FALSE, 0, tex_coords);
-  glEnableVertexAttribArray(texCoord_location);
-
-  glUniform1i(glGetUniformLocation(shader_program, "uTexture"), 0);
-
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  update_time_texture(state);
-  render_time_box(state);
-  render_password_field(state);
-
-  eglSwapBuffers(state->egl_display, state->egl_surface);
 }
 
 static void render_password_field(struct client_state* state)
 {
-  const char* vertex_shader_source = load_shader_source(SHADERS_RENDER_PWD_FIELD_EGL_VERTEX);
 
-  const char* fragment_shader_source = load_shader_source(SHADERS_RENDER_PWD_FIELD_EGL_FRAG);
+  char* vertex_shader_str =
+    ANVIL_SAFE_STR_JOIN(state->shaderRuntimeDir, SHADERS_RENDER_PWD_FIELD_EGL_VERTEX);
+  char* fragment_shader_str =
+    ANVIL_SAFE_STR_JOIN(state->shaderRuntimeDir, SHADERS_RENDER_PWD_FIELD_EGL_FRAG);
 
-  // Create and compile shaders
-  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-  glCompileShader(vertex_shader);
-
-  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-  glCompileShader(fragment_shader);
-
-  // Create and link program
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vertex_shader);
-  glAttachShader(program, fragment_shader);
-  glLinkProgram(program);
-
-  // Enable blending for transparency
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Use the shader program
-  glUseProgram(program);
-
-  // Get uniform locations
-  GLint color_location    = glGetUniformLocation(program, "color");
-  GLint offset_location   = glGetUniformLocation(program, "offset");
-  GLint position_location = glGetAttribLocation(program, "position");
-
-  // Width and height of the password field
-  float field_width  = 0.7f;  // Adjusted width for the field
-  float field_height = 0.15f; // Adjusted height for the field
-
-  // Position offset to center at the bottom of the screen
-  float offset_x = 0;                           // Horizontally center the field
-  float offset_y = -0.8f + field_height / 2.0f; // Vertically align it at the bottom
-
-  // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
-  glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
-  glUniform2f(offset_location, offset_x, offset_y);
-
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, password_field_vertices);
-  glEnableVertexAttribArray(position_location);
-
-  // Draw the background of the password field
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  // Draw the border with a subtle shadow effect
-  glUniform4f(color_location, 0.8f, 0.8f, 0.8f, 1.0f);
-  glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-  // Draw password dots
-  glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
-
-  // Set up vertices for dots
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, dot_vertices);
-
-  // Adjust dot positions based on password input
-  float dot_spacing = field_width / (state->pam.password_index + 1);
-  for (int i = 0; i < state->pam.password_index; i++)
+  if (vertex_shader_str && fragment_shader_str)
   {
-    float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
-    glUniform2f(offset_location, x_position, offset_y);
+
+    const char* vertex_shader_source   = load_shader_source(vertex_shader_str);
+    const char* fragment_shader_source = load_shader_source(fragment_shader_str);
+
+    // Create and compile shaders
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+    glCompileShader(vertex_shader);
+
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+    glCompileShader(fragment_shader);
+
+    // Create and link program
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    // Enable blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Use the shader program
+    glUseProgram(program);
+
+    // Get uniform locations
+    GLint color_location    = glGetUniformLocation(program, "color");
+    GLint offset_location   = glGetUniformLocation(program, "offset");
+    GLint position_location = glGetAttribLocation(program, "position");
+
+    // Width and height of the password field
+    float field_width  = 0.7f;  // Adjusted width for the field
+    float field_height = 0.15f; // Adjusted height for the field
+
+    // Position offset to center at the bottom of the screen
+    float offset_x = 0;                           // Horizontally center the field
+    float offset_y = -0.8f + field_height / 2.0f; // Vertically align it at the bottom
+
+    // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
+    glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
+    glUniform2f(offset_location, offset_x, offset_y);
+
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, password_field_vertices);
+    glEnableVertexAttribArray(position_location);
+
+    // Draw the background of the password field
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  }
 
-  // Handle Authentication Failure (Red border for failure)
-  if (state->pam.auth_state.auth_failed)
+    // Draw the border with a subtle shadow effect
+    glUniform4f(color_location, 0.8f, 0.8f, 0.8f, 1.0f);
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+    // Draw password dots
+    glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
+
+    // Set up vertices for dots
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, dot_vertices);
+
+    // Adjust dot positions based on password input
+    float dot_spacing = field_width / (state->pam.password_index + 1);
+    for (int i = 0; i < state->pam.password_index; i++)
+    {
+      float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
+      glUniform2f(offset_location, x_position, offset_y);
+      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    // Handle Authentication Failure (Red border for failure)
+    if (state->pam.auth_state.auth_failed)
+    {
+      float failColor[] = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
+
+      glUniform4fv(color_location, 1, failColor);
+      glUniform2f(offset_location, offset_x, offset_y);
+      glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with failure color
+    }
+
+    // Handle Authentication Success (Green border for success)
+    if (!state->pam.auth_state.auth_failed && state->pam.password_index > 0)
+    {
+      float successColor[] = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
+
+      glUniform4fv(color_location, 1, successColor);
+      glUniform2f(offset_location, offset_x, offset_y);
+      glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with success color
+    }
+
+    // Disable blending and clean up
+    glDisable(GL_BLEND);
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    glDeleteProgram(program);
+
+    // Swap buffers to render the final frame
+    eglSwapBuffers(state->egl_display, state->egl_surface);
+
+    if (state->pam.auth_state.auth_failed)
+      sleep(1);
+  }
+  else
   {
-    float failColor[] = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
-
-    glUniform4fv(color_location, 1, failColor);
-    glUniform2f(offset_location, offset_x, offset_y);
-    glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with failure color
+    log_message(LOG_LEVEL_ERROR,
+                "Failed to allocate memory, causing password field render to fail");
   }
-
-  // Handle Authentication Success (Green border for success)
-  if (!state->pam.auth_state.auth_failed && state->pam.password_index > 0)
-  {
-    float successColor[] = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
-
-    glUniform4fv(color_location, 1, successColor);
-    glUniform2f(offset_location, offset_x, offset_y);
-    glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with success color
-  }
-
-  // Disable blending and clean up
-  glDisable(GL_BLEND);
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
-  glDeleteProgram(program);
-
-  // Swap buffers to render the final frame
-  eglSwapBuffers(state->egl_display, state->egl_surface);
-
-  if (state->pam.auth_state.auth_failed)
-    sleep(1);
 }
 
 void render_lock_screen(struct client_state* state)
@@ -508,7 +562,7 @@ void render_lock_screen(struct client_state* state)
     log_message(LOG_LEVEL_WARN, "EGL not initialized.");
     texture = load_texture(state->global_config.bg_path); // Use the bg path here
     // Create shader program for texture
-    texture_shader_program = create_texture_shader_program();
+    texture_shader_program = create_texture_shader_program(state->shaderRuntimeDir);
     initialized            = 1;
   }
 

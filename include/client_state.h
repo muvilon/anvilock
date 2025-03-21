@@ -125,6 +125,12 @@ struct client_state
   int  width, height;
   bool closed;
 
+  /* Home directory */
+  char* homeDir;
+
+  /* Shaders runtime directory */
+  char* shaderRuntimeDir;
+
   /* Input and Pointer State */
   struct pointer_event pointer_event;
 

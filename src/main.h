@@ -116,28 +116,33 @@ static int initialize_configs(struct client_state* state)
 }
 
 // Check if the shader file exists
-static void shader_exist(const char* filepath)
+static void shader_exist(const char* relfilepath, const char* shader_runtime_dir)
 {
-  FILE* file = fopen(filepath, "r");
+  char* abs_filepath = ANVIL_SAFE_STR_JOIN(shader_runtime_dir, relfilepath);
+  FILE* file         = fopen(abs_filepath, "r");
   if (!file)
   {
-    log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", filepath);
+    log_message(LOG_LEVEL_ERROR, "[SHADERS] Failed to open shader file: %s", abs_filepath);
     exit(EXIT_FAILURE);
+  }
+  else
+  {
+    log_message(LOG_LEVEL_TRACE, "[SHADERS] Preloaded shader '%s' successfully.", relfilepath);
   }
 }
 
 // Initialize shaders by checking all of them
-static void initialize_shaders()
+static void initialize_shaders(const char* shader_runtime_dir)
 {
 // Iterate over all shader paths and check if they exist
 #define X(name, path)                                                 \
   log_message(LOG_LEVEL_DEBUG, "[SHADERS] Loading shader %s.", path); \
-  shader_exist(path);
+  shader_exist(path, shader_runtime_dir);
 
   SHADER_PATHS // Expands to all shaders
 #undef X
 
-    log_message(LOG_LEVEL_TRACE, "Found all shader files.");
+    log_message(LOG_LEVEL_INFO, "[SHADERS] Found and initialized all shaders.");
 }
 
 static void cleanup(struct client_state* state)

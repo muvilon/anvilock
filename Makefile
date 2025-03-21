@@ -98,6 +98,7 @@ tidy:
 
 clean:
 	@rm -rf $(BUILD_DIR) $(ASAN_BUILD_DIR) $(TSAN_BUILD_DIR)
+	@echo "--> Cleaned up $(BUILD_DIR), $(ASAN_BUILD_DIR) and $(TSAN_BUILD_DIR)."
 
 build-global:
 	@echo "==> Building Anvilock GLOBALLY and installing..."

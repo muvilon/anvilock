@@ -2,13 +2,19 @@
 #define GLOBAL_FUNCS_H
 
 #include "log.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 // Has some functions and macros that are used globally
 #define __ANVIL_FALLBACK_SCREEN_WIDTH__  1920
 #define __ANVIL_FALLBACK_SCREEN_HEIGHT__ 1080
+#define __ANVIL_FALLBACK_HOME_DIR__      "/root"
+
+// OpenGL ret codes
+#define GL_RET_CODE_FAIL 0
 
 // Max/Min macros for different types
 #define ANVIL_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -30,6 +36,23 @@
     (a)       = (b);           \
     (b)       = temp;          \
   } while (0)
+
+#define ANVIL_GET_HOME_DIR()                   \
+  ({                                           \
+    const char* home = getenv("HOME");         \
+    home ? home : __ANVIL_FALLBACK_HOME_DIR__; \
+  })
+
+#define ANVIL_SAFE_STR_JOIN(s1, s2)              \
+  ({                                             \
+    size_t len    = strlen(s1) + strlen(s2) + 1; \
+    char*  result = (char*)malloc(len);          \
+    if (result)                                  \
+    {                                            \
+      snprintf(result, len, "%s%s", (s1), (s2)); \
+    }                                            \
+    result;                                      \
+  })
 
 // Get current time as a formatted string
 void get_time_string(char* buffer, size_t size, const char* format)
