@@ -1,9 +1,9 @@
 #pragma once
 
 #include <anvilock/include/Types.hpp>
+#include <anvilock/include/term/AnsiSchema.hpp>
 #include <chrono>
 #include <ctime>
-#include <format>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -12,6 +12,8 @@
 
 namespace anvlk::logger
 {
+
+using namespace anvlk::term::ansi;
 
 // Log levels (for filtering)
 enum class LogLevel
@@ -23,17 +25,6 @@ enum class LogLevel
   Error,
   Critical
 };
-
-#define DEFINE_ANSI_COLOR(name, code) inline constexpr types::AnsiColor name = code
-
-DEFINE_ANSI_COLOR(ansiBold, "\033[1m");
-DEFINE_ANSI_COLOR(ansiReset, "\033[0m");
-DEFINE_ANSI_COLOR(ansiWhite, "\033[37m");
-DEFINE_ANSI_COLOR(ansiCyan, "\033[36m");
-DEFINE_ANSI_COLOR(ansiGreen, "\033[32m");
-DEFINE_ANSI_COLOR(ansiYellow, "\033[33m");
-DEFINE_ANSI_COLOR(ansiRed, "\033[31m");
-DEFINE_ANSI_COLOR(ansiBoldRed, "\033[1;31m");
 
 // ANSI color codes for log levels
 inline auto logLevelColor(LogLevel level) -> const char*

@@ -8,6 +8,13 @@
 namespace anvlk::types
 {
 
+enum ExitCodes
+{
+  ANVLK_SUCCESS   = 0,
+  ANVLK_UNDEFINED = -1,
+  ANVLK_FAILED    = 1,
+};
+
 using u64 = uint64_t;
 using u32 = uint32_t;
 using u16 = uint16_t;
@@ -32,6 +39,7 @@ using AuthString = std::string;
 using PamString  = const char*;
 
 using iter   = int;
+using iters  = std::size_t; // size_t is the size of something in memory
 using Status = int;
 
 using Coords = float;
@@ -40,5 +48,6 @@ using AnsiColor = const char*;
 
 template <std::size_t N> using FloatArray = std::array<float, N>;
 template <std::size_t N> using IntArray   = std::array<int, N>;
+template <std::size_t N> using CStrArray  = std::array<const char*, N>;
 
 } // namespace anvlk::types

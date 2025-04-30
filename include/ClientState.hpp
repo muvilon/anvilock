@@ -1,11 +1,14 @@
 #pragma once
 
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
-#include <anvilock/include/WaylandSmartPtrs.hpp>
-
+#include <anvilock/protocols/ext-session-lock-client-protocol.h>
+#include <anvilock/protocols/xdg-shell-client-protocol.h>
 #include <array>
-#include <string>
+#include <wayland-client.h>
+#include <wayland-egl.h>
 #include <xkbcommon/xkbcommon.h>
 
 using namespace anvlk::types;
@@ -74,11 +77,11 @@ struct AnimationState
 
 struct ExtSessionLock
 {
-  bool                                     surfaceCreated = false;
-  bool                                     surfaceDirty   = false;
-  WlUniquePtr<ext_session_lock_manager_v1> lockManager;
-  WlUniquePtr<ext_session_lock_v1>         lockObj;
-  WlUniquePtr<ext_session_lock_surface_v1> lockSurface;
+  bool                                surfaceCreated = false;
+  bool                                surfaceDirty   = false;
+  struct ext_session_lock_manager_v1* lockManager;
+  struct ext_session_lock_v1*         lockObj;
+  struct ext_session_lock_surface_v1* lockSurface;
 };
 
 struct AuthState
@@ -101,25 +104,23 @@ struct PamState
 
 struct ClientState
 {
-  // Wayland globals
-  WlUniquePtr<wl_display>    wlDisplay;
-  WlUniquePtr<wl_registry>   wlRegistry;
-  WlUniquePtr<wl_shm>        wlShm;
-  WlUniquePtr<wl_shm_pool>   wlShmPool;
-  WlUniquePtr<wl_compositor> wlCompositor;
-  WlUniquePtr<xdg_wm_base>   xdgWMBase;
-  WlUniquePtr<wl_seat>       wlSeat;
+  /* Wayland Globals */
+  struct wl_display*    wlDisplay    = nullptr;
+  struct wl_registry*   wlRegistry   = nullptr;
+  struct wl_shm*        wlShm        = nullptr;
+  struct wl_shm_pool*   wlShmPool    = nullptr;
+  struct wl_compositor* wlCompositor = nullptr;
+  struct xdg_wm_base*   xdgWmBase    = nullptr;
+  struct wl_seat*       wlSeat       = nullptr;
+  struct wl_output*     wlOutput     = nullptr;
 
-  // Some globals may still be referenced directly by other APIs
-  wl_output* wlOutput = nullptr;
-
-  // Wayland objects
-  WlUniquePtr<wl_surface>    wlSurface;
-  WlUniquePtr<wl_egl_window> eglWindow;
-  WlUniquePtr<xdg_surface>   xdgSurface;
-  WlUniquePtr<xdg_toplevel>  xdgToplevel;
-  WlUniquePtr<wl_keyboard>   wlKeyboard;
-  WlUniquePtr<wl_pointer>    wlPointer;
+  /* Wayland Objects */
+  struct wl_surface*    wlSurface   = nullptr;
+  struct wl_egl_window* eglWindow   = nullptr;
+  struct xdg_surface*   xdgSurface  = nullptr;
+  struct xdg_toplevel*  xdgToplevel = nullptr;
+  struct wl_keyboard*   wlKeyboard  = nullptr;
+  struct wl_pointer*    wlPointer   = nullptr;
 
   // Window state
   int  width  = 0;

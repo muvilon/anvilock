@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 include(cmake/CheckHeaders.cmake)
+include(cmake/GenerateProtocols.cmake)
 
-project(anvilock VERSION 1.5 LANGUAGES C CXX)
+project(anvilock VERSION 1.0 LANGUAGES C CXX)
 
 # Option to use Ninja as the build system
 option(USE_NINJA "Use Ninja build system" OFF)
@@ -77,11 +78,9 @@ pkg_check_modules(GLES REQUIRED glesv2)
 
 # message(STATUS "Found TOML header: ${TOML_HEADER}")
 
-# Include directories
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
-# Add Executable
-add_executable(${EXECUTABLE_NAME} src/main.cpp)
+add_executable(${EXECUTABLE_NAME} src/main.cpp protocols/src/xdg-shell-client-protocol.c protocols/src/ext-session-lock-client-protocol.c)
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../)
 
