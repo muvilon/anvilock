@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.22)
-project(anvilock VERSION 1.5 LANGUAGES C)
+cmake_minimum_required(VERSION 3.25)
+include(cmake/CheckHeaders.cmake)
+
+project(anvilock VERSION 1.5 LANGUAGES C CXX)
 
 # Option to use Ninja as the build system
 option(USE_NINJA "Use Ninja build system" OFF)
@@ -18,7 +20,7 @@ if(USE_CLANG)
 endif()
 
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -51,6 +53,10 @@ endif()
 # Enable Warnings
 set(COMPILE_OPTIONS "-Wall -Wextra -Wpedantic -Wno-unused-parameter ${SANITIZER_FLAGS}")
 
+check_headers(STANDARD_C_HEADERS "C")
+check_headers(STANDARD_CXX_HEADERS "CXX")
+check_headers(SYSTEM_HEADERS "C")
+
 # Find Required Packages
 find_package(Freetype REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -63,19 +69,21 @@ pkg_check_modules(OPENGL REQUIRED gl)
 pkg_check_modules(GLES REQUIRED glesv2)
 
 # Ensure all required headers exist
-set(TOML_HEADER "toml/toml.h")
+# set(TOML_HEADER "toml/toml.h")
+#
+# if(NOT EXISTS "${CMAKE_SOURCE_DIR}/${TOML_HEADER}")
+#     message(FATAL_ERROR "** TOML header not found. Expected at: ${TOML_HEADER} **")
+# endif()
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/${TOML_HEADER}")
-    message(FATAL_ERROR "** TOML header not found. Expected at: ${TOML_HEADER} **")
-endif()
-
-message(STATUS "Found TOML header: ${TOML_HEADER}")
+# message(STATUS "Found TOML header: ${TOML_HEADER}")
 
 # Include directories
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
 # Add Executable
-add_executable(${EXECUTABLE_NAME} src/main.c toml/toml.c)
+add_executable(${EXECUTABLE_NAME} src/main.cpp)
+
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../)
 
 # Link Libraries
 target_link_libraries(${EXECUTABLE_NAME}
@@ -106,9 +114,9 @@ else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
   message(STATUS "Building locally, binaries will be in ./build/")
 
-  set(LOCAL_SHADER_DIR "$ENV{HOME}/.local/share/anvilock/shaders")
-  file(MAKE_DIRECTORY ${LOCAL_SHADER_DIR})
-  file(COPY shaders/ DESTINATION ${LOCAL_SHADER_DIR})
+  # set(LOCAL_SHADER_DIR "$ENV{HOME}/.local/share/anvilock/shaders")
+  # file(MAKE_DIRECTORY ${LOCAL_SHADER_DIR})
+  # file(COPY shaders/ DESTINATION ${LOCAL_SHADER_DIR})
 endif()
 
 # Ensure `config.toml` Exists
@@ -121,39 +129,6 @@ if (NOT EXISTS ${CONFIG_FILE})
     )
 endif()
 
-include(CheckIncludeFiles)
-
-set(STANDARD_HEADERS
-    "assert.h"
-    "ctype.h"
-    "errno.h"
-    "fcntl.h"
-    "float.h"
-    "inttypes.h"
-    "limits.h"
-    "math.h"
-    "setjmp.h"
-    "signal.h"
-    "stdarg.h"
-    "stddef.h"
-    "stdio.h"
-    "stdlib.h"
-    "string.h"
-    "time.h"
-    "unistd.h"
-    "stdbool.h"
-)
-
-message(STATUS "${BLUE}Checking Standard C Headers...${RESET}")
-foreach(header ${STANDARD_HEADERS})
-    check_include_files(${header} HAS_${header})
-    if(HAS_${header})
-      message(STATUS "${GREEN}✔ Found header: ${header}${RESET}")
-    else()
-      message(WARNING "${YELLOW}✘ Missing header: ${header}${RESET}")
-    endif()
-endforeach()
-
 # Print Build Info
 message(STATUS "\n\n-- Building anvilock v${PROJECT_VERSION} --")
 message(STATUS "┌─ Configuration ────────────────────────")
@@ -163,7 +138,7 @@ message(STATUS "│ Build Generator:   ${CMAKE_GENERATOR}")
 message(STATUS "│ Compiler:          ${CMAKE_C_COMPILER}")
 message(STATUS "│ Compiler Flags:    ${COMPILE_OPTIONS}")
 message(STATUS "│ Executable Name:   ${EXECUTABLE_NAME}")
-message(STATUS "│ C Standard:        ${CMAKE_C_STANDARD}")
+message(STATUS "│ C++ Standard:      ${CMAKE_CXX_STANDARD}")
 message(STATUS "│ Install Prefix:    ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "│ Local Build Dir:   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message(STATUS "│ Freetype:          YES (${FREETYPE_LIBRARIES})")
