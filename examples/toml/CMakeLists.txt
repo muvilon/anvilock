@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
-set(SOURCES main.cpp)
+set(SOURCES main.cpp ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp ${CMAKE_SOURCE_DIR}/include/term/OutputStream.cpp)
 
 # Executable
 add_executable(example_toml ${SOURCES})
@@ -17,6 +17,8 @@ set_target_properties(example_toml PROPERTIES
 
 # Include directories
 target_include_directories(example_toml PRIVATE ${CMAKE_SOURCE_DIR}/../)
+
+target_link_libraries(example_toml PRIVATE anvilock_logger)
 
 add_custom_command(TARGET example_toml POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

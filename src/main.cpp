@@ -1,6 +1,6 @@
-#include "anvilock/include/Log.hpp"
-#include "anvilock/include/Types.hpp"
-#include <anvilock/include/pam/pam.hpp>
+#include <anvilock/include/Log.hpp>
+#include <anvilock/include/Types.hpp>
+#include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 

@@ -80,7 +80,27 @@ pkg_check_modules(GLES REQUIRED glesv2)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
-add_executable(${EXECUTABLE_NAME} src/main.cpp protocols/src/xdg-shell-client-protocol.c protocols/src/ext-session-lock-client-protocol.c)
+set(PROTOCOL_SRC_FILES 
+  protocols/src/xdg-shell-client-protocol.c 
+  protocols/src/ext-session-lock-client-protocol.c
+)
+
+add_library(anvilock_logger STATIC ${CMAKE_SOURCE_DIR}/include/Log.cpp)
+target_include_directories(anvilock_logger PUBLIC ${CMAKE_SOURCE_DIR}/../)
+
+set(SRC_FILES
+  ${CMAKE_SOURCE_DIR}/include/pam/PamAuthenticator.cpp
+  ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp
+  ${CMAKE_SOURCE_DIR}/include/term/OutputStream.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/RegistryHandler.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/OutputHandler.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/xdg/WmBaseHandler.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/xdg/SurfaceHandler.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/seats/SeatHandler.cpp
+  ${CMAKE_SOURCE_DIR}/include/wayland/seats/PointerHandler.cpp
+)
+
+add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../)
 
@@ -91,6 +111,7 @@ target_link_libraries(${EXECUTABLE_NAME}
     PRIVATE ${XKBCOMMON_LIBRARIES}
     PRIVATE ${PAM_LIBRARIES}
     PRIVATE EGL GLESv2 m
+    PRIVATE anvilock_logger
 )
 
 # Apply Compiler Flags

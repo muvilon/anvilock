@@ -14,7 +14,7 @@ static bool     mlock_supported = true;
 static long int page_size       = 0;
 
 // Retrieve page size
-static auto get_page_size() -> long int
+inline auto get_page_size() -> long int
 {
   if (!page_size)
   {
@@ -24,7 +24,7 @@ static auto get_page_size() -> long int
 }
 
 // Function to lock a password buffer into memory
-auto password_buffer_lock(types::VPtr addr, size_t size) -> bool
+inline auto password_buffer_lock(types::VPtr addr, size_t size) -> bool
 {
   int retries = 5;
   while (mlock(addr, size) != 0 && retries > 0)
@@ -49,7 +49,7 @@ auto password_buffer_lock(types::VPtr addr, size_t size) -> bool
 }
 
 // Function to unlock a password buffer from memory
-auto password_buffer_unlock(types::VPtr addr, size_t size) -> bool
+inline auto password_buffer_unlock(types::VPtr addr, size_t size) -> bool
 {
   if (mlock_supported)
   {
