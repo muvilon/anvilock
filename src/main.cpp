@@ -1,5 +1,6 @@
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
+#include <anvilock/include/config/ConfigHandler.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
@@ -72,6 +73,8 @@ auto main() -> int
 
   cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
 
+  cs.logCtx.changeContext(anvlk::logger::LogCategory::MAIN);
+
   if (initWayland(cs) == ANVLK_SUCCESS)
   {
     logger::log(logL::Info, cs.logCtx, logger::LogStyle::COLOR_BOLD,
@@ -91,6 +94,10 @@ auto main() -> int
     logger::log(logL::Critical, cs.logCtx, "Failed to initialize XKB!");
   }
 
+  anvlk::cfg::ConfigLoader loader(cs.logCtx);
+
+  cs.userConfig = loader.load();
+
   anvlk::pam::PamAuthenticator auth(cs);
   logger::log(logL::Info, cs.logCtx, logger::LogStyle::UNDERLINE, "Hello, gib password: ");
 
@@ -100,14 +107,18 @@ auto main() -> int
   cs.pam.password = pwd;
   cs.pam.username = "s1dd";
 
+  cs.logCtx.changeContext(anvlk::logger::LogCategory::PAM);
+
   if (auth.AuthenticateUser())
   {
     logger::log(logL::Info, cs.logCtx, "ok");
   }
   else
   {
-    logger::log(logL::Critical, cs.logCtx, logger::LogStyle::COLOR_BOLD, "Error while auth");
+    logger::log(logL::Error, cs.logCtx, logger::LogStyle::COLOR_BOLD, "Error while auth");
   }
+
+  cs.logCtx.resetContext();
 
   return ANVLK_SUCCESS;
 }

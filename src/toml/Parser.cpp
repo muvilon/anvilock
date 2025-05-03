@@ -116,4 +116,13 @@ void TOMLParser::dumpRecursive(const toml::table& tbl, const std::string& prefix
   }
 }
 
+auto TOMLParser::getArray(const types::TOMLTable& table, const types::TOMLKey& key) const
+  -> std::optional<const toml::array*>
+{
+  if (auto tbl = m_data[table].as_table())
+    if (auto arr = (*tbl)[key].as_array())
+      return arr;
+  return std::nullopt;
+}
+
 } // namespace anvlk::tomlparser

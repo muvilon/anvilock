@@ -4,7 +4,6 @@
 #include <anvilock/include/term/AnsiSchema.hpp>
 #include <anvilock/include/term/OutputStream.hpp>
 #include <mutex>
-#include <iostream>
 
 namespace anvlk::logger
 {
@@ -32,6 +31,24 @@ enum LogStyle
   COLOR_BOLD_UNDERLINE,
 };
 
+enum LogCategory
+{
+  CONFIG,
+  TOML,
+  PAM,
+  WL_REG,
+  WL_KB,
+  WL_PTR,
+  WL_SEAT,
+  WL_OUT,
+  SESSION_LOCK,
+  XDG_SURFACE,
+  XDG_WMBASE,
+  EGL,
+  SHM,
+  MAIN
+};
+
 // Log context struct to handle various settings
 struct LogContext
 {
@@ -39,9 +56,14 @@ struct LogContext
   types::fsPath logFilePath;
   bool          timestamp   = true;
   LogLevel      minLogLevel = LogLevel::Trace;
+  LogCategory   category    = LogCategory::MAIN;
+
+public:
+  void changeContext(LogCategory category);
+  void resetContext();
 };
 
-inline std::mutex    logMutex;
+inline std::mutex logMutex;
 
 // Function prototypes
 void logMessage(LogLevel level, const LogContext& context, const types::LogString& message,

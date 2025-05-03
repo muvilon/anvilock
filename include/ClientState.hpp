@@ -4,6 +4,7 @@
 #include <GLES2/gl2.h>
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
+#include <anvilock/include/config/ConfigStruct.hpp>
 #include <anvilock/protocols/ext-session-lock-client-protocol.h>
 #include <anvilock/protocols/xdg-shell-client-protocol.h>
 #include <array>
@@ -72,16 +73,6 @@ struct OutputState
 struct Vertex
 {
   Coords x{}, y{}, u{}, v{};
-};
-
-struct TOMLConfig
-{
-  TOMLKey               fontPath;
-  TOMLKey               bgName;
-  TOMLKey               bgPath;
-  TOMLKey               dbgLogEnable;
-  TOMLKey               timeFormat;
-  std::array<Vertex, 4> timeBoxVerts{};
 };
 
 struct PointerAxes
@@ -201,7 +192,7 @@ struct ClientState
   OutputState outputState;
 
   // Parsed user config
-  TOMLConfig globalConfig;
+  AnvlkConfig userConfig;
 
   // EGL/GLES
   EGLDisplay eglDisplay  = EGL_NO_DISPLAY;

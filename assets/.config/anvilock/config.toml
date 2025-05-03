@@ -1,0 +1,17 @@
+[font]
+name = "Ok"
+path =  "/home/s1dd/dotfiles/fonts/SpaceMonoNF/SpaceMonoNerdFont-Regular.ttf"
+
+[bg]
+name = "Something"
+path = "/home/s1dd/wallpapers/wal32.png"
+
+[time]
+time_format = "H:M:S"
+
+[time_box]
+top_left  = [-0.20, 0.9]
+top_right = [ 0.45, 0.9]
+bottom_left  = [-0.20, 0.5]
+bottom_right = [ 0.45, 0.5]
+

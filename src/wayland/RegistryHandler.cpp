@@ -16,6 +16,8 @@ using logL = logger::LogLevel;
 void handleRegistryGlobal(ClientState& cs, anvlk::types::wayland::WLRegistry_* registry, u32 name,
                           const char* interface, u32 version)
 {
+  cs.logCtx.changeContext(anvlk::logger::WL_REG);
+
   const std::string_view iface{interface};
 
   logger::log(logL::Info, cs.logCtx, "Binding global: {} (version {})", iface, version);
@@ -63,11 +65,17 @@ void handleRegistryGlobal(ClientState& cs, anvlk::types::wayland::WLRegistry_* r
   {
     logger::log(logL::Warn, cs.logCtx, "Unknown interface: {}", iface);
   }
+
+  cs.logCtx.resetContext();
 }
 
 void handleRegistryRemove(ClientState& cs, u32 name)
 {
+  cs.logCtx.changeContext(anvlk::logger::WL_REG);
+
   logger::log(logL::Info, cs.logCtx, "Removing global: {}", name);
+
+  cs.logCtx.resetContext();
 }
 
 } // namespace anvlk::wl

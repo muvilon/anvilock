@@ -30,6 +30,9 @@ public:
 
   void dumpAll() const;
 
+  [[nodiscard]] auto getArray(const types::TOMLTable& table, const types::TOMLKey& key) const
+    -> std::optional<const toml::array*>;
+
 private:
   toml::table m_data;
 

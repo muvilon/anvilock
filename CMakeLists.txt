@@ -69,15 +69,6 @@ pkg_check_modules(PAM REQUIRED pam)
 pkg_check_modules(OPENGL REQUIRED gl)
 pkg_check_modules(GLES REQUIRED glesv2)
 
-# Ensure all required headers exist
-# set(TOML_HEADER "toml/toml.h")
-#
-# if(NOT EXISTS "${CMAKE_SOURCE_DIR}/${TOML_HEADER}")
-#     message(FATAL_ERROR "** TOML header not found. Expected at: ${TOML_HEADER} **")
-# endif()
-
-# message(STATUS "Found TOML header: ${TOML_HEADER}")
-
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
 set(PROTOCOL_SRC_FILES 
@@ -98,6 +89,7 @@ set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/src/wayland/xdg/SurfaceHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/SeatHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/PointerHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/config/ConfigHandler.cpp
 )
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})

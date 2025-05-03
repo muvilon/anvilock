@@ -1,5 +1,9 @@
+#include "anvilock/include/Types.hpp"
+#include "anvilock/include/term/AnsiSchema.hpp"
 #include <anvilock/include/Log.hpp>
 #include <fstream>
+#include <iostream>
+#include <utility>
 
 namespace anvlk::logger
 {
@@ -30,6 +34,52 @@ inline auto logLevelColor(LogLevel level) -> types::AnsiColor
   }
 }
 
+inline auto makeCategory(types::AnsiColor color, types::LogCategoryString name)
+  -> std::pair<types::AnsiColor, types::LogCategoryString>
+{
+  return std::make_pair(color, name);
+}
+
+inline auto findLogCategory(LogCategory category)
+  -> std::pair<types::AnsiColor, types::LogCategoryString>
+{
+  using namespace anvlk::term::ansi;
+
+  switch (category)
+  {
+    case anvlk::logger::LogCategory::MAIN:
+      return makeCategory(ansiBold, "MAIN");
+    case anvlk::logger::LogCategory::CONFIG:
+      return makeCategory(ansiBoldRed, "CONFIG");
+    case anvlk::logger::LogCategory::TOML:
+      return makeCategory(ansiBoldPurple, "TOML");
+    case anvlk::logger::LogCategory::EGL:
+      return makeCategory(ansiBoldOrange, "EGL");
+    case anvlk::logger::LogCategory::PAM:
+      return makeCategory(ansiBoldCyan, "PAM");
+    case anvlk::logger::LogCategory::SHM:
+      return makeCategory(ansiBoldGreen, "SHM");
+    case anvlk::logger::LogCategory::WL_KB:
+      return makeCategory(ansiBoldBlue, "WL_KB");
+    case anvlk::logger::LogCategory::WL_PTR:
+      return makeCategory(ansiBoldBlue, "WL_PTR");
+    case anvlk::logger::LogCategory::WL_OUT:
+      return makeCategory(ansiBoldBlue, "WL_OUT");
+    case anvlk::logger::LogCategory::WL_SEAT:
+      return makeCategory(ansiBoldBlue, "WL_SEAT");
+    case anvlk::logger::LogCategory::WL_REG:
+      return makeCategory(ansiBoldBlue, "WL_REG");
+    case anvlk::logger::LogCategory::SESSION_LOCK:
+      return makeCategory(ansiBoldBlue, "SESSION_LOCK");
+    case anvlk::logger::LogCategory::XDG_SURFACE:
+      return makeCategory(ansiBoldYellow, "XDG_SURFACE");
+    case anvlk::logger::LogCategory::XDG_WMBASE:
+      return makeCategory(ansiBoldYellow, "XDG_WMBASE");
+    default:
+      return makeCategory(ansiBold, "MAIN");
+  }
+}
+
 inline auto findLogLevelString(LogLevel level) -> types::LogStatus
 {
   switch (level)
@@ -44,8 +94,6 @@ inline auto findLogLevelString(LogLevel level) -> types::LogStatus
       return "WARN";
     case LogLevel::Error:
       return "ERROR";
-    case LogLevel::Critical:
-      return "CRITICAL";
     default:
       return "UNKNOWN";
   }
@@ -99,7 +147,10 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
   }
 
   // Log level string
-  types::LogStatus levelStr = findLogLevelString(level);
+  types::LogStatus         levelStr         = findLogLevelString(level);
+  auto                     logCategoryPair  = findLogCategory(context.category);
+  types::LogCategoryString logCategoryStr   = logCategoryPair.second;
+  types::AnsiColor         logCategoryColor = logCategoryPair.first;
 
   // Console output
   types::LogString console_output;
@@ -107,6 +158,9 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
     console_output += term::ansi::boldLog(timestamp_str);
   console_output +=
     std::format(" [{}{}{}] ", logLevelColor(level), levelStr, term::ansi::ansiReset);
+
+  console_output +=
+    std::format(" [{}{}{}] ", logCategoryColor, logCategoryStr, term::ansi::ansiReset);
 
   std::cout << console_output << styleLogMessage(level, message, style) << std::endl;
 
@@ -143,5 +197,9 @@ void init(const LogContext& context)
       (context.timestamp ? term::ansi::color(term::ansi::ansiBoldGreen, "ENABLED")
                          : term::ansi::color(term::ansi::ansiBoldOrange, "DISABLED")));
 }
+
+void LogContext::changeContext(LogCategory newCategory) { category = newCategory; }
+
+void LogContext::resetContext() { category = LogCategory::MAIN; }
 
 } // namespace anvlk::logger

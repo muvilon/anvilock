@@ -19,6 +19,10 @@ auto main() -> int
   for (const auto& k : reader.listKeys("network"))
     std::cout << "  " << k << "\n";
 
+  std::optional<std::string> netIP = reader.get<anvlk::types::TOMLKey>("network", "ip");
+
+  std::cout << "\n==> network.ip = " << *netIP << std::endl;
+
   std::cout << "\n-> All values (recursive):\n";
   reader.dumpAll();
 

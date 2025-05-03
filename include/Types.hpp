@@ -32,10 +32,13 @@ using TOMLTable = std::string;
 using AuthFlag  = bool;
 
 using Path      = std::string;
+using PathCStr  = const char*;
+using FileName  = const char*;
 using Directory = std::string;
 
-using LogString = std::string;
-using LogStatus = const char*;
+using LogString         = std::string;
+using LogStatus         = const char*;
+using LogCategoryString = std::string;
 
 using AuthString = std::string;
 using PamString  = const char*;
