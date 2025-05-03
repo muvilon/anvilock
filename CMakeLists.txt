@@ -91,6 +91,7 @@ target_include_directories(anvilock_logger PUBLIC ${CMAKE_SOURCE_DIR}/../)
 set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/include/pam/PamAuthenticator.cpp
   ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp
+  ${CMAKE_SOURCE_DIR}/include/ClientState.cpp
   ${CMAKE_SOURCE_DIR}/include/wayland/RegistryHandler.cpp
   ${CMAKE_SOURCE_DIR}/include/wayland/OutputHandler.cpp
   ${CMAKE_SOURCE_DIR}/include/wayland/xdg/WmBaseHandler.cpp
