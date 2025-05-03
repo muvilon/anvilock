@@ -2,6 +2,7 @@
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
+#include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 
 using namespace anvlk;

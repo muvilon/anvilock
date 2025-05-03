@@ -85,19 +85,19 @@ set(PROTOCOL_SRC_FILES
   protocols/src/ext-session-lock-client-protocol.c
 )
 
-add_library(anvilock_logger STATIC ${CMAKE_SOURCE_DIR}/include/Log.cpp)
+add_library(anvilock_logger STATIC ${CMAKE_SOURCE_DIR}/src/logger/Log.cpp)
 target_include_directories(anvilock_logger PUBLIC ${CMAKE_SOURCE_DIR}/../)
 
 set(SRC_FILES
-  ${CMAKE_SOURCE_DIR}/include/pam/PamAuthenticator.cpp
-  ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp
-  ${CMAKE_SOURCE_DIR}/include/ClientState.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/RegistryHandler.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/OutputHandler.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/xdg/WmBaseHandler.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/xdg/SurfaceHandler.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/seats/SeatHandler.cpp
-  ${CMAKE_SOURCE_DIR}/include/wayland/seats/PointerHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/pam/PamAuthenticator.cpp
+  ${CMAKE_SOURCE_DIR}/src/toml/Parser.cpp
+  ${CMAKE_SOURCE_DIR}/src/global/ClientState.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/RegistryHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/OutputHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/xdg/WmBaseHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/xdg/SurfaceHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/seats/SeatHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/seats/PointerHandler.cpp
 )
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})
