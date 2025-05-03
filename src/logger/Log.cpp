@@ -173,7 +173,7 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
       types::LogString file_line;
       if (context.timestamp)
         file_line += std::format("[{}] ", timestamp_str);
-      file_line += std::format("[{}] {}", levelStr, message);
+      file_line += std::format("[{}] [{}] {}", levelStr, logCategoryStr, message);
       log_file << file_line << std::endl;
     }
   }
