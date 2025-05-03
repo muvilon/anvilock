@@ -2,7 +2,7 @@
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
-#include <cstring>
+#include <anvilock/include/Types.hpp>
 #include <wayland-client.h>
 
 namespace anvlk::wl
@@ -22,8 +22,9 @@ enum PointerEventMask : u32
   AxisDiscrete = 1 << 7,
 };
 
-inline void onPointerEnter(void* data, wl_pointer*, u32 serial, wl_surface*, wl_fixed_t x,
-                           wl_fixed_t y)
+inline void onPointerEnter(types::VPtr data, types::wayland::WLPointer_*, u32 serial,
+                           types::wayland::WLSurface_*, types::wayland::WLFixed_ x,
+                           types::wayland::WLFixed_ y)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -34,14 +35,16 @@ inline void onPointerEnter(void* data, wl_pointer*, u32 serial, wl_surface*, wl_
   ev.surfaceY = y;
 }
 
-inline void onPointerLeave(void* data, wl_pointer*, u32 serial, wl_surface*)
+inline void onPointerLeave(types::VPtr data, types::wayland::WLPointer_*, u32 serial,
+                           types::wayland::WLSurface_*)
 {
   auto& cs = *static_cast<ClientState*>(data);
   cs.pointerEvent.eventMask |= PointerEventMask::Leave;
   cs.pointerEvent.serial = serial;
 }
 
-inline void onPointerMotion(void* data, wl_pointer*, u32 time, wl_fixed_t x, wl_fixed_t y)
+inline void onPointerMotion(types::VPtr data, types::wayland::WLPointer_*, u32 time,
+                            types::wayland::WLFixed_ x, types::wayland::WLFixed_ y)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -52,7 +55,8 @@ inline void onPointerMotion(void* data, wl_pointer*, u32 time, wl_fixed_t x, wl_
   ev.surfaceY = y;
 }
 
-inline void onPointerButton(void* data, wl_pointer*, u32 serial, u32 time, u32 button, u32 state)
+inline void onPointerButton(types::VPtr data, types::wayland::WLPointer_*, u32 serial, u32 time,
+                            u32 button, u32 state)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -64,7 +68,8 @@ inline void onPointerButton(void* data, wl_pointer*, u32 serial, u32 time, u32 b
   ev.state  = state;
 }
 
-inline void onPointerAxis(void* data, wl_pointer*, u32 time, u32 axis, wl_fixed_t value)
+inline void onPointerAxis(types::VPtr data, types::wayland::WLPointer_*, u32 time, u32 axis,
+                          types::wayland::WLFixed_ value)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -75,14 +80,14 @@ inline void onPointerAxis(void* data, wl_pointer*, u32 time, u32 axis, wl_fixed_
   ev.axes[axis].value = value;
 }
 
-inline void onPointerAxisSource(void* data, wl_pointer*, u32 source)
+inline void onPointerAxisSource(types::VPtr data, types::wayland::WLPointer_*, u32 source)
 {
   auto& cs = *static_cast<ClientState*>(data);
   cs.pointerEvent.eventMask |= PointerEventMask::AxisSource;
   cs.pointerEvent.axisSource = source;
 }
 
-inline void onPointerAxisStop(void* data, wl_pointer*, u32 time, u32 axis)
+inline void onPointerAxisStop(types::VPtr data, types::wayland::WLPointer_*, u32 time, u32 axis)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -92,7 +97,8 @@ inline void onPointerAxisStop(void* data, wl_pointer*, u32 time, u32 axis)
   ev.axes[axis].valid = true;
 }
 
-inline void onPointerAxisDiscrete(void* data, wl_pointer*, u32 axis, i32 discrete)
+inline void onPointerAxisDiscrete(types::VPtr data, types::wayland::WLPointer_*, u32 axis,
+                                  i32 discrete)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
@@ -102,7 +108,7 @@ inline void onPointerAxisDiscrete(void* data, wl_pointer*, u32 axis, i32 discret
   ev.axes[axis].discrete = discrete;
 }
 
-inline void onPointerFrame(void* data, wl_pointer*)
+inline void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;

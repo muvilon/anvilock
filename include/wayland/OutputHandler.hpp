@@ -9,9 +9,9 @@ namespace anvlk::wl
 
 using logL = logger::LogLevel;
 
-inline void handleOutputGeometry(void* data, wl_output*, i32 x, i32 y, int32_t physicalWidth,
-                                 i32 physicalHeight, [[maybe_unused]] i32 subpixel,
-                                 const char* make, const char* model,
+inline void handleOutputGeometry(anvlk::types::VPtr data, anvlk::types::wayland::WLOutput_*, i32 x,
+                                 i32 y, i32 physicalWidth, i32 physicalHeight,
+                                 [[maybe_unused]] i32 subpixel, const char* make, const char* model,
                                  [[maybe_unused]] i32 transform)
 {
   auto& cs = *static_cast<ClientState*>(data);
@@ -19,8 +19,9 @@ inline void handleOutputGeometry(void* data, wl_output*, i32 x, i32 y, int32_t p
               physicalWidth, physicalHeight);
 }
 
-inline void handleOutputMode(void* data, wl_output*, [[maybe_unused]] u32 flags, i32 width,
-                             i32 height, i32 refreshRate)
+inline void handleOutputMode(anvlk::types::VPtr   data, anvlk::types::wayland::WLOutput_*,
+                             [[maybe_unused]] u32 flags, Dimensions width, Dimensions height,
+                             i32 refreshRate)
 {
   auto& cs                    = *static_cast<ClientState*>(data);
   cs.outputState.width        = width;
@@ -30,25 +31,28 @@ inline void handleOutputMode(void* data, wl_output*, [[maybe_unused]] u32 flags,
   logger::log(logL::Info, cs.logCtx, "Output mode: {}x{} @ {} Hz", width, height, refreshRate);
 }
 
-inline void handleOutputScale(void* data, wl_output*, i32 factor)
+inline void handleOutputScale(anvlk::types::VPtr data, anvlk::types::wayland::WLOutput_*,
+                              i32                factor)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Info, cs.logCtx, "Output scale factor: {}", factor);
 }
 
-inline void handleOutputDone(void* data, wl_output*)
+inline void handleOutputDone(anvlk::types::VPtr data, anvlk::types::wayland::WLOutput_*)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Info, cs.logCtx, "Output configuration done.");
 }
 
-inline void handleOutputName(void* data, wl_output*, const char* name)
+inline void handleOutputName(anvlk::types::VPtr data, anvlk::types::wayland::WLOutput_*,
+                             const char*        name)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Info, cs.logCtx, "Output name: {}", name);
 }
 
-inline void handleOutputDescription(void* data, wl_output*, const char* description)
+inline void handleOutputDescription(anvlk::types::VPtr data, anvlk::types::wayland::WLOutput_*,
+                                    const char*        description)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Info, cs.logCtx, "Output description: {}", description);
@@ -64,7 +68,7 @@ inline constexpr wl_output_listener kOutputListener{
   .description = handleOutputDescription,
 };
 
-// Register the wl_output global and set listener
+// Register the anvlk::types::wayland::WLOutput_ global and set listener
 inline void registerOutput(ClientState& cs, wl_registry* registry, u32 id, u32 version)
 {
   if (cs.outputState.wlOutput)
@@ -73,12 +77,12 @@ inline void registerOutput(ClientState& cs, wl_registry* registry, u32 id, u32 v
     return;
   }
 
-  cs.outputState.wlOutput =
-    static_cast<wl_output*>(wl_registry_bind(registry, id, &wl_output_interface, version));
+  cs.outputState.wlOutput = static_cast<anvlk::types::wayland::WLOutput_*>(
+    wl_registry_bind(registry, id, &wl_output_interface, version));
   wl_output_add_listener(cs.outputState.wlOutput, &kOutputListener,
                          &cs); // Use get() to get raw pointer
 
-  logger::log(logL::Info, cs.logCtx, "Registered wl_output with ID: {}", id);
+  logger::log(logL::Info, cs.logCtx, "Registered anvlk::types::wayland::WLOutput_ with ID: {}", id);
 }
 
 } // namespace anvlk::wl

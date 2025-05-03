@@ -42,6 +42,10 @@ using iter   = int;
 using iters  = std::size_t; // size_t is the size of something in memory
 using Status = int;
 
+using Dimensions = i32;
+
+using VPtr = void*;
+
 using Coords = float;
 
 using AnsiColor = const char*;

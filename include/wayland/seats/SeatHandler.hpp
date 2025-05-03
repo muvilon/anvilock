@@ -2,6 +2,7 @@
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
 #include <anvilock/include/wayland/seats/PointerHandler.hpp>
 
@@ -10,7 +11,8 @@ namespace anvlk::wl
 
 using logL = logger::LogLevel;
 
-inline void onSeatCapabilities(void* data, [[maybe_unused]] wl_seat* seat, u32 capabilities)
+inline void onSeatCapabilities(types::VPtr data, [[maybe_unused]] types::wayland::WLSeat_* seat,
+                               u32 capabilities)
 {
   auto& cs = *static_cast<ClientState*>(data);
 
@@ -50,7 +52,8 @@ inline void onSeatCapabilities(void* data, [[maybe_unused]] wl_seat* seat, u32 c
   }
 }
 
-inline void onSeatName(void* data, [[maybe_unused]] wl_seat* seat, const char* name)
+inline void onSeatName(types::VPtr data, [[maybe_unused]] types::wayland::WLSeat_* seat,
+                       const char* name)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Info, cs.logCtx, "Seat name => {}", name);

@@ -1,11 +1,19 @@
 #pragma once
 
 #include "PasswordBuffer.hpp"
-#include "anvilock/include/Types.hpp"
 #include <anvilock/include/ClientState.hpp>
+#include <anvilock/include/Types.hpp>
 #include <memory>
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>
+
+namespace anvlk::types::pam
+{
+using PamHandle_   = pam_handle_t;
+using PamMessage_  = struct pam_message;
+using PamResponse_ = struct pam_response;
+using PamConv_     = struct pam_conv;
+} // namespace anvlk::types::pam
 
 namespace anvlk::pam
 {
@@ -22,12 +30,12 @@ public:
     std::memcpy(m_passwordBuffer.get(), m_clientState.pam.password.data(),
                 m_clientState.pam.password.size() + 1);
 
-    struct pam_conv pamConversation = {
+    types::pam::PamConv_ pamConversation = {
       .conv        = PamConvFunc,
       .appdata_ptr = m_passwordBuffer.get()}; // Pass the buffer to the conversation function
 
-    pam_handle_t* pamHandle = nullptr;
-    Status        pamStatus =
+    types::pam::PamHandle_* pamHandle = nullptr;
+    Status                  pamStatus =
       pam_start("login", m_clientState.pam.username.c_str(), &pamConversation, &pamHandle);
 
     if (pamStatus != PAM_SUCCESS)
@@ -54,11 +62,11 @@ public:
   }
 
 private:
-  static auto PamConvFunc(int numMsg, const struct pam_message** msg, struct pam_response** resp,
-                          void* appDataPtr) -> int
+  static auto PamConvFunc(int numMsg, const types::pam::PamMessage_** msg,
+                          types::pam::PamResponse_** resp, types::VPtr appDataPtr) -> int
   {
     auto password = static_cast<PamString>(appDataPtr); // Get the password
-    auto reply    = std::make_unique<struct pam_response[]>(numMsg);
+    auto reply    = std::make_unique<types::pam::PamResponse_[]>(numMsg);
 
     for (iter i = 0; i < numMsg; ++i)
     {

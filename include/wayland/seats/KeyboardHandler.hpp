@@ -68,13 +68,14 @@ inline void handleBackspaceRepeat(ClientState& cs)
 }
 } // namespace
 
-inline void onKeyboardEnter(void* data, wl_keyboard*, uint32_t, wl_surface*, wl_array* keys)
+inline void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
+                            types::wayland::WLSurface_*, types::wayland::WLArray_* keys)
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::log(logL::Debug, cs.logCtx, "Keyboard entered surface; keys pressed:");
 
-  for (auto* key = static_cast<uint32_t*>(keys->data);
-       key < static_cast<uint32_t*>(keys->data) + keys->size / sizeof(uint32_t); ++key)
+  for (auto* key = static_cast<u32*>(keys->data);
+       key < static_cast<u32*>(keys->data) + keys->size / sizeof(u32); ++key)
   {
     char nameBuf[128];
     auto sym = xkb_state_key_get_one_sym(cs.xkbState, *key + 8);
@@ -86,31 +87,32 @@ inline void onKeyboardEnter(void* data, wl_keyboard*, uint32_t, wl_surface*, wl_
   }
 }
 
-inline void onKeyboardLeave(void*, wl_keyboard*, uint32_t, wl_surface*)
+inline void onKeyboardLeave(types::VPtr, types::wayland::WLKeyboard_*, u32,
+                            types::wayland::WLSurface_*)
 {
   // No-op for now
 }
 
-inline void onKeyboardModifiers(void* data, wl_keyboard*, uint32_t, uint32_t mods_depressed,
-                                uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+inline void onKeyboardModifiers(types::VPtr data, types::wayland::WLKeyboard_*, u32,
+                                u32 mods_depressed, u32 mods_latched, u32 mods_locked, u32 group)
 {
   auto& cs = *static_cast<ClientState*>(data);
   xkb_state_update_mask(cs.xkbState, mods_depressed, mods_latched, mods_locked, 0, 0, group);
 }
 
-inline void onKeyboardRepeatInfo(void*, wl_keyboard*, int32_t, int32_t)
+inline void onKeyboardRepeatInfo(types::VPtr, types::wayland::WLKeyboard_*, i32, i32)
 {
   // Ignored in this context
 }
 
-inline void onKeyboardKey(void* data, wl_keyboard*, uint32_t, uint32_t, uint32_t key,
-                          uint32_t state)
+inline void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uint32_t key,
+                          u32 state)
 {
   auto& cs = *static_cast<ClientState*>(data);
   auto& kb = keyboardState();
 
-  const uint32_t keycode = key + 8;
-  xkb_keysym_t   sym     = xkb_state_key_get_one_sym(cs.xkbState, keycode);
+  const u32              keycode = key + 8;
+  types::xkb::XKBKeySym_ sym     = xkb_state_key_get_one_sym(cs.xkbState, keycode);
 
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
   {
@@ -172,8 +174,8 @@ inline void onKeyboardKey(void* data, wl_keyboard*, uint32_t, uint32_t, uint32_t
   //render_lock_screen(&cs);
 }
 
-inline void onKeyboardKeymap(void* data, wl_keyboard*, [[maybe_unused]] u32 format, i32 fd,
-                             u32 size)
+inline void onKeyboardKeymap(types::VPtr          data, types::wayland::WLKeyboard_*,
+                             [[maybe_unused]] u32 format, i32 fd, u32 size)
 {
   auto& cs = *static_cast<ClientState*>(data);
   assert(format == WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1);

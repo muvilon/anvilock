@@ -13,12 +13,57 @@
 
 using namespace anvlk::types;
 
+// Custom defs
+namespace anvlk::types::ext
+{
+using SessionLockManagerV1_ = struct ext_session_lock_manager_v1;
+using SessionLockObjV1_     = struct ext_session_lock_v1;
+using SessionLockSurfaceV1_ = struct ext_session_lock_surface_v1;
+} // namespace anvlk::types::ext
+
+namespace anvlk::types::wayland
+{
+// Wayland Defs
+using WLDisplay_    = struct wl_display;
+using WLRegistry_   = struct wl_registry;
+using WLShm_        = struct wl_shm;
+using WLShmPool_    = struct wl_shm_pool;
+using WLCompositor_ = struct wl_compositor;
+using WLSeat_       = struct wl_seat;
+using WLOutput_     = struct wl_output;
+using WLSurface_    = struct wl_surface;
+using WLKeyboard_   = struct wl_keyboard;
+using WLPointer_    = struct wl_pointer;
+using WLArray_      = struct wl_array;
+using WLFixed_      = wl_fixed_t;
+} // namespace anvlk::types::wayland
+
+namespace anvlk::types::wayland::egl
+{
+using WLEglWindow_ = struct wl_egl_window;
+}
+
+namespace anvlk::types::wayland::xdg
+{
+using XDGWmBase_   = struct xdg_wm_base;
+using XDGSurface_  = struct xdg_surface;
+using XDGTopLevel_ = struct xdg_toplevel;
+} // namespace anvlk::types::wayland::xdg
+
+namespace anvlk::types::xkb
+{
+using XKBState_  = xkb_state;
+using XKBCtx_    = xkb_context;
+using XKBKeyMap_ = xkb_keymap;
+using XKBKeySym_ = xkb_keysym_t;
+} // namespace anvlk::types::xkb
+
 // Stores output-related information
 struct OutputState
 {
   u32        id{};
-  i32        width{};
-  i32        height{};
+  Dimensions width{};
+  Dimensions height{};
   i32        refresh_rate{};
   wl_output* wlOutput = nullptr;
 };
@@ -77,11 +122,11 @@ struct AnimationState
 
 struct ExtSessionLock
 {
-  bool                                surfaceCreated = false;
-  bool                                surfaceDirty   = false;
-  struct ext_session_lock_manager_v1* lockManager;
-  struct ext_session_lock_v1*         lockObj;
-  struct ext_session_lock_surface_v1* lockSurface;
+  bool                        surfaceCreated = false;
+  bool                        surfaceDirty   = false;
+  ext::SessionLockManagerV1_* lockManager;
+  ext::SessionLockObjV1_*     lockObj;
+  ext::SessionLockSurfaceV1_* lockSurface;
 };
 
 struct AuthState
@@ -105,27 +150,28 @@ struct PamState
 struct ClientState
 {
   /* Wayland Globals */
-  struct wl_display*    wlDisplay    = nullptr;
-  struct wl_registry*   wlRegistry   = nullptr;
-  struct wl_shm*        wlShm        = nullptr;
-  struct wl_shm_pool*   wlShmPool    = nullptr;
-  struct wl_compositor* wlCompositor = nullptr;
-  struct xdg_wm_base*   xdgWmBase    = nullptr;
-  struct wl_seat*       wlSeat       = nullptr;
-  struct wl_output*     wlOutput     = nullptr;
+  wayland::WLDisplay_*    wlDisplay    = nullptr;
+  wayland::WLRegistry_*   wlRegistry   = nullptr;
+  wayland::WLShm_*        wlShm        = nullptr;
+  wayland::WLShmPool_*    wlShmPool    = nullptr;
+  wayland::WLCompositor_* wlCompositor = nullptr;
+  wayland::WLSeat_*       wlSeat       = nullptr;
+  wayland::WLOutput_*     wlOutput     = nullptr;
+  wayland::WLKeyboard_*   wlKeyboard   = nullptr;
+  wayland::WLPointer_*    wlPointer    = nullptr;
+  wayland::WLSurface_*    wlSurface    = nullptr;
 
-  /* Wayland Objects */
-  struct wl_surface*    wlSurface   = nullptr;
-  struct wl_egl_window* eglWindow   = nullptr;
-  struct xdg_surface*   xdgSurface  = nullptr;
-  struct xdg_toplevel*  xdgToplevel = nullptr;
-  struct wl_keyboard*   wlKeyboard  = nullptr;
-  struct wl_pointer*    wlPointer   = nullptr;
+  wayland::egl::WLEglWindow_* eglWindow = nullptr;
+
+  /* XDG Objects */
+  wayland::xdg::XDGWmBase_*   xdgWmBase   = nullptr;
+  wayland::xdg::XDGSurface_*  xdgSurface  = nullptr;
+  wayland::xdg::XDGTopLevel_* xdgToplevel = nullptr;
 
   // Window state
-  int  width  = 0;
-  int  height = 0;
-  bool closed = false;
+  Dimensions width  = 0;
+  Dimensions height = 0;
+  bool       closed = false;
 
   // Filesystem directories
   Directory homeDir;
@@ -135,9 +181,9 @@ struct ClientState
   PointerEvent pointerEvent;
 
   // XKB keyboard state (raw pointers for now)
-  xkb_state*   xkbState   = nullptr;
-  xkb_context* xkbContext = nullptr;
-  xkb_keymap*  xkbKeymap  = nullptr;
+  xkb::XKBState_*  xkbState   = nullptr;
+  xkb::XKBCtx_*    xkbContext = nullptr;
+  xkb::XKBKeyMap_* xkbKeymap  = nullptr;
 
   // Animation and rendering state
   AnimationState animationState;

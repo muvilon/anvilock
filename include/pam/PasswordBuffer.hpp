@@ -1,5 +1,6 @@
 #pragma once
 
+#include <anvilock/include/Types.hpp>
 #include <cerrno>
 #include <cstddef>
 #include <cstring>
@@ -23,7 +24,7 @@ static auto get_page_size() -> long int
 }
 
 // Function to lock a password buffer into memory
-auto password_buffer_lock(void* addr, size_t size) -> bool
+auto password_buffer_lock(types::VPtr addr, size_t size) -> bool
 {
   int retries = 5;
   while (mlock(addr, size) != 0 && retries > 0)
@@ -48,7 +49,7 @@ auto password_buffer_lock(void* addr, size_t size) -> bool
 }
 
 // Function to unlock a password buffer from memory
-auto password_buffer_unlock(void* addr, size_t size) -> bool
+auto password_buffer_unlock(types::VPtr addr, size_t size) -> bool
 {
   if (mlock_supported)
   {
@@ -89,7 +90,7 @@ public:
   }
 
   // Accessor for the buffer
-  auto get() -> void* { return m_buffer; }
+  auto get() -> types::VPtr { return m_buffer; }
 
   // Clear the buffer securely
   void clear()
@@ -101,7 +102,7 @@ public:
   }
 
 private:
-  void*  m_buffer = nullptr;
-  size_t m_size   = 0;
+  types::VPtr m_buffer = nullptr;
+  size_t      m_size   = 0;
 };
 } // namespace anvlk::pwdbuf

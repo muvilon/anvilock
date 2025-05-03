@@ -2,6 +2,7 @@
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
+#include <anvilock/include/Types.hpp>
 #include <wayland-client.h>
 #include <wayland-egl.h>
 
@@ -10,7 +11,9 @@ namespace anvlk::wl
 
 using logL = anvlk::logger::LogLevel;
 
-inline void handleXdgSurfaceConfigure(void* data, xdg_surface* xdgSurface, uint32_t serial)
+inline void handleXdgSurfaceConfigure(types::VPtr                              data,
+                                      anvlk::types::wayland::xdg::XDGSurface_* xdgSurface,
+                                      u32                                      serial)
 {
   auto* state = static_cast<ClientState*>(data);
   xdg_surface_ack_configure(xdgSurface, serial);

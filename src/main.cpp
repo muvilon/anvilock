@@ -88,7 +88,7 @@ auto main() -> int
     logger::log(logL::Critical, cs.logCtx, "Failed to initialize XKB!");
   }
 
-  pam::PamAuthenticator auth(cs);
+  anvlk::pam::PamAuthenticator auth(cs);
   logger::log(logL::Info, cs.logCtx, "Hello, gib password: ");
 
   AuthString pwd;
