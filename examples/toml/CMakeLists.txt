@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
-set(SOURCES main.cpp ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp ${CMAKE_SOURCE_DIR}/include/term/OutputStream.cpp)
+set(SOURCES main.cpp ${CMAKE_SOURCE_DIR}/include/toml/Parser.cpp)
 
 # Executable
 add_executable(example_toml ${SOURCES})
