@@ -36,6 +36,7 @@ using WLKeyboard_   = struct wl_keyboard;
 using WLPointer_    = struct wl_pointer;
 using WLArray_      = struct wl_array;
 using WLFixed_      = wl_fixed_t;
+using WLBuffer_     = wl_buffer;
 } // namespace anvlk::types::wayland
 
 namespace anvlk::types::wayland::egl
