@@ -27,13 +27,15 @@ using i8  = int8_t;
 
 using fsPath = std::filesystem::path;
 
-using TOMLKey  = std::string;
-using AuthFlag = bool;
+using TOMLKey   = std::string;
+using TOMLTable = std::string;
+using AuthFlag  = bool;
 
 using Path      = std::string;
 using Directory = std::string;
 
 using LogString = std::string;
+using LogStatus = const char*;
 
 using AuthString = std::string;
 using PamString  = const char*;

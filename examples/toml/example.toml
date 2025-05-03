@@ -1,0 +1,7 @@
+[network]
+hello = "world"
+ip = "111.1.12.1"
+port = 100
+
+[ok]
+now = true

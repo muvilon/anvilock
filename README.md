@@ -11,6 +11,14 @@ This branch aims to port Anvilock to a better and readable codebase using modern
 
 ## Building
 
+Firstly clone this branch recursively:
+
+```bash 
+git clone --branch unstable --recursive https://github.com/muvilon/Anvilock.git
+```
+
+Then build:
+
 ```bash 
 cmake -S . -B build 
 cmake --build build/

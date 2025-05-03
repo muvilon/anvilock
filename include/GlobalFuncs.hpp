@@ -4,7 +4,6 @@
 #include <array>
 #include <chrono>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <iomanip>
 #include <memory>
@@ -48,7 +47,7 @@ template <typename T> constexpr void swap(T& a, T& b) noexcept
 }
 
 // Get HOME directory
-[[nodiscard]] inline auto getHomeDir() -> Directory
+[[nodiscard]] inline auto getHomeDir() -> anvlk::types::Directory
 {
   const char* home = std::getenv("HOME");
   return home ? std::string(home) : FallbackHomeDir;
@@ -139,20 +138,23 @@ inline void print_shader_log(GLuint shader)
 }
 
 // Vertex arrays (exposed as views)
-inline constexpr FloatArray<16> vertices_with_texcoords = {-0.27f, 0.9f, 0.0f,   0.0f, 0.27f, 0.9f,
-                                                           1.0f,   0.0f, -0.27f, 0.7f, 0.0f,  1.0f,
-                                                           0.27f,  0.7f, 1.0f,   1.0f};
+inline constexpr anvlk::types::FloatArray<16> vertices_with_texcoords = {
+  -0.27f, 0.9f, 0.0f, 0.0f, 0.27f, 0.9f, 1.0f, 0.0f,
+  -0.27f, 0.7f, 0.0f, 1.0f, 0.27f, 0.7f, 1.0f, 1.0f};
 
-inline constexpr FloatArray<8> quad_vertices = {-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f};
+inline constexpr anvlk::types::FloatArray<8> quad_vertices = {-1.0f, 1.0f, -1.0f, -1.0f,
+                                                              1.0f,  1.0f, 1.0f,  -1.0f};
 
-inline constexpr FloatArray<6> triangle_vertices = {0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
+inline constexpr anvlk::types::FloatArray<6> triangle_vertices = {0.0f,  0.5f, -0.5f,
+                                                                  -0.5f, 0.5f, -0.5f};
 
-inline constexpr FloatArray<8> tex_coords = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
+inline constexpr anvlk::types::FloatArray<8> tex_coords = {0.0f, 0.0f, 0.0f, 1.0f,
+                                                           1.0f, 0.0f, 1.0f, 1.0f};
 
-inline constexpr FloatArray<8> password_field_vertices = {-0.4f, 0.1f, -0.4f, -0.1f,
-                                                          0.4f,  0.1f, 0.4f,  -0.1f};
+inline constexpr anvlk::types::FloatArray<8> password_field_vertices = {-0.4f, 0.1f, -0.4f, -0.1f,
+                                                                        0.4f,  0.1f, 0.4f,  -0.1f};
 
-inline constexpr FloatArray<8> dot_vertices = {-0.015f, 0.015f, -0.015f, -0.015f,
-                                               0.015f,  0.015f, 0.015f,  -0.015f};
+inline constexpr anvlk::types::FloatArray<8> dot_vertices = {-0.015f, 0.015f, -0.015f, -0.015f,
+                                                             0.015f,  0.015f, 0.015f,  -0.015f};
 
 } // namespace anvil

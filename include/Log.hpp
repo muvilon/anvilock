@@ -2,6 +2,7 @@
 
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/term/AnsiSchema.hpp>
+#include <anvilock/include/term/OutputStream.hpp>
 #include <chrono>
 #include <ctime>
 #include <fstream>
@@ -12,8 +13,6 @@
 
 namespace anvlk::logger
 {
-
-using namespace anvlk::term::ansi;
 
 // Log levels (for filtering)
 enum class LogLevel
@@ -26,30 +25,45 @@ enum class LogLevel
   Critical
 };
 
+// COLOR, COLOR_BOLD, COLOR_BOLD_UNDERLINE, COLOR_UNDERLINE will all take the color found by
+// the log level, for custom color use term::ansi::color() function instead!
+//
+// This will stylize the entire log message line (excluding the timestamp + level)
+enum LogStyle
+{
+  NONE,
+  BOLD,
+  UNDERLINE,
+  COLOR,
+  COLOR_BOLD,
+  COLOR_UNDERLINE,
+  COLOR_BOLD_UNDERLINE,
+};
+
 // ANSI color codes for log levels
-inline auto logLevelColor(LogLevel level) -> const char*
+inline auto logLevelColor(LogLevel level) -> types::AnsiColor
 {
 
   switch (level)
   {
     case LogLevel::Trace:
-      return ansiWhite;
+      return term::ansi::ansiBoldPurple;
     case LogLevel::Debug:
-      return ansiCyan;
+      return term::ansi::ansiBoldCyan;
     case LogLevel::Info:
-      return ansiGreen;
+      return term::ansi::ansiBoldGreen;
     case LogLevel::Warn:
-      return ansiYellow;
+      return term::ansi::ansiBoldYellow;
     case LogLevel::Error:
-      return ansiRed;
+      return term::ansi::ansiBoldRed;
     case LogLevel::Critical:
-      return ansiBoldRed;
+      return term::ansi::ansiBoldRed;
     default:
-      return ansiReset;
+      return term::ansi::ansiReset;
   }
 }
 
-inline auto findLogLevelString(LogLevel level) -> const char*
+inline auto findLogLevelString(LogLevel level) -> types::LogStatus
 {
   switch (level)
   {
@@ -70,6 +84,32 @@ inline auto findLogLevelString(LogLevel level) -> const char*
   }
 }
 
+inline auto styleLogMessage(const LogLevel level, const types::LogString& logMsg, LogStyle style)
+  -> term::ostream::StyledText
+{
+  using namespace term;
+  const auto color = logLevelColor(level);
+
+  switch (style)
+  {
+    case LogStyle::BOLD:
+      return ostream::boldStream(logMsg);
+    case LogStyle::UNDERLINE:
+      return ostream::underlineStream(logMsg);
+    case LogStyle::COLOR:
+      return ostream::colorStream(logMsg, color);
+    case LogStyle::COLOR_BOLD:
+      return ostream::boldColorStream(logMsg, color);
+    case LogStyle::COLOR_UNDERLINE:
+      return ostream::underlineColorStream(logMsg, color);
+    case LogStyle::COLOR_BOLD_UNDERLINE:
+      return ostream::styleStream(logMsg, {ansi::ansiBold, ansi::ansiUnderline, color});
+    case LogStyle::NONE:
+    default:
+      return {.stylePrefix = "", .text = logMsg, .styleSuffix = ""};
+  }
+}
+
 // Log context struct to handle various settings
 struct LogContext
 {
@@ -83,7 +123,8 @@ struct LogContext
 inline std::mutex logMutex;
 
 // Internal logger function (protected by mutex for thread-safety)
-inline void logMessage(LogLevel level, const LogContext& context, const types::LogString& message)
+inline void logMessage(LogLevel level, const LogContext& context, const types::LogString& message,
+                       LogStyle style = LogStyle::NONE)
 {
   if (level < context.minLogLevel)
     return;
@@ -104,16 +145,16 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
   }
 
   // Log level string
-  const char* level_str = findLogLevelString(level);
+  types::LogStatus levelStr = findLogLevelString(level);
 
   // Console output
   types::LogString console_output;
   if (context.timestamp)
-    console_output += std::format("[{}{}{}] ", ansiBold, timestamp_str, ansiReset);
-  console_output += std::format("[{}{}{}] ", logLevelColor(level), level_str, ansiReset);
-  console_output += message;
+    console_output += term::ansi::boldLog(timestamp_str);
+  console_output +=
+    std::format(" [{}{}{}] ", logLevelColor(level), levelStr, term::ansi::ansiReset);
 
-  std::cout << console_output << std::endl;
+  std::cout << console_output << styleLogMessage(level, message, style) << std::endl;
 
   // File output (plain, no ANSI)
   if (context.toFile)
@@ -124,7 +165,7 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
       types::LogString file_line;
       if (context.timestamp)
         file_line += std::format("[{}] ", timestamp_str);
-      file_line += std::format("[{}] {}", level_str, message);
+      file_line += std::format("[{}] {}", levelStr, message);
       log_file << file_line << std::endl;
     }
   }
@@ -132,30 +173,37 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
 
 // Variadic log formatting function
 template <typename... Args>
+inline void log(LogLevel level, const LogContext& ctx, const LogStyle logStyle,
+                std::format_string<Args...> fmt, Args&&... args)
+{
+  types::LogString message = std::format(fmt, std::forward<Args>(args)...);
+  logMessage(level, ctx, std::move(message), logStyle);
+}
+
+template <typename... Args>
 inline void log(LogLevel level, const LogContext& ctx, std::format_string<Args...> fmt,
                 Args&&... args)
 {
-  types::LogString message = std::format(fmt, std::forward<Args>(args)...);
-  logMessage(level, ctx, std::move(message));
+  log(level, ctx, LogStyle::NONE, fmt, std::forward<Args>(args)...);
 }
 
 inline void init(const LogContext& context)
 {
-  std::ostringstream init_msg;
-
-  init_msg << ansiBold << "ANVILOCK Logger initialized!" << ansiReset << "\n";
+  log(LogLevel::Info, context, LogStyle::COLOR_BOLD, "ANVILOCK Logger initialized!!");
 
   if (context.toFile)
-    init_msg << "  • Output: file logging to '" << context.logFilePath << "'\n";
+    log(LogLevel::Info, context, LogStyle::BOLD, "  • Output: file logging to '{}'",
+        term::ansi::color(term::ansi::ansiBoldPurple, context.logFilePath.c_str()));
   else
-    init_msg << "  • Output: console only\n";
+    log(LogLevel::Info, context, LogStyle::BOLD, "  • Output: console only");
 
-  init_msg << "  • Minimum level: " << logLevelColor(context.minLogLevel)
-           << findLogLevelString(context.minLogLevel) << ansiReset << "\n";
+  log(
+    LogLevel::Info, context, LogStyle::BOLD, "  • Minimum level: {}",
+    term::ansi::color(logLevelColor(context.minLogLevel), findLogLevelString(context.minLogLevel)));
 
-  init_msg << "  • Timestamps: " << (context.timestamp ? "enabled" : "disabled");
-
-  logMessage(LogLevel::Info, context, init_msg.str());
+  log(LogLevel::Info, context, LogStyle::BOLD, "  • Timestamps: {}",
+      (context.timestamp ? term::ansi::color(term::ansi::ansiBoldGreen, "ENABLED")
+                         : term::ansi::color(term::ansi::ansiBoldOrange, "DISABLED")));
 }
 
 } // namespace anvlk::logger

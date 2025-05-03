@@ -1,3 +1,4 @@
+#include "anvilock/include/Log.hpp"
 #include "anvilock/include/Types.hpp"
 #include <anvilock/include/pam/pam.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
@@ -72,8 +73,8 @@ auto main() -> int
 
   if (initWayland(cs) == ANVLK_SUCCESS)
   {
-    logger::log(logL::Info, cs.logCtx, "{}",
-                term::ansi::bold("Successfully initialized Wayland!!"));
+    logger::log(logL::Info, cs.logCtx, logger::LogStyle::COLOR_BOLD,
+                "Successfully initialized Wayland!!");
   }
   else
   {
@@ -81,7 +82,8 @@ auto main() -> int
   }
   if (initXKB(cs) == ANVLK_SUCCESS)
   {
-    logger::log(logL::Info, cs.logCtx, "{}", term::ansi::bold("Successfully initialized XKB!"));
+    logger::log(logL::Info, cs.logCtx, logger::LogStyle::COLOR_BOLD,
+                "Successfully initialized XKB!");
   }
   else
   {
@@ -89,7 +91,7 @@ auto main() -> int
   }
 
   anvlk::pam::PamAuthenticator auth(cs);
-  logger::log(logL::Info, cs.logCtx, "Hello, gib password: ");
+  logger::log(logL::Info, cs.logCtx, logger::LogStyle::UNDERLINE, "Hello, gib password: ");
 
   AuthString pwd;
   std::cin >> pwd;
@@ -103,7 +105,7 @@ auto main() -> int
   }
   else
   {
-    logger::log(logL::Critical, cs.logCtx, "Error while auth");
+    logger::log(logL::Critical, cs.logCtx, logger::LogStyle::COLOR_BOLD, "Error while auth");
   }
 
   return ANVLK_SUCCESS;

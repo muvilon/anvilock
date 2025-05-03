@@ -128,6 +128,8 @@ if (NOT EXISTS ${CONFIG_FILE})
     )
 endif()
 
+add_subdirectory(examples/toml)
+
 # Print Build Info
 message(STATUS "\n\n-- Building anvilock v${PROJECT_VERSION} --")
 message(STATUS "┌─ Configuration ────────────────────────")
