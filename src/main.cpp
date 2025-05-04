@@ -1,7 +1,9 @@
+#include <anvilock/include/GlobalFuncs.hpp>
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
+#include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
@@ -67,13 +69,27 @@ static auto initXKB(ClientState& state) -> int
   return ANVLK_SUCCESS;
 }
 
+void setHomeDir(ClientState& cs)
+{
+  types::Directory home = anvlk::utils::getHomeDir();
+
+  if (!home.c_str())
+  {
+    logger::log(logger::LogLevel::Error, cs.logCtx, "Home directory (env var) not found!");
+    return;
+  }
+
+  cs.homeDir = home;
+  logger::log(logger::LogLevel::Info, cs.logCtx, "Home directory found: '{}'", cs.homeDir);
+}
+
 auto main() -> int
 {
   ClientState cs;
 
-  cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
+  setHomeDir(cs);
 
-  cs.logCtx.changeContext(anvlk::logger::LogCategory::MAIN);
+  cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
 
   if (initWayland(cs) == ANVLK_SUCCESS)
   {
@@ -94,9 +110,23 @@ auto main() -> int
     logger::log(logL::Critical, cs.logCtx, "Failed to initialize XKB!");
   }
 
-  anvlk::cfg::ConfigLoader loader(cs.logCtx);
+  // If the class does not take the entire ClientState reference,
+  //
+  // decl the log context switch in main itself!
+  logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::CONFIG);
 
+  anvlk::cfg::ConfigLoader loader(cs.logCtx, cs.homeDir);
   cs.userConfig = loader.load();
+
+  logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::SHADERS);
+
+  anvlk::gfx::ShaderManager shaderMgr(cs.homeDir, cs.logCtx);
+  if (!shaderMgr.isValid())
+  {
+    std::exit(EXIT_FAILURE);
+  }
+
+  logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::PAM);
 
   anvlk::pam::PamAuthenticator auth(cs);
   logger::log(logL::Info, cs.logCtx, logger::LogStyle::UNDERLINE, "Hello, gib password: ");
@@ -106,8 +136,6 @@ auto main() -> int
 
   cs.pam.password = pwd;
   cs.pam.username = "s1dd";
-
-  cs.logCtx.changeContext(anvlk::logger::LogCategory::PAM);
 
   if (auth.AuthenticateUser())
   {

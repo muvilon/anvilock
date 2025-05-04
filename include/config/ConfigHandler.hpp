@@ -16,7 +16,8 @@ class ConfigLoader
 {
 public:
   // Constructor with optional custom path
-  explicit ConfigLoader(anvlk::logger::LogContext& logCtx, const types::fsPath& customPath = {});
+  explicit ConfigLoader(anvlk::logger::LogContext& logCtx, types::Directory& homeDir,
+                        const types::fsPath& customPath = {});
 
   // Load configuration from file
   auto load() -> AnvlkConfig;
@@ -26,13 +27,14 @@ public:
 
 private:
   anvlk::logger::LogContext& m_logCtx;
+  types::PathCStr            m_homeDir;
   types::fsPath              m_configPath;
 
   // Helper method to parse float arrays for box corners
   static auto parseVec2(const toml::array* arr) -> anvlk::types::FloatArray<2>;
 
   // Get default config path
-  static auto getUserConfigPath() -> types::fsPath;
+  auto getUserConfigPath() -> types::fsPath;
 };
 
 } // namespace anvlk::cfg

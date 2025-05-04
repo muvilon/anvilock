@@ -1,3 +1,4 @@
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/toml/Parser.hpp>
 
 namespace anvlk::tomlparser
@@ -5,6 +6,7 @@ namespace anvlk::tomlparser
 
 TOMLParser::TOMLParser(const anvlk::types::fsPath& path, anvlk::logger::LogContext& logCtx)
 {
+  m_logCtx = std::move(logCtx);
   try
   {
     m_data = toml::parse_file(path.string());
@@ -13,7 +15,7 @@ TOMLParser::TOMLParser(const anvlk::types::fsPath& path, anvlk::logger::LogConte
   {
     const auto&            src      = err.source();
     const types::LogString location = std::format("{}:{}", src.begin.line, src.begin.column);
-    anvlk::logger::log(anvlk::logger::LogLevel::Error, logCtx, "Parse error: {} at {}",
+    anvlk::logger::log(anvlk::logger::LogLevel::Error, m_logCtx, "Parse error: {} at {}",
                        err.description(), location);
     exit(EXIT_FAILURE);
   }
@@ -34,7 +36,7 @@ auto TOMLParser::contains(const anvlk::types::TOMLTable& table,
 
 auto TOMLParser::listTables() const -> std::vector<anvlk::types::TOMLTable>
 {
-  std::vector<std::string> results;
+  std::vector<anvlk::types::TOMLTable> results;
   list_tables_recursive(m_data, "", results);
   return results;
 }
@@ -64,7 +66,7 @@ auto TOMLParser::listKeys(const types::TOMLTable& table) const -> std::vector<ty
 void TOMLParser::dumpAll() const { dumpRecursive(m_data, ""); }
 
 void TOMLParser::list_tables_recursive(const toml::table& tbl, const std::string& prefix,
-                                       std::vector<std::string>& out) const
+                                       std::vector<anvlk::types::TOMLTable>& out) const
 {
   for (const auto& [k, v] : tbl)
   {

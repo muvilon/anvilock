@@ -14,14 +14,14 @@
 #include <GLES2/gl2.h>
 #include <unistd.h>
 
-namespace anvil
+namespace anvlk::utils
 {
 
 // Constants
-inline constexpr int    FallbackScreenWidth  = 1920;
-inline constexpr int    FallbackScreenHeight = 1080;
-inline constexpr auto   FallbackHomeDir      = "/root";
-inline constexpr GLuint GLRetCodeFail        = 0;
+inline constexpr types::Dimensions FallbackScreenWidth  = 1920;
+inline constexpr types::Dimensions FallbackScreenHeight = 1080;
+inline constexpr auto              FallbackHomeDir      = "/root";
+inline constexpr GLuint            GLRetCodeFail        = 0;
 
 // Math utilities
 template <typename T> [[nodiscard]] constexpr auto max(T a, T b) noexcept -> T
@@ -157,4 +157,4 @@ inline constexpr anvlk::types::FloatArray<8> password_field_vertices = {-0.4f, 0
 inline constexpr anvlk::types::FloatArray<8> dot_vertices = {-0.015f, 0.015f, -0.015f, -0.015f,
                                                              0.015f,  0.015f, 0.015f,  -0.015f};
 
-} // namespace anvil
+} // namespace anvlk::utils

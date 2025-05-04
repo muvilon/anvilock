@@ -90,6 +90,7 @@ set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/SeatHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/PointerHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/config/ConfigHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/shaders/ShaderManager.cpp
 )
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})

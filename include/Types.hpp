@@ -36,6 +36,9 @@ using PathCStr  = const char*;
 using FileName  = const char*;
 using Directory = std::string;
 
+using ShaderName    = std::string;
+using ShaderContent = std::string;
+
 using LogString         = std::string;
 using LogStatus         = const char*;
 using LogCategoryString = std::string;

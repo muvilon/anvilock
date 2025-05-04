@@ -1,3 +1,4 @@
+
 #include <anvilock/include/wayland/seats/SeatHandler.hpp>
 
 namespace anvlk::wl

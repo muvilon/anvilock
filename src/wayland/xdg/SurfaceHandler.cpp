@@ -1,3 +1,4 @@
+
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 

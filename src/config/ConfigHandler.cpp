@@ -1,5 +1,5 @@
+#include "anvilock/include/Log.hpp"
 #include <anvilock/include/config/ConfigHandler.hpp>
-#include <cstdlib>
 #include <stdexcept>
 
 namespace anvlk::cfg
@@ -7,14 +7,16 @@ namespace anvlk::cfg
 
 auto ConfigLoader::getUserConfigPath() -> types::fsPath
 {
-  types::PathCStr home = std::getenv("HOME");
-  if (!home)
-    throw std::runtime_error("HOME environment variable not set");
-  return anvlk::types::fsPath(home) / REL_CFG_PATH / CFG_FILE_NAME;
+  if (!m_homeDir)
+    throw std::runtime_error("No HOME env var found!");
+  return anvlk::types::fsPath(m_homeDir) / REL_CFG_PATH / CFG_FILE_NAME;
 }
 
-ConfigLoader::ConfigLoader(anvlk::logger::LogContext& logCtx, const types::fsPath& customPath)
-    : m_logCtx(logCtx), m_configPath(customPath.empty() ? getUserConfigPath() : customPath)
+ConfigLoader::ConfigLoader(anvlk::logger::LogContext& logCtx, types::Directory& homeDir,
+                           const types::fsPath& customPath)
+    : m_logCtx(logCtx), m_homeDir(std::move(homeDir.c_str())),
+      m_configPath(customPath.empty() ? getUserConfigPath() : customPath)
+
 {
 }
 

@@ -46,6 +46,7 @@ enum LogCategory
   XDG_WMBASE,
   EGL,
   SHM,
+  SHADERS,
   MAIN
 };
 
@@ -85,5 +86,6 @@ inline void log(LogLevel level, const LogContext& ctx, std::format_string<Args..
 }
 
 void init(const LogContext& context);
+void switchCtx(LogContext& ctx, LogCategory category);
 
 } // namespace anvlk::logger

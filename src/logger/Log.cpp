@@ -1,6 +1,6 @@
-#include "anvilock/include/Types.hpp"
-#include "anvilock/include/term/AnsiSchema.hpp"
 #include <anvilock/include/Log.hpp>
+#include <anvilock/include/Types.hpp>
+#include <anvilock/include/term/AnsiSchema.hpp>
 #include <fstream>
 #include <iostream>
 #include <utility>
@@ -75,6 +75,8 @@ inline auto findLogCategory(LogCategory category)
       return makeCategory(ansiBoldYellow, "XDG_SURFACE");
     case anvlk::logger::LogCategory::XDG_WMBASE:
       return makeCategory(ansiBoldYellow, "XDG_WMBASE");
+    case anvlk::logger::LogCategory::SHADERS:
+      return makeCategory(ansiGray, "SHADERS");
     default:
       return makeCategory(ansiBold, "MAIN");
   }
@@ -198,8 +200,23 @@ void init(const LogContext& context)
                          : term::ansi::color(term::ansi::ansiBoldOrange, "DISABLED")));
 }
 
-void LogContext::changeContext(LogCategory newCategory) { category = newCategory; }
+void LogContext::changeContext(LogCategory newCategory)
+{
+  std::scoped_lock lock(anvlk::logger::logMutex);
+  category = newCategory;
+}
 
-void LogContext::resetContext() { category = LogCategory::MAIN; }
+void LogContext::resetContext()
+{
+  std::scoped_lock lock(anvlk::logger::logMutex);
+  category = LogCategory::MAIN;
+}
 
+void switchCtx(LogContext& ctx, LogCategory category)
+{
+  ctx.changeContext(category);
+  auto logCatPair = findLogCategory(category);
+  log(LogLevel::Info, ctx, LogStyle::BOLD, "LOGGER SWITCHED CTX TO: {}{}{}", logCatPair.first,
+      logCatPair.second, term::ansi::ansiReset);
+}
 } // namespace anvlk::logger

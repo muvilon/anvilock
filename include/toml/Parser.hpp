@@ -34,7 +34,8 @@ public:
     -> std::optional<const toml::array*>;
 
 private:
-  toml::table m_data;
+  anvlk::logger::LogContext m_logCtx;
+  toml::table               m_data;
 
   void list_tables_recursive(const toml::table& tbl, const std::string& prefix,
                              std::vector<std::string>& out) const;
