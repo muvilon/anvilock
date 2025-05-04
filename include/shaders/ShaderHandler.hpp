@@ -43,6 +43,8 @@ public:
 
   [[nodiscard]] auto isValid() const -> bool;
   [[nodiscard]] auto getShaderSource(ShaderID id) const -> std::optional<types::ShaderContent>;
+  [[nodiscard]] static auto asCString(const std::optional<types::ShaderContent>& content)
+    -> types::ShaderContentCStr;
 
 private:
   types::PathCStr                                    m_homePath;

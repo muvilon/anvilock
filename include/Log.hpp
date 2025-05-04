@@ -16,7 +16,6 @@ enum class LogLevel
   Info,
   Warn,
   Error,
-  Critical
 };
 
 // Log style enums for styling logs
@@ -47,6 +46,7 @@ enum LogCategory
   EGL,
   SHM,
   SHADERS,
+  FREETYPE,
   MAIN
 };
 

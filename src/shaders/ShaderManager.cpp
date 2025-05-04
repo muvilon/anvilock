@@ -117,4 +117,10 @@ void ShaderManager::loadAllShaders()
   return buffer.str();
 }
 
+[[nodiscard]] auto ShaderManager::asCString(const std::optional<types::ShaderContent>& content)
+  -> types::ShaderContentCStr
+{
+  return content ? content->c_str() : nullptr;
+}
+
 } // namespace anvlk::gfx

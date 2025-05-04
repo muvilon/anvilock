@@ -15,6 +15,12 @@ enum ExitCodes
   ANVLK_FAILED    = 1,
 };
 
+enum EGLCodes
+{
+  RET_CODE_FAIL    = 0,
+  RET_CODE_SUCCESS = 1
+};
+
 using u64 = uint64_t;
 using u32 = uint32_t;
 using u16 = uint16_t;
@@ -36,8 +42,11 @@ using PathCStr  = const char*;
 using FileName  = const char*;
 using Directory = std::string;
 
-using ShaderName    = std::string;
-using ShaderContent = std::string;
+using ShaderName        = std::string;
+using ShaderContent     = std::string;
+using ShaderContentCStr = const char*;
+
+using ImageData = unsigned char;
 
 using LogString         = std::string;
 using LogStatus         = const char*;

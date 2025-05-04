@@ -27,8 +27,6 @@ inline auto logLevelColor(LogLevel level) -> types::AnsiColor
       return term::ansi::ansiBoldYellow;
     case LogLevel::Error:
       return term::ansi::ansiBoldRed;
-    case LogLevel::Critical:
-      return term::ansi::ansiBoldRed;
     default:
       return term::ansi::ansiReset;
   }

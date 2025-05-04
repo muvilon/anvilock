@@ -6,7 +6,7 @@ namespace anvlk::tomlparser
 
 TOMLParser::TOMLParser(const anvlk::types::fsPath& path, anvlk::logger::LogContext& logCtx)
 {
-  m_logCtx = std::move(logCtx);
+  m_logCtx = logCtx;
   try
   {
     m_data = toml::parse_file(path.string());

@@ -5,6 +5,7 @@
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigStruct.hpp>
+#include <anvilock/include/freetype/FreeTypeStruct.hpp>
 #include <anvilock/protocols/ext-session-lock-client-protocol.h>
 #include <anvilock/protocols/xdg-shell-client-protocol.h>
 #include <array>
@@ -176,6 +177,9 @@ struct ClientState
   xkb::XKBState_*  xkbState   = nullptr;
   xkb::XKBCtx_*    xkbContext = nullptr;
   xkb::XKBKeyMap_* xkbKeymap  = nullptr;
+
+  // FreeTypeState
+  FreeTypeState freeTypeState;
 
   // Animation and rendering state
   AnimationState animationState;

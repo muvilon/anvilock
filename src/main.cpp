@@ -2,6 +2,7 @@
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
+#include <anvilock/include/freetype/FreeTypeHandler.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
@@ -98,7 +99,7 @@ auto main() -> int
   }
   else
   {
-    logger::log(logL::Critical, cs.logCtx, "Failed to initialize Wayland!");
+    logger::log(logL::Error, cs.logCtx, "Failed to initialize Wayland!");
   }
   if (initXKB(cs) == ANVLK_SUCCESS)
   {
@@ -107,7 +108,7 @@ auto main() -> int
   }
   else
   {
-    logger::log(logL::Critical, cs.logCtx, "Failed to initialize XKB!");
+    logger::log(logL::Error, cs.logCtx, "Failed to initialize XKB!");
   }
 
   // If the class does not take the entire ClientState reference,
@@ -117,6 +118,13 @@ auto main() -> int
 
   anvlk::cfg::ConfigLoader loader(cs.logCtx, cs.homeDir);
   cs.userConfig = loader.load();
+
+  logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::FREETYPE);
+
+  anvlk::freetype::FreeTypeHandler freeType(cs.logCtx, cs.userConfig.font.path);
+
+  cs.freeTypeState.ftFace    = freeType.face();
+  cs.freeTypeState.ftLibrary = freeType.library();
 
   logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::SHADERS);
 
