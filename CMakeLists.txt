@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 include(cmake/CheckHeaders.cmake)
-include(cmake/GenerateProtocols.cmake)
+
 
 project(anvilock VERSION 1.0 LANGUAGES C CXX)
 
@@ -88,6 +88,7 @@ set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/src/wayland/xdg/WmBaseHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/xdg/SurfaceHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/SeatHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/session-lock/SessionLockHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/PointerHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/config/ConfigHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/shaders/ShaderManager.cpp
