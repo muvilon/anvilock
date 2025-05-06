@@ -1,3 +1,4 @@
+#include "anvilock/include/Types.hpp"
 #include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <cstring> // for std::memcpy
 #include <cstring> // for strdup
@@ -6,22 +7,21 @@
 namespace anvlk::pam
 {
 
-PamAuthenticator::PamAuthenticator(const ClientState& clientState)
-    : m_clientState(clientState), m_passwordBuffer(m_clientState.pam.password.size() + 1)
+PamAuthenticator::PamAuthenticator(types::AuthString& userName, types::AuthString& password)
+    : m_userName(std::move(userName)), m_password(std::move(password)),
+      m_passwordBuffer(m_password.size() + 1)
 {
 }
 
 auto PamAuthenticator::AuthenticateUser() -> bool
 {
-  std::memcpy(m_passwordBuffer.get(), m_clientState.pam.password.data(),
-              m_clientState.pam.password.size() + 1);
+  std::memcpy(m_passwordBuffer.get(), m_password.data(), m_password.size() + 1);
 
   types::pam::PamConv_ pamConversation = {.conv        = PamConvFunc,
                                           .appdata_ptr = m_passwordBuffer.get()};
 
   types::pam::PamHandle_* pamHandle = nullptr;
-  Status                  pamStatus =
-    pam_start("login", m_clientState.pam.username.c_str(), &pamConversation, &pamHandle);
+  types::Status pamStatus = pam_start("login", m_userName.c_str(), &pamConversation, &pamHandle);
 
   if (pamStatus != PAM_SUCCESS)
     return false;
@@ -47,10 +47,10 @@ auto PamAuthenticator::AuthenticateUser() -> bool
 auto PamAuthenticator::PamConvFunc(int numMsg, const types::pam::PamMessage_** msg,
                                    types::pam::PamResponse_** resp, types::VPtr appDataPtr) -> int
 {
-  auto password = static_cast<PamString>(appDataPtr);
+  auto password = static_cast<types::PamString>(appDataPtr);
   auto reply    = std::make_unique<types::pam::PamResponse_[]>(numMsg);
 
-  for (iter i = 0; i < numMsg; ++i)
+  for (types::iter i = 0; i < numMsg; ++i)
   {
     if (msg[i]->msg_style == PAM_PROMPT_ECHO_OFF)
     {

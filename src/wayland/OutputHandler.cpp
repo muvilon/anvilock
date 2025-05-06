@@ -66,8 +66,9 @@ const wl_output_listener kOutputListener{
   .description = handleOutputDescription,
 };
 
-void registerOutput(ClientState& cs, wl_registry* registry, u32 id, u32 version)
+void registerOutput(ClientState& cs, types::wayland::WLRegistry_* registry, u32 id, u32 version)
 {
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_OUT);
   if (cs.outputState.wlOutput)
   {
     logger::log(logL::Error, cs.logCtx, "Output already bound. Skipping re-registration.");

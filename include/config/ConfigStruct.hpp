@@ -34,12 +34,17 @@ struct BoxCorners
   anvlk::types::FloatArray<2> bottom_right;
 };
 
+struct Vertex
+{
+  Coords x{}, y{}, u{}, v{};
+};
+
 // Top-level config
 struct AnvlkConfig
 {
-  Font       font;
-  Background bg;
-  Debug      debug;
-  Time       time;
-  BoxCorners time_box;
+  Font                  font;
+  Background            bg;
+  Debug                 debug;
+  Time                  time;
+  std::array<Vertex, 4> timeBoxVertices;
 };

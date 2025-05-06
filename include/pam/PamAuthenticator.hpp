@@ -1,6 +1,5 @@
 #pragma once
 
-#include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/pam/PasswordBuffer.hpp>
 #include <security/pam_appl.h>
@@ -20,15 +19,15 @@ namespace anvlk::pam
 class PamAuthenticator
 {
 public:
-  explicit PamAuthenticator(const ClientState& clientState);
-
+  explicit PamAuthenticator(types::AuthString& userName, types::AuthString& password);
   auto AuthenticateUser() -> bool;
 
 private:
   static auto PamConvFunc(int numMsg, const types::pam::PamMessage_** msg,
                           types::pam::PamResponse_** resp, types::VPtr appDataPtr) -> int;
 
-  const ClientState&     m_clientState;
+  types::AuthString      m_userName;
+  types::AuthString      m_password;
   pwdbuf::PasswordBuffer m_passwordBuffer;
 };
 

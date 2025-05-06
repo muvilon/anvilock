@@ -1,3 +1,4 @@
+#include "anvilock/include/shaders/ShaderHandler.hpp"
 #include <anvilock/include/ClientState.hpp>
 
 void ClientState::setLogContext(bool writeToFile, fsPath path, bool useTimestamp,
@@ -7,4 +8,14 @@ void ClientState::setLogContext(bool writeToFile, fsPath path, bool useTimestamp
     .toFile = writeToFile, .logFilePath = path, .timestamp = useTimestamp, .minLogLevel = logLevel};
 
   anvlk::logger::init(logCtx);
+}
+
+void ClientState::initShaderManager()
+{
+  shaderManagerPtr = std::make_unique<anvlk::gfx::ShaderManager>(homeDir, logCtx);
+}
+
+void ClientState::initPamAuth()
+{
+  pamAuth = std::make_unique<anvlk::pam::PamAuthenticator>(pam.username, pam.password);
 }

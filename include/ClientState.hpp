@@ -6,6 +6,8 @@
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigStruct.hpp>
 #include <anvilock/include/freetype/FreeTypeStruct.hpp>
+#include <anvilock/include/pam/PamAuthenticator.hpp>
+#include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/protocols/ext-session-lock-client-protocol.h>
 #include <anvilock/protocols/xdg-shell-client-protocol.h>
 #include <array>
@@ -69,11 +71,6 @@ struct OutputState
   Dimensions height{};
   i32        refresh_rate{};
   wl_output* wlOutput = nullptr;
-};
-
-struct Vertex
-{
-  Coords x{}, y{}, u{}, v{};
 };
 
 struct PointerAxes
@@ -189,6 +186,8 @@ struct ClientState
   // PAM and authentication
   PamState pam;
 
+  std::unique_ptr<anvlk::pam::PamAuthenticator> pamAuth;
+
   // Session lock protocol
   ExtSessionLock sessionLock;
 
@@ -204,6 +203,9 @@ struct ClientState
   EGLSurface eglSurface  = EGL_NO_SURFACE;
   EGLConfig  eglConfig   = nullptr;
   GLuint     timeTexture = 0;
+
+  // Shader Manager
+  std::unique_ptr<anvlk::gfx::ShaderManager> shaderManagerPtr;
 
   // Shader program state
   struct
@@ -222,4 +224,6 @@ struct ClientState
 public:
   void setLogContext(bool writeToFile, fsPath path, bool useTimestamp,
                      anvlk::logger::LogLevel logLevel);
+  void initShaderManager();
+  void initPamAuth();
 };

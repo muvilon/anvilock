@@ -217,4 +217,7 @@ void switchCtx(LogContext& ctx, LogCategory category)
   log(LogLevel::Info, ctx, LogStyle::BOLD, "LOGGER SWITCHED CTX TO: {}{}{}", logCatPair.first,
       logCatPair.second, term::ansi::ansiReset);
 }
+
+void resetCtx(LogContext& ctx) { ctx.resetContext(); }
+
 } // namespace anvlk::logger

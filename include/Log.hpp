@@ -87,5 +87,6 @@ inline void log(LogLevel level, const LogContext& ctx, std::format_string<Args..
 
 void init(const LogContext& context);
 void switchCtx(LogContext& ctx, LogCategory category);
+void resetCtx(LogContext& ctx);
 
 } // namespace anvlk::logger

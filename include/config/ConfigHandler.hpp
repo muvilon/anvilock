@@ -12,6 +12,16 @@ inline constexpr types::PathCStr REL_CFG_PATH  = ".config/anvilock/";
 inline constexpr types::FileName CFG_FILE_NAME = "config.toml";
 using TOMLKey                                  = anvlk::types::TOMLKey;
 
+inline constexpr types::FloatArray2D<4, 2> TEXCOORDS = {{
+  {0.0f, 0.0f}, // Top left
+  {1.0f, 0.0f}, // Top right
+  {0.0f, 1.0f}, // Bottom left
+  {1.0f, 1.0f}  // Bottom right
+}};
+
+inline constexpr std::array<TOMLKey, 4> TIMEBOXPOS = {"top_left", "top_right", "bottom_left",
+                                                      "bottom_right"};
+
 class ConfigLoader
 {
 public:

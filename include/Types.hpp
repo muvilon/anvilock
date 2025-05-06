@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <string_view>
 
 namespace anvlk::types
 {
@@ -55,6 +56,8 @@ using LogCategoryString = std::string;
 using AuthString = std::string;
 using PamString  = const char*;
 
+using TimeString = std::string;
+
 using iter   = int;
 using iters  = std::size_t; // size_t is the size of something in memory
 using Status = int;
@@ -68,7 +71,9 @@ using Coords = float;
 using AnsiColor = const char*;
 
 template <std::size_t N> using FloatArray = std::array<float, N>;
-template <std::size_t N> using IntArray   = std::array<int, N>;
-template <std::size_t N> using CStrArray  = std::array<const char*, N>;
+template <std::size_t ROWS, std::size_t COLS>
+using FloatArray2D                       = std::array<std::array<float, COLS>, ROWS>;
+template <std::size_t N> using IntArray  = std::array<int, N>;
+template <std::size_t N> using CStrArray = std::array<const char*, N>;
 
 } // namespace anvlk::types

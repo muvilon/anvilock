@@ -4,6 +4,7 @@
 #include <anvilock/include/config/ConfigHandler.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
+#include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
@@ -87,6 +88,8 @@ void setHomeDir(ClientState& cs)
 auto main() -> int
 {
   ClientState cs;
+  cs.pam.authState.authSuccess = false;
+  cs.pam.username              = "s1dd";
 
   setHomeDir(cs);
 
@@ -111,9 +114,6 @@ auto main() -> int
     logger::log(logL::Error, cs.logCtx, "Failed to initialize XKB!");
   }
 
-  // If the class does not take the entire ClientState reference,
-  //
-  // decl the log context switch in main itself!
   logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::CONFIG);
 
   anvlk::cfg::ConfigLoader loader(cs.logCtx, cs.homeDir);
@@ -128,33 +128,30 @@ auto main() -> int
 
   logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::SHADERS);
 
-  anvlk::gfx::ShaderManager shaderMgr(cs.homeDir, cs.logCtx);
-  if (!shaderMgr.isValid())
+  cs.initShaderManager();
+
+  if (!cs.shaderManagerPtr->isValid())
   {
     std::exit(EXIT_FAILURE);
   }
 
-  logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::PAM);
+  cs.logCtx.resetContext();
 
-  anvlk::pam::PamAuthenticator auth(cs);
-  logger::log(logL::Info, cs.logCtx, logger::LogStyle::UNDERLINE, "Hello, gib password: ");
+  wl_surface_commit(cs.wlSurface);
 
-  AuthString pwd;
-  std::cin >> pwd;
-
-  cs.pam.password = pwd;
-  cs.pam.username = "s1dd";
-
-  if (auth.AuthenticateUser())
+  while (!cs.pam.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)
   {
-    logger::log(logL::Info, cs.logCtx, "ok");
-  }
-  else
-  {
-    logger::log(logL::Error, cs.logCtx, logger::LogStyle::COLOR_BOLD, "Error while auth");
+    cs.pam.authState.authFailed = false;
+    if (cs.sessionLock.surfaceCreated)
+    {
+      wl::initiateSessionLock(cs);
+    }
+
+    render::renderLockScreen(cs);
   }
 
   cs.logCtx.resetContext();
+  wl::unlockAndDestroySessionLock(cs);
 
   return ANVLK_SUCCESS;
 }

@@ -1,5 +1,6 @@
 
 #include <anvilock/include/Log.hpp>
+#include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 
 namespace anvlk::wl
@@ -29,11 +30,12 @@ static void handleXdgSurfaceConfigure(types::VPtr                              d
       }
     }
 
-    //render_lock_screen(*state); // Assuming this takes a ClientState& in modern version
+    render::renderLockScreen(*state);
 
     state->sessionLock.surfaceDirty = true;
 
     wl_surface_commit(state->wlSurface);
+
     if (!eglSwapBuffers(state->eglDisplay, state->eglSurface))
     {
       anvlk::logger::log(logL::Error, state->logCtx, "Failed to swap EGL buffers");

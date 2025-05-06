@@ -63,14 +63,17 @@ auto ConfigLoader::load() -> AnvlkConfig
     cfg.time.time_format = TOMLKey{*val};
 
   // Time Box
-  if (auto arr = parser.getArray("time_box", "top_left"))
-    cfg.time_box.top_left = parseVec2(*arr);
-  if (auto arr = parser.getArray("time_box", "top_right"))
-    cfg.time_box.top_right = parseVec2(*arr);
-  if (auto arr = parser.getArray("time_box", "bottom_left"))
-    cfg.time_box.bottom_left = parseVec2(*arr);
-  if (auto arr = parser.getArray("time_box", "bottom_right"))
-    cfg.time_box.bottom_right = parseVec2(*arr);
+  for (int i = 0; i < 4; ++i)
+  {
+    if (auto arr = parser.getArray("time_box", TIMEBOXPOS[i]))
+    {
+      auto pos                 = parseVec2(*arr);
+      cfg.timeBoxVertices[i].x = pos[0];
+      cfg.timeBoxVertices[i].y = pos[1];
+      cfg.timeBoxVertices[i].u = TEXCOORDS[i][0];
+      cfg.timeBoxVertices[i].v = TEXCOORDS[i][1];
+    }
+  }
 
   logger::log(logger::LogLevel::Info, m_logCtx, logger::LogStyle::COLOR_BOLD,
               "Configuration loaded successfully from '{}'", m_configPath.c_str());

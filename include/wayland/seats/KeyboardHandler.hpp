@@ -2,6 +2,7 @@
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
+#include <anvilock/include/renderer/EGL.hpp>
 
 #include <cassert>
 #include <wayland-client.h>
@@ -48,7 +49,7 @@ inline void handleBackspace(ClientState& cs, bool ctrl)
     cs.pam.passwordIndex--;
   }
   cs.pam.password[cs.pam.passwordIndex] = '\0';
-  //render_lock_screen(&cs);
+  render::renderLockScreen(cs);
 }
 
 inline void handleBackspaceRepeat(ClientState& cs)
@@ -131,7 +132,7 @@ inline void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u
     {
       cs.pam.password[cs.pam.passwordIndex++] = static_cast<char>(sym);
       cs.pam.password[cs.pam.passwordIndex]   = '\0';
-      //render_lock_screen(&cs);
+      render::renderLockScreen(cs);
     }
   }
   else if (state == WL_KEYBOARD_KEY_STATE_RELEASED)
@@ -150,28 +151,30 @@ inline void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u
       {
         cs.pam.password[cs.pam.passwordIndex] = '\0';
 
-        // if (authenticate_user(cs.pam.username, cs.pam.password))
-        // {
-        //   logger::log(logL::Auth, cs.logCtx, "Authentication successful.");
-        //   cs.pam.authState.authSuccess = true;
-        // }
-        // else
-        // {
-        //   logger::log(logL::Auth, cs.logCtx, "Authentication failed.");
-        //   cs.pam.passwordIndex        = 0;
-        //   cs.pam.password[0]          = '\0';
-        //   cs.pam.authState.authFailed = true;
-        //   //render_lock_screen(&cs);
-        //   cs.pam.authState.authFailed = false;
-        // }
+        cs.initPamAuth();
+
+        if (cs.pamAuth->AuthenticateUser())
+        {
+          logger::log(logL::Info, cs.logCtx, "Authentication successful.");
+          cs.pam.authState.authSuccess = true;
+        }
+        else
+        {
+          logger::log(logL::Error, cs.logCtx, "Authentication failed.");
+          cs.pam.passwordIndex        = 0;
+          cs.pam.password[0]          = '\0';
+          cs.pam.authState.authFailed = true;
+          render::renderLockScreen(cs);
+          cs.pam.authState.authFailed = false;
+        }
 
         cs.pam.firstEnterPress = false;
       }
     }
   }
 
-  //if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-  //render_lock_screen(&cs);
+  if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
+    render::renderLockScreen(cs);
 }
 
 inline void onKeyboardKeymap(types::VPtr          data, types::wayland::WLKeyboard_*,
