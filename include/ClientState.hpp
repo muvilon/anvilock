@@ -66,11 +66,11 @@ using XKBKeySym_ = xkb_keysym_t;
 // Stores output-related information
 struct OutputState
 {
-  u32        id{};
-  Dimensions width{};
-  Dimensions height{};
-  i32        refresh_rate{};
-  wl_output* wlOutput = nullptr;
+  u32                               id{};
+  Dimensions                        width{};
+  Dimensions                        height{};
+  i32                               refresh_rate{};
+  anvlk::types::wayland::WLOutput_* wlOutput = nullptr;
 };
 
 struct PointerAxes
@@ -127,14 +127,28 @@ struct AuthState
   float    successEffectIntensity{};
 };
 
+struct KeyboardState
+{
+  bool      ctrlHeld          = false;
+  bool      backspaceHeld     = false;
+  TimePoint lastBackspaceTime = SteadyClock::now();
+};
+
 struct PamState
 {
-  bool       firstEnterPress = true;
-  AuthString username;
-  AuthString password;
-  int        passwordIndex = 0;
-  bool       locked        = false;
-  AuthState  authState;
+  bool                         firstEnterPress = true;
+  AuthString                   username;
+  AuthString                   password;
+  int                          passwordIndex = 0;
+  bool                         locked        = false;
+  AuthState                    authState;
+  static constexpr std::size_t MAX_PASSWORD_LENGTH = 128;
+
+public:
+  auto canSeekIndex() -> bool;
+  auto canSeekToIndex(const i64& idx) -> bool;
+  void clearPassword();
+  void seekToIndex(const i64& idx);
 };
 
 struct ClientState
@@ -169,6 +183,8 @@ struct ClientState
 
   // Input state
   PointerEvent pointerEvent;
+
+  KeyboardState keyboardState;
 
   // XKB keyboard state (raw pointers for now)
   xkb::XKBState_*  xkbState   = nullptr;
@@ -226,4 +242,7 @@ public:
                      anvlk::logger::LogLevel logLevel);
   void initShaderManager();
   void initPamAuth();
+  void destroyEGL();
+  void destroyFreeType();
+  void disconnectWLDisplay();
 };

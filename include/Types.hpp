@@ -9,6 +9,9 @@
 namespace anvlk::types
 {
 
+using SteadyClock = std::chrono::steady_clock;
+using TimePoint   = SteadyClock::time_point;
+
 enum ExitCodes
 {
   ANVLK_SUCCESS   = 0,
@@ -70,10 +73,14 @@ using Coords = float;
 
 using AnsiColor = const char*;
 
+using RuntimeErrorMessage = std::string_view;
+using RuntimeErrorString  = std::string;
+
 template <std::size_t N> using FloatArray = std::array<float, N>;
 template <std::size_t ROWS, std::size_t COLS>
 using FloatArray2D                       = std::array<std::array<float, COLS>, ROWS>;
 template <std::size_t N> using IntArray  = std::array<int, N>;
 template <std::size_t N> using CStrArray = std::array<const char*, N>;
+template <std::size_t N> using CharArray = std::array<char, N>;
 
 } // namespace anvlk::types

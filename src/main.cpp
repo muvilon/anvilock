@@ -142,7 +142,7 @@ auto main() -> int
   while (!cs.pam.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)
   {
     cs.pam.authState.authFailed = false;
-    if (cs.sessionLock.surfaceCreated)
+    if (!cs.sessionLock.surfaceCreated)
     {
       wl::initiateSessionLock(cs);
     }
@@ -152,6 +152,10 @@ auto main() -> int
 
   cs.logCtx.resetContext();
   wl::unlockAndDestroySessionLock(cs);
+  cs.destroyEGL();
+  cs.disconnectWLDisplay();
+
+  logger::log(logL::Info, cs.logCtx, "Cleanup job done. Exiting Anvilock...");
 
   return ANVLK_SUCCESS;
 }

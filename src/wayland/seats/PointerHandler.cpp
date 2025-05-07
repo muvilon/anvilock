@@ -93,23 +93,23 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
 
-  logger::log(logL::Debug, cs.logCtx, "Pointer frame @ {}", ev.time);
+  logger::log(logL::Trace, cs.logCtx, "Pointer frame @ {}", ev.time);
 
   if (ev.eventMask & PointerEventMask::Enter)
-    logger::log(logL::Debug, cs.logCtx, "Pointer entered at ({}, {})",
+    logger::log(logL::Trace, cs.logCtx, "Pointer entered at ({}, {})",
                 wl_fixed_to_double(ev.surfaceX), wl_fixed_to_double(ev.surfaceY));
 
   if (ev.eventMask & PointerEventMask::Leave)
     logger::log(logL::Debug, cs.logCtx, "Pointer left surface");
 
   if (ev.eventMask & PointerEventMask::Motion)
-    logger::log(logL::Debug, cs.logCtx, "Pointer moved to ({}, {})",
+    logger::log(logL::Trace, cs.logCtx, "Pointer moved to ({}, {})",
                 wl_fixed_to_double(ev.surfaceX), wl_fixed_to_double(ev.surfaceY));
 
   if (ev.eventMask & PointerEventMask::Button)
   {
     const char* stateStr = ev.state == WL_POINTER_BUTTON_STATE_RELEASED ? "released" : "pressed";
-    logger::log(logL::Debug, cs.logCtx, "Button {} {}", ev.button, stateStr);
+    logger::log(logL::Trace, cs.logCtx, "Button {} {}", ev.button, stateStr);
   }
 
   const uint32_t axisEvents = PointerEventMask::Axis | PointerEventMask::AxisSource |
@@ -125,16 +125,16 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
       if (!ev.axes[i].valid)
         continue;
 
-      logger::log(logL::Debug, cs.logCtx, "{} axis event", axisNames[i]);
+      logger::log(logL::Trace, cs.logCtx, "{} axis event", axisNames[i]);
 
       if (ev.eventMask & PointerEventMask::Axis)
-        logger::log(logL::Debug, cs.logCtx, "  value: {}", wl_fixed_to_double(ev.axes[i].value));
+        logger::log(logL::Trace, cs.logCtx, "  value: {}", wl_fixed_to_double(ev.axes[i].value));
 
       if (ev.eventMask & PointerEventMask::AxisDiscrete)
-        logger::log(logL::Debug, cs.logCtx, "  discrete: {}", ev.axes[i].discrete);
+        logger::log(logL::Trace, cs.logCtx, "  discrete: {}", ev.axes[i].discrete);
 
       if (ev.eventMask & PointerEventMask::AxisSource)
-        logger::log(logL::Debug, cs.logCtx, "  source: {}", sourceNames[ev.axisSource]);
+        logger::log(logL::Trace, cs.logCtx, "  source: {}", sourceNames[ev.axisSource]);
 
       if (ev.eventMask & PointerEventMask::AxisStop)
         logger::log(logL::Info, cs.logCtx, "  axis stopped");

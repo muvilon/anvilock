@@ -6,6 +6,7 @@
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
+#include <anvilock/include/runtime/EGLExceptionHandler.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 
 namespace anvlk::render

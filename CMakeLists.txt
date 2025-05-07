@@ -90,6 +90,7 @@ set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/SeatHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/session-lock/SessionLockHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/wayland/seats/PointerHandler.cpp
+  ${CMAKE_SOURCE_DIR}/src/wayland/seats/KeyboardHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/config/ConfigHandler.cpp
   ${CMAKE_SOURCE_DIR}/src/shaders/ShaderManager.cpp
   ${CMAKE_SOURCE_DIR}/src/renderer/EGL.cpp
