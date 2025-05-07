@@ -1,3 +1,4 @@
+#include "anvilock/include/Log.hpp"
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
 
@@ -8,13 +9,15 @@ void handleBackspace(ClientState& cs, bool ctrl)
 {
   if (ctrl)
   {
-    cs.pam.passwordIndex = 0;
+    // If CTRL is held, clear the password or reset the index
+    cs.pam.clearPassword();
   }
   else if (cs.pam.passwordIndex > 0)
   {
+    // Regular backspace logic: move cursor back and delete last character
     cs.pam.passwordIndex--;
+    cs.pam.password.resize(cs.pam.passwordIndex);
   }
-  cs.pam.password[cs.pam.passwordIndex] = '\0';
   render::renderLockScreen(cs);
 }
 
@@ -38,6 +41,7 @@ void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
                      types::wayland::WLSurface_*, types::wayland::WLArray_* keys)
 {
   auto& cs = *static_cast<ClientState*>(data);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
   logger::log(logL::Debug, cs.logCtx, "Keyboard entered surface; keys pressed:");
 
   for (auto* key = static_cast<u32*>(keys->data);
@@ -54,6 +58,7 @@ void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
     xkb_state_key_get_utf8(cs.xkbState, xkbKeycode, nameBuf.data(), nameBuf.size());
     logger::log(logL::Debug, cs.logCtx, "  utf8: '{}'", nameBuf.data());
   }
+  logger::resetCtx(cs.logCtx);
 }
 
 void onKeyboardLeave(types::VPtr, types::wayland::WLKeyboard_*, u32, types::wayland::WLSurface_*)
@@ -76,9 +81,12 @@ void onKeyboardRepeatInfo(anvlk::types::VPtr, anvlk::types::wayland::WLKeyboard_
 void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uint32_t key,
                    u32 state)
 {
-  auto&                  cs      = *static_cast<ClientState*>(data);
+  auto& cs = *static_cast<ClientState*>(data);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
   const u32              keycode = key + XKB_KEYCODE_OFFSET;
   types::xkb::XKBKeySym_ sym     = xkb_state_key_get_one_sym(cs.xkbState, keycode);
+
+  bool shouldRender = false; // Flag to track if we need to render
 
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
   {
@@ -89,15 +97,17 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uin
     else if (sym == XKB_KEY_BackSpace)
     {
       handleBackspace(cs, cs.keyboardState.ctrlHeld);
+      logger::log(logger::LogLevel::Debug, cs.logCtx, "Held backspace: ");
       cs.keyboardState.backspaceHeld     = true;
       cs.keyboardState.lastBackspaceTime = SteadyClock::now();
+      shouldRender                       = true; // Backspace should trigger a render
     }
     else if (ALLOWED_KEYS.count(sym) == KeycodeStatus::FOUND && cs.pam.canSeekIndex())
     {
       types::CharArray<8> utf8Sym{};
       xkb_state_key_get_utf8(cs.xkbState, keycode, utf8Sym.data(), utf8Sym.size());
 
-      if (!utf8Sym[0])
+      if (!utf8Sym[0] || utf8Sym[0] == '\0')
         return; // Skip if no character was produced
 
       auto len = std::strlen(utf8Sym.data());
@@ -105,7 +115,7 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uin
       {
         cs.pam.password.append(utf8Sym.data(), len);
         cs.pam.seekToIndex(len);
-        render::renderLockScreen(cs);
+        shouldRender = true; // Adding to password should trigger a render
       }
     }
   }
@@ -128,24 +138,32 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uin
         if (cs.pamAuth->AuthenticateUser())
         {
           logger::log(logL::Info, cs.logCtx, "Authentication successful.");
+          cs.pam.clearPassword();
           cs.pam.authState.authSuccess = true;
         }
         else
         {
-          logger::log(logL::Error, cs.logCtx, "Authentication failed.");
+          logger::log(logL::Error, cs.logCtx, "Authentication failed. Entered: {}",
+                      cs.pam.password);
+          // sanity clear, password is std::moved when AuthenticateUser() is called
           cs.pam.clearPassword();
           cs.pam.authState.authFailed = true;
-          render::renderLockScreen(cs);
-          cs.pam.authState.authFailed = false;
+          shouldRender                = true; // Failed auth should trigger a render
         }
 
         cs.pam.firstEnterPress = false;
       }
+      shouldRender = true; // Enter key should trigger a render
     }
   }
 
-  if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
+  // Only render when necessary
+  if (shouldRender)
+  {
     render::renderLockScreen(cs);
+  }
+
+  logger::resetCtx(cs.logCtx);
 }
 
 void onKeyboardKeymap(types::VPtr data, types::wayland::WLKeyboard_*, [[maybe_unused]] u32 format,

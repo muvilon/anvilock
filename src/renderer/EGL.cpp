@@ -1,3 +1,5 @@
+#include <EGL/egl.h>
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include <anvilock/external/stb/stb_image.h>
@@ -42,8 +44,6 @@ auto initEGLConfig(ClientState& cs) -> EGLConfig
 
 auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
 {
-  // TODO: Render text using FreeType and return a GL texture
-
   if (text.empty())
   {
     logger::log(logger::LogLevel::Error, state.logCtx, "Invalid text string for texture.");
@@ -129,10 +129,8 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
   return texture;
 }
 
-auto loadTexture(ClientState& cs) -> GLuint
+auto loadBGTexture(ClientState& cs) -> GLuint
 {
-  // TODO: Load image file with stb_image and upload it to OpenGL as a texture
-
   types::Dimensions width, height;
   int               channels;
 
@@ -165,7 +163,6 @@ auto loadTexture(ClientState& cs) -> GLuint
 
 void initEGL(ClientState& cs)
 {
-  // TODO: Initialize EGL display, context, surface, etc.
   cs.eglConfig = initEGLConfig(cs);
 
   cs.eglContext =
@@ -210,9 +207,9 @@ void initEGL(ClientState& cs)
 
   glViewport(0, 0, width, height);
 
-  GLuint texture = loadTexture(cs);
+  GLuint bgTexture = loadBGTexture(cs);
 
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glBindTexture(GL_TEXTURE_2D, bgTexture);
 
   glClear(GL_COLOR_BUFFER_BIT);
 
@@ -279,7 +276,7 @@ void initEGL(ClientState& cs)
 
     updateTimeTexture(cs);
     renderTimeBox(cs);
-    //render_password_field(state);
+    //renderPasswordField(cs);
 
     eglSwapBuffers(cs.eglDisplay, cs.eglSurface);
   }
@@ -289,15 +286,135 @@ void initEGL(ClientState& cs)
   }
 }
 
+void renderPasswordField(ClientState& state)
+{
+  const auto pwdFieldVertexOpt =
+    state.shaderManagerPtr->getShaderSource(anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_VERTEX);
+  const auto pwdFieldFragOpt =
+    state.shaderManagerPtr->getShaderSource(anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_FRAG);
+
+  if (pwdFieldVertexOpt && pwdFieldFragOpt)
+  {
+    types::ShaderContentCStr pwdFieldVertexSrc =
+      state.shaderManagerPtr->asCString(pwdFieldVertexOpt);
+    types::ShaderContentCStr pwdFieldFragSrc = state.shaderManagerPtr->asCString(pwdFieldFragOpt);
+
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &pwdFieldVertexSrc, nullptr);
+    glCompileShader(vertex_shader);
+
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &pwdFieldFragSrc, nullptr);
+    glCompileShader(fragment_shader);
+
+    // Create and link program
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    // Use the shader program
+    glUseProgram(program);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth testing for 2D UI elements (password field)
+    glDisable(GL_DEPTH_TEST);
+
+    // Get uniform locations
+    GLint color_location    = glGetUniformLocation(program, "color");
+    GLint offset_location   = glGetUniformLocation(program, "offset");
+    GLint position_location = glGetAttribLocation(program, "position");
+
+    // Width and height of the password field
+    float field_width  = 0.7f;  // Adjusted width for the field
+    float field_height = 0.15f; // Adjusted height for the field
+
+    // Position offset to center at the bottom of the screen
+    float offset_x = 0;                           // Horizontally center the field
+    float offset_y = -0.8f + field_height / 2.0f; // Vertically align it at the bottom
+
+    // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
+    glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
+    glUniform2f(offset_location, offset_x, offset_y);
+
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0,
+                          utils::password_field_vertices.data());
+    glEnableVertexAttribArray(position_location);
+
+    // Draw the background of the password field
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    // Draw the border with a subtle shadow effect
+    glUniform4f(color_location, 0.8f, 0.8f, 0.8f, 1.0f);
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+    // Draw password dots
+    glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
+
+    // Set up vertices for dots
+    glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, utils::dot_vertices.data());
+
+    // Adjust dot positions based on password input
+    float dot_spacing = field_width / (state.pam.passwordIndex + 1);
+    for (int i = 0; i < state.pam.passwordIndex; i++)
+    {
+      float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
+      glUniform2f(offset_location, x_position, offset_y);
+      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    // Handle Authentication Failure (Red border for failure)
+    if (state.pam.authState.authFailed)
+    {
+      types::FloatArray<4> failColor = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
+
+      glUniform4fv(color_location, 1, failColor.data());
+      glUniform2f(offset_location, offset_x, offset_y);
+      glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with failure color
+    }
+
+    // Handle Authentication Success (Green border for success)
+    if (!state.pam.authState.authFailed && state.pam.passwordIndex > 0)
+    {
+      types::FloatArray<4> successColor = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
+
+      glUniform4fv(color_location, 1, successColor.data());
+      glUniform2f(offset_location, offset_x, offset_y);
+      glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with success color
+    }
+
+    // Disable blending and clean up
+    glDisable(GL_BLEND);
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    glDeleteProgram(program);
+
+    // Swap buffers to render the final frame
+    eglSwapBuffers(state.eglDisplay, state.eglSurface);
+
+    if (state.pam.authState.authFailed)
+      sleep(1);
+  }
+  else
+  {
+    logger::log(logger::LogLevel::Error, state.logCtx,
+                "Failed to allocate memory, causing pwd render to fail!");
+  }
+}
+
 void updateTimeTexture(ClientState& cs)
 {
   // TODO: Update the texture containing the current time
   types::TimeString timeStr = utils::getTimeString(cs.userConfig.time.time_format);
 
-  types::TimeString lastRecordedTimeStr = "";
+  static types::TimeString lastRecordedTimeStr = "";
 
   if (lastRecordedTimeStr != timeStr)
   {
+    logger::log(logger::LogLevel::Debug, cs.logCtx, "Time changed from '{}' to '{}'",
+                lastRecordedTimeStr, timeStr);
     lastRecordedTimeStr = timeStr;
 
     if (cs.timeTexture)
@@ -358,11 +475,6 @@ void renderTimeBox(ClientState& cs)
   logger::log(logger::LogLevel::Trace, cs.logCtx, "Time box rendered successfully!!");
 }
 
-void renderPasswordField(ClientState& state)
-{
-  // TODO: Render the password input field
-}
-
 auto createTextureShaderProgram(anvlk::gfx::ShaderManager& shaderManager) -> GLuint
 {
   const auto textureVertexOpt =
@@ -407,14 +519,14 @@ void renderLockScreen(ClientState& cs)
     throw EGLErrorException("!!! FAILED TO MAKE EGL CURRENT CTX !!!");
   }
 
-  static GLuint texture              = 0;
+  static GLuint bgTexture            = 0;
   static GLuint textureShaderProgram = 0;
   static int    initialized          = 0;
 
   if (!initialized)
   {
     logger::log(logger::LogLevel::Warn, cs.logCtx, "EGL not initialized!");
-    texture              = loadTexture(cs);
+    bgTexture            = loadBGTexture(cs);
     textureShaderProgram = createTextureShaderProgram(*cs.shaderManagerPtr);
     initialized          = 1;
   }
@@ -434,11 +546,12 @@ void renderLockScreen(ClientState& cs)
 
   // Bind and render texture
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glBindTexture(GL_TEXTURE_2D, bgTexture);
   glUniform1i(glGetUniformLocation(textureShaderProgram, "uTexture"), 0);
 
   updateTimeTexture(cs);
   renderTimeBox(cs);
+  //renderPasswordField(cs);
 }
 
 } // namespace anvlk::render

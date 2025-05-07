@@ -1,15 +1,13 @@
-#include "anvilock/include/Types.hpp"
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
-#include <cstring> // for std::memcpy
-#include <cstring> // for strdup
-#include <memory>  // for std::make_unique
+#include <cstring>
+#include <memory>
 
 namespace anvlk::pam
 {
 
 PamAuthenticator::PamAuthenticator(types::AuthString& userName, types::AuthString& password)
-    : m_userName(std::move(userName)), m_password(std::move(password)),
-      m_passwordBuffer(m_password.size() + 1)
+    : m_userName(userName), m_password(std::move(password)), m_passwordBuffer(m_password.size() + 1)
 {
 }
 

@@ -50,6 +50,5 @@ void PamState::seekToIndex(const i64& idx)
 void PamState::clearPassword()
 {
   passwordIndex = 0;
-  std::ranges::fill(password, '\0');
   password.clear();
 }

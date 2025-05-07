@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <GLES2/gl2.h>
+#include <pwd.h>
 #include <unistd.h>
 
 namespace anvlk::utils
@@ -51,6 +52,17 @@ template <typename T> constexpr void swap(T& a, T& b) noexcept
 {
   const char* home = std::getenv("HOME");
   return home ? std::string(home) : FallbackHomeDir;
+}
+
+[[nodiscard]] inline auto getCurrentUsername() -> std::optional<types::AuthString>
+{
+  uid_t   uid = geteuid();     // Get effective user ID
+  passwd* pw  = getpwuid(uid); // Get passwd struct for this UID
+  if (pw && pw->pw_name)
+  {
+    return std::string(pw->pw_name);
+  }
+  return std::nullopt;
 }
 
 // Safe string concatenation

@@ -1,3 +1,4 @@
+#include <anvilock/include/Log.hpp>
 #include <anvilock/include/wayland/seats/PointerHandler.hpp>
 
 namespace anvlk::wl
@@ -93,6 +94,8 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
   auto& cs = *static_cast<ClientState*>(data);
   auto& ev = cs.pointerEvent;
 
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_PTR);
+
   logger::log(logL::Trace, cs.logCtx, "Pointer frame @ {}", ev.time);
 
   if (ev.eventMask & PointerEventMask::Enter)
@@ -142,6 +145,8 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
   }
 
   ev = PointerEvent{}; // safely reset
+
+  logger::resetCtx(cs.logCtx);
 }
 
 } // namespace anvlk::wl

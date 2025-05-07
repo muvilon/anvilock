@@ -89,11 +89,19 @@ auto main() -> int
 {
   ClientState cs;
   cs.pam.authState.authSuccess = false;
-  cs.pam.username              = "s1dd";
-
-  setHomeDir(cs);
 
   cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
+  setHomeDir(cs);
+  auto usernameOpt = utils::getCurrentUsername();
+  if (!usernameOpt)
+  {
+    logger::log(logL::Error, cs.logCtx, "Did not find a valid username! Exiting...");
+    std::exit(EXIT_FAILURE);
+  }
+
+  cs.pam.username = *usernameOpt;
+
+  logger::log(logL::Info, cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pam.username);
 
   if (initWayland(cs) == ANVLK_SUCCESS)
   {

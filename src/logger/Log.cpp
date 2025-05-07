@@ -210,13 +210,7 @@ void LogContext::resetContext()
   category = LogCategory::MAIN;
 }
 
-void switchCtx(LogContext& ctx, LogCategory category)
-{
-  ctx.changeContext(category);
-  auto logCatPair = findLogCategory(category);
-  log(LogLevel::Info, ctx, LogStyle::BOLD, "LOGGER SWITCHED CTX TO: {}{}{}", logCatPair.first,
-      logCatPair.second, term::ansi::ansiReset);
-}
+void switchCtx(LogContext& ctx, LogCategory category) { ctx.changeContext(category); }
 
 void resetCtx(LogContext& ctx) { ctx.resetContext(); }
 

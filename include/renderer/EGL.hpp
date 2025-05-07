@@ -34,5 +34,6 @@ void updateTimeTexture(ClientState& cs);
 void renderTimeBox(ClientState& cs);
 auto createTextureShaderProgram(anvlk::gfx::ShaderManager& shaderManager) -> GLuint;
 void renderLockScreen(ClientState& cs);
+void renderPasswordField(ClientState& state);
 
 } // namespace anvlk::render

@@ -26,7 +26,7 @@ private:
   static auto PamConvFunc(int numMsg, const types::pam::PamMessage_** msg,
                           types::pam::PamResponse_** resp, types::VPtr appDataPtr) -> int;
 
-  types::AuthString      m_userName;
+  types::AuthString&     m_userName;
   types::AuthString      m_password;
   pwdbuf::PasswordBuffer m_passwordBuffer;
 };
