@@ -26,14 +26,7 @@ inline constexpr std::array<EGLint, 11> GLOBAL_EGL_ATTRIBS = {EGL_RENDERABLE_TYP
 
 inline constexpr std::array<EGLint, 3> EGL_CTX_ATTRIBS = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-auto initEGLConfig(ClientState& cs) -> EGLConfig;
-auto createTextTexture(ClientState& state, const std::string& text) -> GLuint;
-auto loadTexture(ClientState& cs) -> GLuint;
 void initEGL(ClientState& cs);
-void updateTimeTexture(ClientState& cs);
-void renderTimeBox(ClientState& cs);
-auto createTextureShaderProgram(anvlk::gfx::ShaderManager& shaderManager) -> GLuint;
 void renderLockScreen(ClientState& cs);
-void renderPasswordField(ClientState& state);
 
 } // namespace anvlk::render
