@@ -55,26 +55,24 @@ ShaderManager::ShaderManager(const types::Directory& homeDir, logger::LogContext
   types::fsPath globalPath = GLOBAL_SHADER_DIR;
   if (std::filesystem::exists(globalPath))
   {
-    logger::log(logger::LogLevel::Info, m_ctx, logger::LogStyle::COLOR_BOLD,
-                "Found GLOBAL SHADER RUNTIME AT: {}", globalPath.c_str());
+    LOG::INFO(m_ctx, logger::LogStyle::COLOR_BOLD, "Found GLOBAL SHADER RUNTIME AT: {}",
+              globalPath.c_str());
     return globalPath;
   }
 
   types::fsPath localPath = types::fsPath(m_homePath) / REL_LOCAL_SHADER_DIR;
 
-  logger::log(logger::LogLevel::Trace, m_ctx,
-              "Attempting to find LOCAL SHADER RUNTIME at: {} from '{}'", localPath.c_str(),
-              m_homePath);
+  LOG::TRACE(m_ctx, "Attempting to find LOCAL SHADER RUNTIME at: {} from '{}'", localPath.c_str(),
+             m_homePath);
 
   if (std::filesystem::exists(localPath))
   {
-    logger::log(logger::LogLevel::Info, m_ctx, logger::LogStyle::COLOR_BOLD,
-                "Found LOCAL SHADER RUNTIME AT: {}", localPath.c_str());
+    LOG::INFO(m_ctx, logger::LogStyle::COLOR_BOLD, "Found LOCAL SHADER RUNTIME AT: {}",
+              localPath.c_str());
     return localPath;
   }
 
-  logger::log(logger::LogLevel::Error, m_ctx, logger::LogStyle::COLOR_BOLD,
-              "Shader runtime directory not found!");
+  LOG::ERROR(m_ctx, logger::LogStyle::COLOR_BOLD, "Shader runtime directory not found!");
   return std::nullopt;
 }
 
@@ -83,20 +81,19 @@ void ShaderManager::loadAllShaders()
   for (const auto& [id, relPath] : ShaderPaths)
   {
     types::fsPath fullPath = *m_shaderDir / relPath;
-    logger::log(logger::LogLevel::Debug, m_ctx, "Loading SHADER: '{}'", shaderIDToStr(id),
-                fullPath.c_str());
-    logger::log(logger::LogLevel::Trace, m_ctx, "SHADER path: '{}'", fullPath.c_str());
+    LOG::DEBUG(m_ctx, "Loading SHADER: '{}'", shaderIDToStr(id), fullPath.c_str());
+    LOG::TRACE(m_ctx, "SHADER path: '{}'", fullPath.c_str());
 
     if (auto source = loadShaderSource(fullPath))
     {
       m_shaders[id] = std::move(*source);
-      logger::log(logger::LogLevel::Info, m_ctx, logger::LogStyle::COLOR_BOLD,
-                  "Loaded SHADER: '{}'", shaderIDToStr(id), fullPath.c_str());
+      LOG::INFO(m_ctx, logger::LogStyle::COLOR_BOLD, "Loaded SHADER: '{}'", shaderIDToStr(id),
+                fullPath.c_str());
     }
     else
     {
-      logger::log(logger::LogLevel::Error, m_ctx, logger::LogStyle::COLOR_BOLD,
-                  "Failed to load SHADER: '{}'", shaderIDToStr(id), fullPath.c_str());
+      LOG::ERROR(m_ctx, logger::LogStyle::COLOR_BOLD, "Failed to load SHADER: '{}'",
+                 shaderIDToStr(id), fullPath.c_str());
     }
   }
 }
@@ -107,8 +104,8 @@ void ShaderManager::loadAllShaders()
   std::ifstream file(filePath, std::ios::in | std::ios::binary);
   if (!file)
   {
-    logger::log(logger::LogLevel::Error, m_ctx, logger::LogStyle::COLOR_BOLD,
-                "Failed to open shader file: {}", filePath.string());
+    LOG::ERROR(m_ctx, logger::LogStyle::COLOR_BOLD, "Failed to open shader file: {}",
+               filePath.string());
     return std::nullopt;
   }
 

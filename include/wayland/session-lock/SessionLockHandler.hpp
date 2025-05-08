@@ -5,7 +5,7 @@
 #include <wayland-client.h>
 
 #include <anvilock/include/ClientState.hpp>
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
 #include <anvilock/include/wayland/seats/PointerHandler.hpp>

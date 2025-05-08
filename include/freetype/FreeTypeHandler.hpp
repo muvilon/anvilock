@@ -1,6 +1,7 @@
 #pragma once
 
-#include <anvilock/include/Log.hpp>
+#include "anvilock/include/Log.hpp"
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/freetype/FreeTypeStruct.hpp>
 #include <stdexcept>
@@ -21,29 +22,31 @@ public:
   explicit FreeTypeHandler(logger::LogContext& ctx, const anvlk::types::Path& fontPath)
       : m_logCtx(ctx), m_fontPath(std::move(fontPath))
   {
-    using logL = logger::LogLevel;
-    using logS = logger::LogStyle;
+    using style = logger::LogStyle;
+
+    logger::switchCtx(ctx, logger::LogCategory::FREETYPE);
 
     if (FT_Init_FreeType(&m_ftLibrary))
     {
-      logger::log(logL::Error, m_logCtx, logS::COLOR_BOLD, "Failed to initialize FreeType");
+      LOG::ERROR(m_logCtx, style::COLOR_BOLD, "Failed to initialize FreeType");
       throw std::runtime_error("FreeType init failed");
     }
 
     if (FT_New_Face(m_ftLibrary, m_fontPath.c_str(), 0, &m_ftFace))
     {
-      logger::log(logL::Error, m_logCtx, logS::COLOR_BOLD, "Failed to load font: '{}'", m_fontPath);
+      LOG::ERROR(m_logCtx, style::COLOR_BOLD, "Failed to load font: '{}'", m_fontPath);
       throw std::runtime_error("Font load failed");
     }
 
     if (FT_Set_Pixel_Sizes(m_ftFace, 0, CHAR_HEIGHT_PX))
     {
-      logger::log(logL::Error, m_logCtx, logS::COLOR_BOLD, "Failed to set font size to {}px",
-                  CHAR_HEIGHT_PX);
+      LOG::ERROR(m_logCtx, style::COLOR_BOLD, "Failed to set font size to {}px", CHAR_HEIGHT_PX);
       throw std::runtime_error("Set font size failed");
     }
 
-    logger::log(logL::Info, m_logCtx, "FreeType2 initialized => font loaded successfully");
+    LOG::INFO(m_logCtx, "FreeType2 initialized => font loaded successfully");
+
+    logger::resetCtx(ctx);
   }
 
   ~FreeTypeHandler()

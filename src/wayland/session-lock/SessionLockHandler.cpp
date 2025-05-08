@@ -1,4 +1,4 @@
-#include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
+#include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 
 namespace anvlk::wl
 {
@@ -12,8 +12,9 @@ void handleLocked(types::VPtr data, types::ext::SessionLockObjV1_* /*lock*/)
 void handleFinished(types::VPtr data, types::ext::SessionLockObjV1_* /*lock*/)
 {
   auto& state = *static_cast<ClientState*>(data);
-  anvlk::logger::log(logger::LogLevel::Error, state.logCtx,
-                     "Failed to lock session -- is another lockscreen running?");
+  logger::switchCtx(state.logCtx, logger::LogCategory::SESSION_LOCK);
+  LOG::ERROR(state.logCtx, "Failed to lock session -- is another lockscreen running?");
+  logger::resetCtx(state.logCtx);
   std::exit(2);
 }
 
@@ -32,12 +33,14 @@ void handleSurfaceConfigure(types::VPtr data, types::ext::SessionLockSurfaceV1_*
 
 void createLockSurface(ClientState& state)
 {
+  logger::switchCtx(state.logCtx, logger::LogCategory::SESSION_LOCK);
   state.wlSurface = wl_compositor_create_surface(state.wlCompositor);
   assert(state.wlSurface);
 
   if (!state.outputState.wlOutput)
   {
-    logger::log(logger::LogLevel::Error, state.logCtx, "No output available for lock surface");
+    LOG::ERROR(state.logCtx, "No output available for lock surface");
+    logger::resetCtx(state.logCtx);
     return;
   }
 
@@ -54,6 +57,7 @@ void createLockSurface(ClientState& state)
   wl_pointer_add_listener(state.wlPointer, &kPointerListener, &state);
 
   state.sessionLock.surfaceCreated = true;
+  logger::resetCtx(state.logCtx);
 }
 
 void initiateSessionLock(ClientState& state)
@@ -69,13 +73,14 @@ void initiateSessionLock(ClientState& state)
 
 void unlockAndDestroySessionLock(ClientState& state)
 {
+  logger::switchCtx(state.logCtx, logger::LogCategory::SESSION_LOCK);
   if (state.sessionLock.lockObj)
   {
     ext_session_lock_v1_unlock_and_destroy(state.sessionLock.lockObj);
     state.sessionLock.lockObj = nullptr;
-    logger::log(logger::LogLevel::Info, state.logCtx,
-                "Session unlocked and lock object destroyed.");
+    LOG::INFO(state.logCtx, "Session unlocked and lock object destroyed.");
   }
+  logger::resetCtx(state.logCtx);
 }
 
 } // namespace anvlk::wl

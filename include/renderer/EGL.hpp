@@ -2,7 +2,7 @@
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/GlobalFuncs.hpp>
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
 #include <anvilock/include/renderer/EGL.hpp>

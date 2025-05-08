@@ -5,6 +5,14 @@
 #include <anvilock/include/term/OutputStream.hpp>
 #include <mutex>
 
+//////////////////////////////////////////////////
+//
+// !!!NEVER USE THIS FILE STANDALONE!!!
+//
+// Use it through LogMacros.hpp
+//
+/////////////////////////////////////////////////
+
 namespace anvlk::logger
 {
 

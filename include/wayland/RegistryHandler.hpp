@@ -1,6 +1,7 @@
 #pragma once
 
 #include <anvilock/include/ClientState.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <wayland-client.h>
 

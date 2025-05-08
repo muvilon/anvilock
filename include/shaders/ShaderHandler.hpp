@@ -1,6 +1,6 @@
 #pragma once
 
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <optional>
 #include <unordered_map>

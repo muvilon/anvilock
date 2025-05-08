@@ -1,15 +1,15 @@
 
+#include "anvilock/include/Log.hpp"
 #include <anvilock/include/wayland/seats/SeatHandler.hpp>
 
 namespace anvlk::wl
 {
 
-using logL = logger::LogLevel;
-
 void onSeatCapabilities(types::VPtr data, [[maybe_unused]] types::wayland::WLSeat_* seat,
                         uint32_t capabilities)
 {
   auto& cs = *static_cast<ClientState*>(data);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_SEAT);
 
   const bool hasPointer  = capabilities & WL_SEAT_CAPABILITY_POINTER;
   const bool hasKeyboard = capabilities & WL_SEAT_CAPABILITY_KEYBOARD;
@@ -21,13 +21,13 @@ void onSeatCapabilities(types::VPtr data, [[maybe_unused]] types::wayland::WLSea
     if (cs.wlPointer)
     {
       wl_pointer_add_listener(cs.wlPointer, &kPointerListener, &cs);
-      logger::log(logL::Info, cs.logCtx, "Pointer capabilities enabled.");
+      LOG::INFO(cs.logCtx, "Pointer capabilities enabled.");
     }
   }
   else if (!hasPointer && cs.wlPointer)
   {
     cs.wlPointer = nullptr;
-    logger::log(logL::Info, cs.logCtx, "Pointer capabilities removed.");
+    LOG::INFO(cs.logCtx, "Pointer capabilities removed.");
   }
 
   // Keyboard handling
@@ -37,20 +37,23 @@ void onSeatCapabilities(types::VPtr data, [[maybe_unused]] types::wayland::WLSea
     if (cs.wlKeyboard)
     {
       wl_keyboard_add_listener(cs.wlKeyboard, &kKeyboardListener, &cs);
-      logger::log(logL::Info, cs.logCtx, "Keyboard capabilities enabled.");
+      LOG::INFO(cs.logCtx, "Keyboard capabilities enabled.");
     }
   }
   else if (!hasKeyboard && cs.wlKeyboard)
   {
     cs.wlKeyboard = nullptr;
-    logger::log(logL::Info, cs.logCtx, "Keyboard capabilities removed.");
+    LOG::INFO(cs.logCtx, "Keyboard capabilities removed.");
   }
+  logger::resetCtx(cs.logCtx);
 }
 
 void onSeatName(types::VPtr data, [[maybe_unused]] types::wayland::WLSeat_* seat, const char* name)
 {
   auto& cs = *static_cast<ClientState*>(data);
-  logger::log(logL::Info, cs.logCtx, "Seat name => {}", name);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_SEAT);
+  LOG::INFO(cs.logCtx, "Seat name => {}", name);
+  logger::resetCtx(cs.logCtx);
 }
 
 } // namespace anvlk::wl

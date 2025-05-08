@@ -1,4 +1,4 @@
-#include "anvilock/include/Log.hpp"
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
 
@@ -42,7 +42,7 @@ void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
-  logger::log(logL::Debug, cs.logCtx, "Keyboard entered surface; keys pressed:");
+  LOG::DEBUG(cs.logCtx, "Keyboard entered surface; keys pressed:");
 
   for (auto* key = static_cast<u32*>(keys->data);
        key < static_cast<u32*>(keys->data) + keys->size / sizeof(u32); ++key)
@@ -53,10 +53,10 @@ void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
 
     const auto sym = xkb_state_key_get_one_sym(cs.xkbState, xkbKeycode);
     xkb_keysym_get_name(sym, nameBuf.data(), nameBuf.size());
-    logger::log(logL::Debug, cs.logCtx, "  sym: {:<12} ({})", nameBuf.data(), sym);
+    LOG::DEBUG(cs.logCtx, "  sym: {:<12} ({})", nameBuf.data(), sym);
 
     xkb_state_key_get_utf8(cs.xkbState, xkbKeycode, nameBuf.data(), nameBuf.size());
-    logger::log(logL::Debug, cs.logCtx, "  utf8: '{}'", nameBuf.data());
+    LOG::DEBUG(cs.logCtx, "  utf8: '{}'", nameBuf.data());
   }
   logger::resetCtx(cs.logCtx);
 }
@@ -97,7 +97,7 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uin
     else if (sym == XKB_KEY_BackSpace)
     {
       handleBackspace(cs, cs.keyboardState.ctrlHeld);
-      logger::log(logger::LogLevel::Debug, cs.logCtx, "Held backspace: ");
+      LOG::DEBUG(cs.logCtx, "Held backspace: ");
       cs.keyboardState.backspaceHeld     = true;
       cs.keyboardState.lastBackspaceTime = SteadyClock::now();
       shouldRender                       = true; // Backspace should trigger a render
@@ -137,14 +137,13 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uin
 
         if (cs.pamAuth->AuthenticateUser())
         {
-          logger::log(logL::Info, cs.logCtx, "Authentication successful.");
+          LOG::INFO(cs.logCtx, "Authentication successful.");
           cs.pam.clearPassword();
           cs.pam.authState.authSuccess = true;
         }
         else
         {
-          logger::log(logL::Error, cs.logCtx, "Authentication failed. Entered: {}",
-                      cs.pam.password);
+          LOG::ERROR(cs.logCtx, "Authentication failed. Entered: {}", cs.pam.password);
           // sanity clear, password is std::moved when AuthenticateUser() is called
           cs.pam.clearPassword();
           cs.pam.authState.authFailed = true;

@@ -1,5 +1,4 @@
 #include <anvilock/include/GlobalFuncs.hpp>
-#include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
@@ -7,23 +6,14 @@
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
-#include <anvilock/include/wayland/session-lock/SessionLockHander.hpp>
+#include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 
 using namespace anvlk;
 
-using logL = logger::LogLevel;
-
-// This is a basic PAM setup (very naive and impractical) that showcases the
-// current progress of the porting process of Anvilock to C++.
-//
-// Before PAM comes into picture, the Wayland Registry Handler has been implemented completely.
-//
-// In the future, surface rendering and EGL will be integrated along with the session lock obj.
-
 static auto initWayland(ClientState& state) -> int
 {
-  logger::log(logL::Debug, state.logCtx, "Initializing Wayland...");
+  LOG::DEBUG(state.logCtx, "Initializing Wayland...");
   state.wlDisplay = wl_display_connect(nullptr);
   if (!state.wlDisplay)
   {
@@ -49,7 +39,7 @@ static auto initXKB(ClientState& state) -> int
   state.xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
   if (!state.xkbContext)
   {
-    logger::log(logL::Error, state.logCtx, "Failed to initialize XKB context!");
+    LOG::ERROR(state.logCtx, "Failed to initialize XKB context!");
     return ANVLK_FAILED;
   }
 
@@ -57,14 +47,14 @@ static auto initXKB(ClientState& state) -> int
     xkb_keymap_new_from_names(state.xkbContext, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
   if (!state.xkbKeymap)
   {
-    logger::log(logL::Error, state.logCtx, "Failed to create XKB keymap!");
+    LOG::ERROR(state.logCtx, "Failed to create XKB keymap!");
     return ANVLK_FAILED;
   }
 
   state.xkbState = xkb_state_new(state.xkbKeymap);
   if (!state.xkbState)
   {
-    logger::log(logL::Error, state.logCtx, "Failed to create XKB state!");
+    LOG::ERROR(state.logCtx, "Failed to create XKB state!");
     return ANVLK_FAILED;
   }
 
@@ -95,31 +85,29 @@ auto main() -> int
   auto usernameOpt = utils::getCurrentUsername();
   if (!usernameOpt)
   {
-    logger::log(logL::Error, cs.logCtx, "Did not find a valid username! Exiting...");
+    LOG::ERROR(cs.logCtx, "Did not find a valid username! Exiting...");
     std::exit(EXIT_FAILURE);
   }
 
   cs.pam.username = *usernameOpt;
 
-  logger::log(logL::Info, cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pam.username);
+  LOG::INFO(cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pam.username);
 
   if (initWayland(cs) == ANVLK_SUCCESS)
   {
-    logger::log(logL::Info, cs.logCtx, logger::LogStyle::COLOR_BOLD,
-                "Successfully initialized Wayland!!");
+    LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized Wayland!!");
   }
   else
   {
-    logger::log(logL::Error, cs.logCtx, "Failed to initialize Wayland!");
+    LOG::ERROR(cs.logCtx, "Failed to initialize Wayland!");
   }
   if (initXKB(cs) == ANVLK_SUCCESS)
   {
-    logger::log(logL::Info, cs.logCtx, logger::LogStyle::COLOR_BOLD,
-                "Successfully initialized XKB!");
+    LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized XKB!");
   }
   else
   {
-    logger::log(logL::Error, cs.logCtx, "Failed to initialize XKB!");
+    LOG::ERROR(cs.logCtx, "Failed to initialize XKB!");
   }
 
   logger::switchCtx(cs.logCtx, anvlk::logger::LogCategory::CONFIG);
@@ -162,8 +150,9 @@ auto main() -> int
   wl::unlockAndDestroySessionLock(cs);
   cs.destroyEGL();
   cs.disconnectWLDisplay();
+  // freetype gets destroyed via destructor
 
-  logger::log(logL::Info, cs.logCtx, "Cleanup job done. Exiting Anvilock...");
+  LOG::INFO(cs.logCtx, "Cleanup job done. Exiting Anvilock...");
 
   return ANVLK_SUCCESS;
 }

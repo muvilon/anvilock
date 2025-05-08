@@ -1,4 +1,4 @@
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/wayland/seats/PointerHandler.hpp>
 
 namespace anvlk::wl
@@ -96,27 +96,27 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
 
   logger::switchCtx(cs.logCtx, logger::LogCategory::WL_PTR);
 
-  logger::log(logL::Trace, cs.logCtx, "Pointer frame @ {}", ev.time);
+  LOG::TRACE(cs.logCtx, "Pointer frame @ {}", ev.time);
 
   if (ev.eventMask & PointerEventMask::Enter)
-    logger::log(logL::Trace, cs.logCtx, "Pointer entered at ({}, {})",
-                wl_fixed_to_double(ev.surfaceX), wl_fixed_to_double(ev.surfaceY));
+    LOG::TRACE(cs.logCtx, "Pointer entered at ({}, {})", wl_fixed_to_double(ev.surfaceX),
+               wl_fixed_to_double(ev.surfaceY));
 
   if (ev.eventMask & PointerEventMask::Leave)
     logger::log(logL::Debug, cs.logCtx, "Pointer left surface");
 
   if (ev.eventMask & PointerEventMask::Motion)
-    logger::log(logL::Trace, cs.logCtx, "Pointer moved to ({}, {})",
-                wl_fixed_to_double(ev.surfaceX), wl_fixed_to_double(ev.surfaceY));
+    LOG::TRACE(cs.logCtx, "Pointer moved to ({}, {})", wl_fixed_to_double(ev.surfaceX),
+               wl_fixed_to_double(ev.surfaceY));
 
   if (ev.eventMask & PointerEventMask::Button)
   {
     const char* stateStr = ev.state == WL_POINTER_BUTTON_STATE_RELEASED ? "released" : "pressed";
-    logger::log(logL::Trace, cs.logCtx, "Button {} {}", ev.button, stateStr);
+    LOG::TRACE(cs.logCtx, "Button {} {}", ev.button, stateStr);
   }
 
-  const uint32_t axisEvents = PointerEventMask::Axis | PointerEventMask::AxisSource |
-                              PointerEventMask::AxisStop | PointerEventMask::AxisDiscrete;
+  const u32 axisEvents = PointerEventMask::Axis | PointerEventMask::AxisSource |
+                         PointerEventMask::AxisStop | PointerEventMask::AxisDiscrete;
 
   static constexpr CStrArray<2> axisNames   = {"vertical", "horizontal"};
   static constexpr CStrArray<4> sourceNames = {"wheel", "finger", "continuous", "wheel tilt"};
@@ -128,19 +128,19 @@ void onPointerFrame(types::VPtr data, types::wayland::WLPointer_*)
       if (!ev.axes[i].valid)
         continue;
 
-      logger::log(logL::Trace, cs.logCtx, "{} axis event", axisNames[i]);
+      LOG::TRACE(cs.logCtx, "{} axis event", axisNames[i]);
 
       if (ev.eventMask & PointerEventMask::Axis)
-        logger::log(logL::Trace, cs.logCtx, "  value: {}", wl_fixed_to_double(ev.axes[i].value));
+        LOG::TRACE(cs.logCtx, "  value: {}", wl_fixed_to_double(ev.axes[i].value));
 
       if (ev.eventMask & PointerEventMask::AxisDiscrete)
-        logger::log(logL::Trace, cs.logCtx, "  discrete: {}", ev.axes[i].discrete);
+        LOG::TRACE(cs.logCtx, "  discrete: {}", ev.axes[i].discrete);
 
       if (ev.eventMask & PointerEventMask::AxisSource)
-        logger::log(logL::Trace, cs.logCtx, "  source: {}", sourceNames[ev.axisSource]);
+        LOG::TRACE(cs.logCtx, "  source: {}", sourceNames[ev.axisSource]);
 
       if (ev.eventMask & PointerEventMask::AxisStop)
-        logger::log(logL::Info, cs.logCtx, "  axis stopped");
+        LOG::INFO(cs.logCtx, "  axis stopped");
     }
   }
 

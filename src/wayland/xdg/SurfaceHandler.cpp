@@ -1,18 +1,18 @@
 
-#include <anvilock/include/Log.hpp>
+#include "anvilock/include/Log.hpp"
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
 
 namespace anvlk::wl
 {
 
-using logL = anvlk::logger::LogLevel;
-
 static void handleXdgSurfaceConfigure(types::VPtr                              data,
                                       anvlk::types::wayland::xdg::XDGSurface_* xdgSurface,
                                       u32                                      serial)
 {
   auto* state = static_cast<ClientState*>(data);
+  logger::switchCtx(state->logCtx, logger::LogCategory::XDG_SURFACE);
   xdg_surface_ack_configure(xdgSurface, serial);
 
   if (state->eglDisplay && state->eglSurface && state->eglContext)
@@ -25,7 +25,7 @@ static void handleXdgSurfaceConfigure(types::VPtr                              d
       if (!eglMakeCurrent(state->eglDisplay, state->eglSurface, state->eglSurface,
                           state->eglContext))
       {
-        anvlk::logger::log(logL::Error, state->logCtx, "Failed to make EGL context current.");
+        LOG::ERROR(state->logCtx, "Failed to make EGL context current.");
         return;
       }
     }
@@ -38,14 +38,15 @@ static void handleXdgSurfaceConfigure(types::VPtr                              d
 
     if (!eglSwapBuffers(state->eglDisplay, state->eglSurface))
     {
-      anvlk::logger::log(logL::Error, state->logCtx, "Failed to swap EGL buffers");
+      LOG::ERROR(state->logCtx, "Failed to swap EGL buffers");
     }
   }
   else
   {
-    anvlk::logger::log(logL::Warn, state->logCtx,
-                       "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
+    LOG::WARN(state->logCtx,
+              "EGL display or surfaces not ready in xdg_surface_configure... Waiting ...");
   }
+  logger::resetCtx(state->logCtx);
 }
 
 // Listener instance

@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 

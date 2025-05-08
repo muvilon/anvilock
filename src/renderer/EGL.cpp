@@ -13,19 +13,19 @@ auto initEGLConfig(ClientState& cs) -> EGLConfig
 
   if (cs.eglDisplay == EGL_NO_DISPLAY)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to get EGL display!");
+    LOG::ERROR(cs.logCtx, "Failed to get EGL Display!");
     throw EGLErrorException("!!! FAILED TO GET EGL DISPLAY !!!");
   }
 
   if (!eglInitialize(cs.eglDisplay, nullptr, nullptr))
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to initialize EGL!");
+    LOG::ERROR(cs.logCtx, "Failed to initialize EGL!");
     throw EGLErrorException("!!! FAILED TO INIT EGL !!!");
   }
 
   if (!eglBindAPI(EGL_OPENGL_ES_API))
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to bind OpenGL ES API!");
+    LOG::ERROR(cs.logCtx, "Failed to bind OpenGL ES API!");
     throw EGLErrorException("!!! FAILED TO BIND OPENGL ES API !!!");
   }
 
@@ -35,7 +35,7 @@ auto initEGLConfig(ClientState& cs) -> EGLConfig
   if (!eglChooseConfig(cs.eglDisplay, GLOBAL_EGL_ATTRIBS.data(), &eglConfig, 1, &numConfigs) ||
       numConfigs < 1)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to choose EGL config!");
+    LOG::ERROR(cs.logCtx, "Failed to choose EGL config!");
     throw EGLErrorException("!!! FAILED TO CHOOSE EGL CONFIG !!!");
   }
 
@@ -46,7 +46,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
 {
   if (text.empty())
   {
-    logger::log(logger::LogLevel::Error, state.logCtx, "Invalid text string for texture.");
+    LOG::ERROR(state.logCtx, "Invalid text string for texture.");
     return types::EGLCodes::RET_CODE_FAIL;
   }
 
@@ -60,7 +60,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
   {
     if (FT_Load_Char(state.freeTypeState.ftFace, c, FT_LOAD_RENDER))
     {
-      logger::log(logger::LogLevel::Error, state.logCtx, "Failed to load glyph.");
+      LOG::ERROR(state.logCtx, "Failed to load glyph.");
       continue;
     }
 
@@ -80,7 +80,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
 
   if (!image)
   {
-    logger::log(logger::LogLevel::Error, state.logCtx, "Failed to allocate image buffer.");
+    LOG::ERROR(state.logCtx, "Failed to allocate image buffer.");
     return types::EGLCodes::RET_CODE_FAIL;
   }
 
@@ -115,7 +115,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
   glGenTextures(1, &texture);
   if (texture == 0)
   {
-    logger::log(logger::LogLevel::Error, state.logCtx, "Failed to generate OpenGL ES texture.");
+    LOG::ERROR(state.logCtx, "Failed to generate OpenGL ES texture.");
     return types::EGLCodes::RET_CODE_FAIL;
   }
 
@@ -125,7 +125,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  logger::log(logger::LogLevel::Trace, state.logCtx, "Text texture successfully created!");
+  LOG::TRACE(state.logCtx, "Text texture successfully created!");
   return texture;
 }
 
@@ -134,7 +134,7 @@ auto loadBGTexture(ClientState& cs) -> GLuint
   types::Dimensions width, height;
   int               channels;
 
-  logger::log(logger::LogLevel::Debug, cs.logCtx, "Loading BG of name: {}", cs.userConfig.bg.name);
+  LOG::DEBUG(cs.logCtx, "Loading BG of name: {}", cs.userConfig.bg.name);
 
   types::PathCStr filePath = cs.userConfig.bg.path.c_str();
 
@@ -142,7 +142,7 @@ auto loadBGTexture(ClientState& cs) -> GLuint
 
   if (!image)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to load image: {}", filePath);
+    LOG::ERROR(cs.logCtx, "Failed to load image: {}", filePath);
     throw EGLErrorException(
       "!!! This should be replaced with fallback file path texture loading !!!");
   }
@@ -170,7 +170,7 @@ void initEGL(ClientState& cs)
 
   if (cs.eglConfig == EGL_NO_CONTEXT)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to create EGL context!");
+    LOG::ERROR(cs.logCtx, "Failed to create EGL context!");
     throw EGLErrorException("!!! FAILED TO CREATE EGL CTX !!!");
   }
 
@@ -186,7 +186,7 @@ void initEGL(ClientState& cs)
 
   if (!cs.eglWindow)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to create EGL window!");
+    LOG::ERROR(cs.logCtx, "Failed to create EGL window!");
     throw EGLErrorException("!!! FAILED TO CREATE EGL WINDOW !!!");
   }
 
@@ -195,13 +195,13 @@ void initEGL(ClientState& cs)
 
   if (cs.eglSurface == EGL_NO_SURFACE)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to create EGL surface!");
+    LOG::ERROR(cs.logCtx, "Failed to create EGL surface!");
     throw EGLErrorException("!!! FAILED TO CREATE EGL SURFACE !!!");
   }
 
   if (!eglMakeCurrent(cs.eglDisplay, cs.eglSurface, cs.eglSurface, cs.eglContext))
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to make EGL the current context!");
+    LOG::ERROR(cs.logCtx, "Failed to make EGL the current context!");
     throw EGLErrorException("!!! FAILED TO MAKE EGL CURRENT CTX !!!");
   }
 
@@ -235,7 +235,7 @@ void initEGL(ClientState& cs)
 
     if (compileStatus == GL_FALSE)
     {
-      logger::log(logger::LogLevel::Error, cs.logCtx, "Vertex shader compilation failed!");
+      LOG::ERROR(cs.logCtx, "Vertex shader compilation failed!");
       throw EGLErrorException("!!! FAILED TO COMPILE EGL VERTEX SHADER !!!");
     }
 
@@ -243,7 +243,7 @@ void initEGL(ClientState& cs)
 
     if (compileStatus == GL_FALSE)
     {
-      logger::log(logger::LogLevel::Error, cs.logCtx, "Fragment shader compilation failed!");
+      LOG::ERROR(cs.logCtx, "Fragment shader compilation failed!");
       throw EGLErrorException("!!! FAILED TO COMPILE EGL FRAG SHADER !!!");
     }
 
@@ -256,7 +256,7 @@ void initEGL(ClientState& cs)
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
     if (linkStatus == GL_FALSE)
     {
-      logger::log(logger::LogLevel::Error, cs.logCtx, "Shader program linking failed!");
+      LOG::ERROR(cs.logCtx, "Shader program linking failed!");
       throw EGLErrorException("!!! FAILED TO LINK SHADER PROGRAM !!!");
     }
 
@@ -282,7 +282,7 @@ void initEGL(ClientState& cs)
   }
   else
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to validate shader source!");
+    LOG::ERROR(cs.logCtx, "Failed to validate shader source!");
   }
 }
 
@@ -399,8 +399,7 @@ void renderPasswordField(ClientState& state)
   }
   else
   {
-    logger::log(logger::LogLevel::Error, state.logCtx,
-                "Failed to allocate memory, causing pwd render to fail!");
+    LOG::ERROR(state.logCtx, "Failed to allocate memory, causing pwd render to fail!");
   }
 }
 
@@ -413,15 +412,14 @@ void updateTimeTexture(ClientState& cs)
 
   if (lastRecordedTimeStr != timeStr)
   {
-    logger::log(logger::LogLevel::Debug, cs.logCtx, "Time changed from '{}' to '{}'",
-                lastRecordedTimeStr, timeStr);
+    LOG::DEBUG(cs.logCtx, "Time changed from '{}' to '{}'", lastRecordedTimeStr, timeStr);
     lastRecordedTimeStr = timeStr;
 
     if (cs.timeTexture)
     {
       glDeleteTextures(1, &cs.timeTexture);
       cs.timeTexture = 0;
-      logger::log(logger::LogLevel::Trace, cs.logCtx, "Old time texture deleted.");
+      LOG::TRACE(cs.logCtx, "Old time texture deleted.");
     }
 
     cs.timeTexture = createTextTexture(cs, timeStr);
@@ -432,7 +430,7 @@ void renderTimeBox(ClientState& cs)
 {
   if (!cs.timeTexture)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "No valid texture for rendering.");
+    LOG::ERROR(cs.logCtx, "No valid texture for rendering.");
     return;
   }
 
@@ -463,7 +461,7 @@ void renderTimeBox(ClientState& cs)
   GLenum error = glGetError();
   if (error != GL_NO_ERROR)
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "OpenGL error: {}", error);
+    LOG::ERROR(cs.logCtx, "OpenGL error: {}", error);
   }
 
   glDisableVertexAttribArray(1);
@@ -472,7 +470,7 @@ void renderTimeBox(ClientState& cs)
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_BLEND);
 
-  logger::log(logger::LogLevel::Trace, cs.logCtx, "Time box rendered successfully!!");
+  LOG::TRACE(cs.logCtx, "Time box rendered successfully!!");
 }
 
 auto createTextureShaderProgram(anvlk::gfx::ShaderManager& shaderManager) -> GLuint
@@ -513,9 +511,10 @@ auto createTextureShaderProgram(anvlk::gfx::ShaderManager& shaderManager) -> GLu
 
 void renderLockScreen(ClientState& cs)
 {
+  logger::switchCtx(cs.logCtx, logger::LogCategory::EGL);
   if (!eglMakeCurrent(cs.eglDisplay, cs.eglSurface, cs.eglSurface, cs.eglContext))
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Failed to make EGL the current context!");
+    LOG::ERROR(cs.logCtx, "Failed to make EGL the current context!");
     throw EGLErrorException("!!! FAILED TO MAKE EGL CURRENT CTX !!!");
   }
 
@@ -525,7 +524,7 @@ void renderLockScreen(ClientState& cs)
 
   if (!initialized)
   {
-    logger::log(logger::LogLevel::Warn, cs.logCtx, "EGL not initialized!");
+    LOG::WARN(cs.logCtx, "EGL not initialized!");
     bgTexture            = loadBGTexture(cs);
     textureShaderProgram = createTextureShaderProgram(*cs.shaderManagerPtr);
     initialized          = 1;
@@ -552,6 +551,7 @@ void renderLockScreen(ClientState& cs)
   updateTimeTexture(cs);
   renderTimeBox(cs);
   //renderPasswordField(cs);
+  logger::resetCtx(cs.logCtx);
 }
 
 } // namespace anvlk::render

@@ -75,8 +75,8 @@ auto ConfigLoader::load() -> AnvlkConfig
     }
   }
 
-  logger::log(logger::LogLevel::Info, m_logCtx, logger::LogStyle::COLOR_BOLD,
-              "Configuration loaded successfully from '{}'", m_configPath.c_str());
+  LOG::INFO(m_logCtx, logger::LogStyle::COLOR_BOLD, "Configuration loaded successfully from '{}'",
+            m_configPath.c_str());
 
   return cfg;
 }
