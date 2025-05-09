@@ -78,7 +78,7 @@ void setHomeDir(ClientState& cs)
 auto main() -> int
 {
   ClientState cs;
-  cs.pam.authState.authSuccess = false;
+  cs.pamState.authState.authSuccess = false;
 
   cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
   setHomeDir(cs);
@@ -89,9 +89,9 @@ auto main() -> int
     std::exit(EXIT_FAILURE);
   }
 
-  cs.pam.username = *usernameOpt;
+  cs.pamState.username = *usernameOpt;
 
-  LOG::INFO(cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pam.username);
+  LOG::INFO(cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pamState.username);
 
   if (initWayland(cs) == ANVLK_SUCCESS)
   {
@@ -135,9 +135,9 @@ auto main() -> int
 
   wl_surface_commit(cs.wlSurface);
 
-  while (!cs.pam.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)
+  while (!cs.pamState.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)
   {
-    cs.pam.authState.authFailed = false;
+    cs.pamState.authState.authFailed = false;
     if (!cs.sessionLock.surfaceCreated)
     {
       wl::initiateSessionLock(cs);

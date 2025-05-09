@@ -5,8 +5,8 @@ namespace anvlk::wl
 
 void handleLocked(types::VPtr data, types::ext::SessionLockObjV1_* /*lock*/)
 {
-  auto& state      = *static_cast<ClientState*>(data);
-  state.pam.locked = true;
+  auto& state           = *static_cast<ClientState*>(data);
+  state.pamState.locked = true;
 }
 
 void handleFinished(types::VPtr data, types::ext::SessionLockObjV1_* /*lock*/)

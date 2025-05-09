@@ -1,3 +1,4 @@
+#include "anvilock/include/Types.hpp"
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 
@@ -17,7 +18,7 @@ void ClientState::initShaderManager()
 
 void ClientState::initPamAuth()
 {
-  pamAuth = std::make_unique<anvlk::pam::PamAuthenticator>(pam.username, pam.password);
+  pamAuth = std::make_unique<anvlk::pam::PamAuthenticator>(pamState.username, pamState.password);
 }
 
 void ClientState::destroyEGL()
@@ -33,17 +34,30 @@ void ClientState::disconnectWLDisplay()
   wl_display_disconnect(wlDisplay);
 }
 
+/// KB STATE ///
+
+void KeyboardState::resetState()
+{
+  ctrlHeld          = false;
+  backspaceHeld     = false;
+  lastBackspaceTime = SteadyClock::now();
+}
+
+/// PAM STATE ///
+
 auto PamState::canSeekIndex() -> bool { return password.size() < MAX_PASSWORD_LENGTH; }
 
-auto PamState::canSeekToIndex(const i64& idx) -> bool
+auto PamState::canSeekToOffset(const i64& offset) -> bool
 {
-  return idx >= 0 && (password.size() + static_cast<size_t>(idx) <= MAX_PASSWORD_LENGTH);
+  return offset >= 0 &&
+         (password.size() + static_cast<anvlk::types::iter>(offset) <= MAX_PASSWORD_LENGTH);
 }
 
 void PamState::seekToIndex(const i64& idx)
 {
   if (idx >= 0)
     passwordIndex += idx;
+  password.resize(passwordIndex);
 }
 
 void PamState::clearPassword()

@@ -132,6 +132,9 @@ struct KeyboardState
   bool      ctrlHeld          = false;
   bool      backspaceHeld     = false;
   TimePoint lastBackspaceTime = SteadyClock::now();
+
+public:
+  void resetState();
 };
 
 struct PamState
@@ -146,7 +149,7 @@ struct PamState
 
 public:
   auto canSeekIndex() -> bool;
-  auto canSeekToIndex(const i64& idx) -> bool;
+  auto canSeekToOffset(const i64& idx) -> bool;
   void clearPassword();
   void seekToIndex(const i64& idx);
 };
@@ -200,7 +203,7 @@ struct ClientState
   u32            lastFrame = 0;
 
   // PAM and authentication
-  PamState pam;
+  PamState pamState;
 
   std::unique_ptr<anvlk::pam::PamAuthenticator> pamAuth;
 

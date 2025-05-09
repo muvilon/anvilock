@@ -9,7 +9,6 @@
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 
-#include <chrono>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -65,13 +64,9 @@ enum KeycodeStatus
   LOST      = -1
 };
 
-using logL = logger::LogLevel;
-
 constexpr int BACKSPACE_REPEAT_DELAY_MS = 200;
 constexpr int BACKSPACE_REPEAT_RATE_MS  = 50;
 
-void handleBackspace(ClientState& cs, bool ctrl);
-void handleBackspaceRepeat(ClientState& cs);
 void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
                      types::wayland::WLSurface_*, types::wayland::WLArray_* keys);
 void onKeyboardLeave(types::VPtr, types::wayland::WLKeyboard_*, u32, types::wayland::WLSurface_*);
@@ -83,7 +78,7 @@ void onKeyboardModifiers(types::VPtr data, types::wayland::WLKeyboard_*, u32, u3
                          u32 mods_latched, u32 mods_locked, u32 group);
 void onKeyboardRepeatInfo(anvlk::types::VPtr, anvlk::types::wayland::WLKeyboard_*, i32, i32);
 
-inline constexpr wl_keyboard_listener kKeyboardListener = {
+static constexpr wl_keyboard_listener kKeyboardListener = {
   .keymap      = onKeyboardKeymap,
   .enter       = onKeyboardEnter,
   .leave       = onKeyboardLeave,

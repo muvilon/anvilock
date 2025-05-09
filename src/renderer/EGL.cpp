@@ -209,8 +209,8 @@ static void renderPasswordField(ClientState& state)
   glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, utils::dot_vertices.data());
 
   // Adjust dot positions based on password input
-  float dot_spacing = field_width / (state.pam.passwordIndex + 1);
-  for (int i = 0; i < state.pam.passwordIndex; i++)
+  float dot_spacing = field_width / (state.pamState.passwordIndex + 1);
+  for (int i = 0; i < state.pamState.passwordIndex; i++)
   {
     float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
     glUniform2f(offset_location, x_position, offset_y);
@@ -218,7 +218,7 @@ static void renderPasswordField(ClientState& state)
   }
 
   // Handle Authentication Failure (Red border for failure)
-  if (state.pam.authState.authFailed)
+  if (state.pamState.authState.authFailed)
   {
     types::FloatArray<4> failColor = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
 
@@ -228,7 +228,7 @@ static void renderPasswordField(ClientState& state)
   }
 
   // Handle Authentication Success (Green border for success)
-  if (!state.pam.authState.authFailed && state.pam.passwordIndex > 0)
+  if (!state.pamState.authState.authFailed && state.pamState.passwordIndex > 0)
   {
     types::FloatArray<4> successColor = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
 
@@ -244,7 +244,7 @@ static void renderPasswordField(ClientState& state)
   // Swap buffers to render the final frame
   eglSwapBuffers(state.eglDisplay, state.eglSurface);
 
-  if (state.pam.authState.authFailed)
+  if (state.pamState.authState.authFailed)
     sleep(1);
 }
 
