@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_SESSION_LOCK_SESSION_LOCK_HANDLER_HPP
+#define ANVLK_WAYLAND_SESSION_LOCK_SESSION_LOCK_HANDLER_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <cassert>
@@ -29,3 +30,5 @@ inline static const ext_session_lock_surface_v1_listener kSessionLockSurfaceList
   .configure = handleSurfaceConfigure};
 
 } // namespace anvlk::wl
+
+#endif

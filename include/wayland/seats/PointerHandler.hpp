@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_SEATS_POINTER_HANDLER_HPP
+#define ANVLK_WAYLAND_SEATS_POINTER_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
@@ -53,3 +54,5 @@ inline constexpr wl_pointer_listener kPointerListener{
 };
 
 } // namespace anvlk::wl
+
+#endif

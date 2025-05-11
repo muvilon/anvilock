@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_GLOBAL_TYPES_HPP
+#define ANVLK_GLOBAL_TYPES_HPP
 
 #include <array>
 #include <cstdint>
@@ -86,3 +87,5 @@ template <std::size_t N> using CStrArray = std::array<const char*, N>;
 template <std::size_t N> using CharArray = std::array<char, N>;
 
 } // namespace anvlk::types
+
+#endif

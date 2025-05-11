@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_SHM_SHARED_MEMORY_HANDLER_HPP
+#define ANVLK_SHM_SHARED_MEMORY_HANDLER_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <chrono>
@@ -75,3 +76,5 @@ private:
 };
 
 } // namespace anvlk::shm
+
+#endif

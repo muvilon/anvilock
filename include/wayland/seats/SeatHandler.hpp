@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_SEATS_SEAT_HANDLER_HPP
+#define ANVLK_WAYLAND_SEATS_SEAT_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
@@ -19,3 +20,5 @@ inline constexpr wl_seat_listener kSeatListener{
 };
 
 } // namespace anvlk::wl
+
+#endif

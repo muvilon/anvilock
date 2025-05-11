@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_TERM_ANSI_SCHEMA_HPP
+#define ANVLK_TERM_ANSI_SCHEMA_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <format>
@@ -66,3 +67,5 @@ inline auto color(const char* colorCode, const types::LogString& text) -> types:
 }
 
 } // namespace anvlk::term::ansi
+
+#endif

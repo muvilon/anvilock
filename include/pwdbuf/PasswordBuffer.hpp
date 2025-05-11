@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_PWDBUF_PASSWORD_BUFFER_HPP
+#define ANVLK_PWDBUF_PASSWORD_BUFFER_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <cerrno>
@@ -106,3 +107,5 @@ private:
   size_t      m_size   = 0;
 };
 } // namespace anvlk::pwdbuf
+
+#endif

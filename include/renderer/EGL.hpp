@@ -1,11 +1,11 @@
-#pragma once
+#ifndef ANVLK_RENDERER_EGL_HPP
+#define ANVLK_RENDERER_EGL_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/GlobalFuncs.hpp>
 #include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
-#include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/runtime/EGLExceptionHandler.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 
@@ -30,3 +30,5 @@ void initEGL(ClientState& cs);
 void renderLockScreen(ClientState& cs);
 
 } // namespace anvlk::render
+
+#endif

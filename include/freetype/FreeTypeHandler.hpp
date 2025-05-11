@@ -1,6 +1,6 @@
-#pragma once
+#ifndef ANVLK_FREETYPE_HANDLER_HPP
+#define ANVLK_FREETYPE_HANDLER_HPP
 
-#include "anvilock/include/Log.hpp"
 #include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/freetype/FreeTypeStruct.hpp>
@@ -68,3 +68,5 @@ private:
 };
 
 } // namespace anvlk::freetype
+
+#endif

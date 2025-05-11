@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_SEATS_KEYBOARD_HANDLER_HPP
+#define ANVLK_WAYLAND_SEATS_KEYBOARD_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
@@ -111,3 +112,5 @@ inline constexpr wl_keyboard_listener kKeyboardListener = {
 };
 
 } // namespace anvlk::wl
+
+#endif

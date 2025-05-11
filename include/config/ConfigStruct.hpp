@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_CONFIG_STRUCT_HPP
+#define ANVLK_CONFIG_STRUCT_HPP
 
 #include <anvilock/include/Types.hpp>
 
@@ -48,3 +49,5 @@ struct AnvlkConfig
   Time                  time;
   std::array<Vertex, 4> timeBoxVertices;
 };
+
+#endif

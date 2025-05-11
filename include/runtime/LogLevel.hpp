@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_RUNTIME_LOG_LEVEL_HPP
+#define ANVLK_RUNTIME_LOG_LEVEL_HPP
 
 #include <algorithm>
 #include <anvilock/include/Log.hpp>
@@ -32,3 +33,5 @@ inline auto getLogLevelFromEnv() -> anvlk::logger::LogLevel
     return anvlk::logger::LogLevel::Debug; // fallback
 }
 } // namespace anvlk::runtime::logger
+
+#endif

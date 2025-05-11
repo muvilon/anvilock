@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_OUTPUT_HANDLER_HPP
+#define ANVLK_WAYLAND_OUTPUT_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Types.hpp>
@@ -13,3 +14,5 @@ extern const wl_output_listener kOutputListener;
 void registerOutput(ClientState& cs, wl_registry* registry, u32 id, u32 version);
 
 } // namespace anvlk::wl
+
+#endif

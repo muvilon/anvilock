@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_RUNTIME_EGL_EXCEPTION_HANDLER_HPP
+#define ANVLK_RUNTIME_EGL_EXCEPTION_HANDLER_HPP
 
 #include <EGL/egl.h>
 #include <anvilock/include/Types.hpp>
@@ -67,3 +68,5 @@ private:
 };
 
 } // namespace anvlk::render
+
+#endif

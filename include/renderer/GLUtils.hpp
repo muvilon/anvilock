@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_RENDERER_GLUTILS_HPP
+#define ANVLK_RENDERER_GLUTILS_HPP
 
 #include <GLES2/gl2.h>
 #include <anvilock/include/LogMacros.hpp>
@@ -89,3 +90,5 @@ static auto createShaderProgram(const logger::LogContext&  logCtx,
 }
 
 } // namespace anvlk::render::GLUtils
+
+#endif

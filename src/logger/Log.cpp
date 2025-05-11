@@ -56,6 +56,8 @@ inline constexpr auto findLogCategory(LogCategory category)
       return makeCategory(ansiBoldOrange, "EGL");
     case anvlk::logger::LogCategory::PAM:
       return makeCategory(ansiBoldCyan, "PAM");
+    case anvlk::logger::LogCategory::FREETYPE:
+      return makeCategory(ansiBoldOrange, "FREETYPE");
     case anvlk::logger::LogCategory::SHM:
       return makeCategory(ansiBoldGreen, "SHM");
     case anvlk::logger::LogCategory::WL_KB:

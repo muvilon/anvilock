@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_GLOBAL_CLIENT_STATE_HPP
+#define ANVLK_GLOBAL_CLIENT_STATE_HPP
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -244,3 +245,5 @@ public:
   void destroyFreeType();
   void disconnectWLDisplay();
 };
+
+#endif

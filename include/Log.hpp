@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_GLOBAL_LOG_HPP
+#define ANVLK_GLOBAL_LOG_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/term/AnsiSchema.hpp>
@@ -98,3 +99,5 @@ void switchCtx(LogContext& ctx, LogCategory category);
 void resetCtx(LogContext& ctx);
 
 } // namespace anvlk::logger
+
+#endif

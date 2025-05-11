@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_SHADERS_SHADER_MANAGER_HPP
+#define ANVLK_SHADERS_SHADER_MANAGER_HPP
 
 #include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
@@ -59,3 +60,5 @@ private:
 };
 
 } // namespace anvlk::gfx
+
+#endif

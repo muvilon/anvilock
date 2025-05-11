@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_GLOBAL_LOG_MACROS_HPP
+#define ANVLK_GLOBAL_LOG_MACROS_HPP
 
 #include <anvilock/include/Log.hpp>
 
@@ -28,3 +29,5 @@ DEFINE_LOG_NAMESPACE(WARN, Warn)
 DEFINE_LOG_NAMESPACE(ERROR, Error)
 
 } // namespace LOG
+
+#endif

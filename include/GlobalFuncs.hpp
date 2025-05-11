@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_GLOBAL_GLOBAL_FUNCS_HPP
+#define ANVLK_GLOBAL_GLOBAL_FUNCS_HPP
 
 #include "Types.hpp"
 #include <array>
@@ -170,3 +171,5 @@ inline constexpr anvlk::types::FloatArray<8> dot_vertices = {-0.015f, 0.015f, -0
                                                              0.015f,  0.015f, 0.015f,  -0.015f};
 
 } // namespace anvlk::utils
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_TOML_PARSER_HPP
+#define ANVLK_TOML_PARSER_HPP
 
 #include <anvilock/external/toml++/toml.hpp>
 #include <anvilock/include/Log.hpp>
@@ -72,3 +73,5 @@ auto TOMLParser::get(const anvlk::types::TOMLTable& table, const anvlk::types::T
   return std::nullopt;
 }
 } // namespace anvlk::tomlparser
+
+#endif

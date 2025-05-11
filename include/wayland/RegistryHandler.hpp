@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_REGISTRY_HANDLER_HPP
+#define ANVLK_WAYLAND_REGISTRY_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/LogMacros.hpp>
@@ -21,3 +22,5 @@ inline constexpr wl_registry_listener kRegistryListener = {
   { handleRegistryRemove(*static_cast<ClientState*>(data), name); }};
 
 } // namespace anvlk::wl
+
+#endif

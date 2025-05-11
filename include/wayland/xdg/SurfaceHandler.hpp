@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_WAYLAND_XDG_SURFACE_HANDLER_HPP
+#define ANVLK_WAYLAND_XDG_SURFACE_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
@@ -13,3 +14,5 @@ namespace anvlk::wl
 extern const xdg_surface_listener kXdgSurfaceListener;
 
 } // namespace anvlk::wl
+
+#endif

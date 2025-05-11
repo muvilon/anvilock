@@ -1,7 +1,8 @@
-#pragma once
+#ifndef ANVLK_PAM_PAM_AUTHENTICATOR_HPP
+#define ANVLK_PAM_PAM_AUTHENTICATOR_HPP
 
 #include <anvilock/include/Types.hpp>
-#include <anvilock/include/pam/PasswordBuffer.hpp>
+#include <anvilock/include/pwdbuf/PasswordBuffer.hpp>
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>
 
@@ -32,3 +33,5 @@ private:
 };
 
 } // namespace anvlk::pam
+
+#endif

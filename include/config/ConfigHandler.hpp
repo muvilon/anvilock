@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_CONFIG_HANDLER_HPP
+#define ANVLK_CONFIG_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
 #include <anvilock/include/Log.hpp>
@@ -48,3 +49,5 @@ private:
 };
 
 } // namespace anvlk::cfg
+
+#endif

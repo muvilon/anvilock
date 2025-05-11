@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ANVLK_TERM_OUTPUT_STREAM_HPP
+#define ANVLK_TERM_OUTPUT_STREAM_HPP
 
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/term/AnsiSchema.hpp>
@@ -68,3 +69,5 @@ inline constexpr auto underlineColorStream(std::string_view text, types::AnsiCol
 inline constexpr auto padSpaces(int length) -> std::string { return std::string(length, ' '); }
 
 } // namespace anvlk::term::ostream
+
+#endif
