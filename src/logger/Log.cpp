@@ -1,6 +1,7 @@
 #include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/term/AnsiSchema.hpp>
+#include <anvilock/include/term/OutputStream.hpp>
 #include <fstream>
 #include <iostream>
 #include <utility>
@@ -11,9 +12,9 @@ namespace anvlk::logger
 template void log<>(LogLevel, const LogContext&, std::format_string<>);
 template void log<>(LogLevel, const LogContext&, LogStyle, std::format_string<>);
 
-using logL = anvlk::logger::LogLevel;
+inline constexpr int MAX_LEVEL_STRING_LENGTH = 5;
 
-inline auto logLevelColor(LogLevel level) -> types::AnsiColor
+inline constexpr auto logLevelColor(LogLevel level) -> types::AnsiColor
 {
   switch (level)
   {
@@ -32,13 +33,13 @@ inline auto logLevelColor(LogLevel level) -> types::AnsiColor
   }
 }
 
-inline auto makeCategory(types::AnsiColor color, types::LogCategoryString name)
+inline constexpr auto makeCategory(types::AnsiColor color, types::LogCategoryString name)
   -> std::pair<types::AnsiColor, types::LogCategoryString>
 {
   return std::make_pair(color, name);
 }
 
-inline auto findLogCategory(LogCategory category)
+inline constexpr auto findLogCategory(LogCategory category)
   -> std::pair<types::AnsiColor, types::LogCategoryString>
 {
   using namespace anvlk::term::ansi;
@@ -80,27 +81,27 @@ inline auto findLogCategory(LogCategory category)
   }
 }
 
-inline auto findLogLevelString(LogLevel level) -> types::LogStatus
+inline constexpr auto findLogLevelString(LogLevel level) -> std::pair<types::LogStatus, int>
 {
   switch (level)
   {
     case LogLevel::Trace:
-      return "TRACE";
+      return std::make_pair("TRACE", 5); // Log level, len(log level)
     case LogLevel::Debug:
-      return "DEBUG";
+      return std::make_pair("DEBUG", 5);
     case LogLevel::Info:
-      return "INFO";
+      return std::make_pair("INFO", 4);
     case LogLevel::Warn:
-      return "WARN";
+      return std::make_pair("WARN", 4);
     case LogLevel::Error:
-      return "ERROR";
+      return std::make_pair("ERROR", 5);
     default:
-      return "UNKNOWN";
+      return std::make_pair("UNKNW", 5);
   }
 }
 
-inline auto styleLogMessage(const LogLevel level, const types::LogString& logMsg, LogStyle style)
-  -> term::ostream::StyledText
+inline constexpr auto styleLogMessage(const LogLevel level, const types::LogString& logMsg,
+                                      LogStyle style) -> term::ostream::StyledText
 {
   using namespace term;
   const auto color = logLevelColor(level);
@@ -147,17 +148,18 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
   }
 
   // Log level string
-  types::LogStatus         levelStr         = findLogLevelString(level);
+  auto                     levelStrPair     = findLogLevelString(level);
   auto                     logCategoryPair  = findLogCategory(context.category);
   types::LogCategoryString logCategoryStr   = logCategoryPair.second;
   types::AnsiColor         logCategoryColor = logCategoryPair.first;
+  const auto paddedSpaces = term::ostream::padSpaces(MAX_LEVEL_STRING_LENGTH - levelStrPair.second);
 
   // Console output
   types::LogString console_output;
   if (context.timestamp)
     console_output += term::ansi::boldLog(timestamp_str);
-  console_output +=
-    std::format(" [{}{}{}] ", logLevelColor(level), levelStr, term::ansi::ansiReset);
+  console_output += std::format(" [{}{}{}]{} ", logLevelColor(level), levelStrPair.first,
+                                term::ansi::ansiReset, paddedSpaces);
 
   console_output +=
     std::format(" [{}{}{}] ", logCategoryColor, logCategoryStr, term::ansi::ansiReset);
@@ -173,7 +175,8 @@ inline void logMessage(LogLevel level, const LogContext& context, const types::L
       types::LogString file_line;
       if (context.timestamp)
         file_line += std::format("[{}] ", timestamp_str);
-      file_line += std::format("[{}] [{}] {}", levelStr, logCategoryStr, message);
+      file_line +=
+        std::format("[{}]{} [{}] {}", levelStrPair.first, paddedSpaces, logCategoryStr, message);
       log_file << file_line << std::endl;
     }
   }
@@ -189,9 +192,9 @@ void init(const LogContext& context)
   else
     log(LogLevel::Info, context, LogStyle::BOLD, "  • Output: console only");
 
-  log(
-    LogLevel::Info, context, LogStyle::BOLD, "  • Minimum level: {}",
-    term::ansi::color(logLevelColor(context.minLogLevel), findLogLevelString(context.minLogLevel)));
+  log(LogLevel::Info, context, LogStyle::BOLD, "  • Minimum level: {}",
+      term::ansi::color(logLevelColor(context.minLogLevel),
+                        findLogLevelString(context.minLogLevel).first));
 
   log(LogLevel::Info, context, LogStyle::BOLD, "  • Timestamps: {}",
       (context.timestamp ? term::ansi::color(term::ansi::ansiBoldGreen, "ENABLED")

@@ -17,11 +17,12 @@ struct StyledText
 
   friend auto operator<<(std::ostream& os, const StyledText& styled) -> std::ostream&
   {
-      return os << styled.stylePrefix << styled.text << styled.styleSuffix;
+    return os << styled.stylePrefix << styled.text << styled.styleSuffix;
   }
 };
 
-inline auto build_style_prefix(std::initializer_list<types::AnsiColor> styles) -> std::string
+inline constexpr auto build_style_prefix(std::initializer_list<types::AnsiColor> styles)
+  -> std::string
 {
   std::string result;
   for (const auto& style : styles)
@@ -31,36 +32,39 @@ inline auto build_style_prefix(std::initializer_list<types::AnsiColor> styles) -
   return result;
 }
 
-inline auto styleStream(std::string_view text, std::initializer_list<types::AnsiColor> styles)
-  -> StyledText
+inline constexpr auto styleStream(std::string_view                        text,
+                                  std::initializer_list<types::AnsiColor> styles) -> StyledText
 {
   return {
     .stylePrefix = build_style_prefix(styles), .text = text, .styleSuffix = term::ansi::ansiReset};
 }
 
-inline auto boldStream(std::string_view text) -> StyledText
+inline constexpr auto boldStream(std::string_view text) -> StyledText
 {
   return styleStream(text, {term::ansi::ansiBold});
 }
 
-inline auto underlineStream(std::string_view text) -> StyledText
+inline constexpr auto underlineStream(std::string_view text) -> StyledText
 {
   return styleStream(text, {term::ansi::ansiUnderline});
 }
 
-inline auto colorStream(std::string_view text, types::AnsiColor color) -> StyledText
+inline constexpr auto colorStream(std::string_view text, types::AnsiColor color) -> StyledText
 {
   return styleStream(text, {color});
 }
 
-inline auto boldColorStream(std::string_view text, types::AnsiColor color) -> StyledText
+inline constexpr auto boldColorStream(std::string_view text, types::AnsiColor color) -> StyledText
 {
   return styleStream(text, {term::ansi::ansiBold, color});
 }
 
-inline auto underlineColorStream(std::string_view text, types::AnsiColor color) -> StyledText
+inline constexpr auto underlineColorStream(std::string_view text, types::AnsiColor color)
+  -> StyledText
 {
   return styleStream(text, {term::ansi::ansiUnderline, color});
 }
+
+inline constexpr auto padSpaces(int length) -> std::string { return std::string(length, ' '); }
 
 } // namespace anvlk::term::ostream
