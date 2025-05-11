@@ -1,3 +1,4 @@
+#include "anvilock/include/runtime/LogLevel.hpp"
 #include <anvilock/include/GlobalFuncs.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
@@ -80,7 +81,7 @@ auto main() -> int
   ClientState cs;
   cs.pamState.authState.authSuccess = false;
 
-  cs.setLogContext(true, "log.txt", true, logger::LogLevel::Debug);
+  cs.setLogContext(true, "log.txt", true, runtime::logger::getLogLevelFromEnv());
   setHomeDir(cs);
   auto usernameOpt = utils::getCurrentUsername();
   if (!usernameOpt)
