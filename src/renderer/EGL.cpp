@@ -128,6 +128,7 @@ static auto createTextTexture(ClientState& state, const std::string& text) -> GL
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   LOG::TRACE(state.logCtx, "Text texture successfully created!");
+
   return texture;
 }
 
@@ -161,15 +162,89 @@ static auto loadBGTexture(ClientState& cs) -> GLuint
   return texture;
 }
 
-static void renderPasswordField(ClientState& state)
+static void updateTimeTexture(ClientState& cs)
 {
+  // TODO: Update the texture containing the current time
+  types::TimeString timeStr = utils::getTimeString(cs.userConfig.time.time_format);
+
+  static types::TimeString lastRecordedTimeStr = "";
+
+  if (lastRecordedTimeStr != timeStr)
+  {
+    LOG::TRACE(cs.logCtx, "Time changed from '{}' to '{}'", lastRecordedTimeStr, timeStr);
+    lastRecordedTimeStr = timeStr;
+
+    if (cs.timeTexture)
+    {
+      glDeleteTextures(1, &cs.timeTexture);
+      cs.timeTexture = 0;
+      LOG::TRACE(cs.logCtx, "Old time texture deleted.");
+    }
+
+    cs.timeTexture = createTextTexture(cs, timeStr);
+  }
+}
+
+static void renderTimeBox(ClientState& cs)
+{
+  if (!cs.timeTexture)
+  {
+    LOG::ERROR(cs.logCtx, "No valid texture for rendering.");
+    return;
+  }
+
+  static GLuint VBO = 0;
+
+  if (VBO == 0)
+  {
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cs.userConfig.timeBoxVertices),
+                 cs.userConfig.timeBoxVertices.data(), GL_STATIC_DRAW);
+  }
+
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)nullptr);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                        (void*)(2 * sizeof(GLfloat)));
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, cs.timeTexture);
+
+  glUseProgram(cs.shaderState.textureShaderProgram);
+  glUniform1i(glGetUniformLocation(cs.shaderState.textureShaderProgram, "uTexture"), 0);
+
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR)
+  {
+    LOG::ERROR(cs.logCtx, "OpenGL error: {}", error);
+  }
+
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_BLEND);
+
+  LOG::TRACE(cs.logCtx, "Time box rendered successfully!!");
+}
+
+static void renderPasswordField(ClientState& state)
+{
   GLuint program =
     render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_VERTEX,
                                          anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_FRAG>(
       state.logCtx, *state.shaderManagerPtr);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Use the shader program
   glUseProgram(program);
@@ -240,82 +315,6 @@ static void renderPasswordField(ClientState& state)
   // Disable blending and clean up
   glDisable(GL_BLEND);
   glDeleteProgram(program);
-
-  // Swap buffers to render the final frame
-  eglSwapBuffers(state.eglDisplay, state.eglSurface);
-
-  if (state.pamState.authState.authFailed)
-    sleep(1);
-}
-
-static void updateTimeTexture(ClientState& cs)
-{
-  // TODO: Update the texture containing the current time
-  types::TimeString timeStr = utils::getTimeString(cs.userConfig.time.time_format);
-
-  static types::TimeString lastRecordedTimeStr = "";
-
-  if (lastRecordedTimeStr != timeStr)
-  {
-    LOG::DEBUG(cs.logCtx, "Time changed from '{}' to '{}'", lastRecordedTimeStr, timeStr);
-    lastRecordedTimeStr = timeStr;
-
-    if (cs.timeTexture)
-    {
-      glDeleteTextures(1, &cs.timeTexture);
-      cs.timeTexture = 0;
-      LOG::TRACE(cs.logCtx, "Old time texture deleted.");
-    }
-
-    cs.timeTexture = createTextTexture(cs, timeStr);
-  }
-}
-
-static void renderTimeBox(ClientState& cs)
-{
-  if (!cs.timeTexture)
-  {
-    LOG::ERROR(cs.logCtx, "No valid texture for rendering.");
-    return;
-  }
-
-  static GLuint VBO = 0;
-
-  if (VBO == 0)
-  {
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cs.userConfig.timeBoxVertices),
-                 cs.userConfig.timeBoxVertices.data(), GL_STATIC_DRAW);
-  }
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)nullptr);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
-                        (void*)(2 * sizeof(GLfloat)));
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, cs.timeTexture);
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR)
-  {
-    LOG::ERROR(cs.logCtx, "OpenGL error: {}", error);
-  }
-
-  glDisableVertexAttribArray(1);
-  glDisableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDisable(GL_BLEND);
-
-  LOG::TRACE(cs.logCtx, "Time box rendered successfully!!");
 }
 
 void renderLockScreen(ClientState& cs)
@@ -327,27 +326,24 @@ void renderLockScreen(ClientState& cs)
     throw EGLErrorException("!!! FAILED TO MAKE EGL CURRENT CTX !!!");
   }
 
-  static GLuint bgTexture            = 0;
-  static GLuint textureShaderProgram = 0;
-  static int    initialized          = 0;
+  static bool initialized = false;
 
   if (!initialized)
   {
-    LOG::WARN(cs.logCtx, "EGL not initialized!");
-    bgTexture = loadBGTexture(cs);
-    textureShaderProgram =
+    cs.shaderState.bgTexture = loadBGTexture(cs);
+    cs.shaderState.textureShaderProgram =
       render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::TEXTURE_EGL_VERTEX,
                                            anvlk::gfx::ShaderID::TEXTURE_EGL_FRAG>(
         cs.logCtx, *cs.shaderManagerPtr);
-    initialized = 1;
+    initialized = true;
   }
 
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glUseProgram(textureShaderProgram);
+  glUseProgram(cs.shaderState.textureShaderProgram);
 
-  GLint posLoc      = glGetAttribLocation(textureShaderProgram, "position");
-  GLint texCoordLoc = glGetAttribLocation(textureShaderProgram, "texCoord");
+  GLint posLoc      = glGetAttribLocation(cs.shaderState.textureShaderProgram, "position");
+  GLint texCoordLoc = glGetAttribLocation(cs.shaderState.textureShaderProgram, "texCoord");
 
   glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::quad_vertices.data());
   glEnableVertexAttribArray(posLoc);
@@ -355,14 +351,18 @@ void renderLockScreen(ClientState& cs)
   glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::tex_coords.data());
   glEnableVertexAttribArray(texCoordLoc);
 
-  // Bind and render texture
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, bgTexture);
-  glUniform1i(glGetUniformLocation(textureShaderProgram, "uTexture"), 0);
+  glBindTexture(GL_TEXTURE_2D, cs.shaderState.bgTexture);
+  glUniform1i(glGetUniformLocation(cs.shaderState.textureShaderProgram, "uTexture"), 0);
+
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   updateTimeTexture(cs);
   renderTimeBox(cs);
   renderPasswordField(cs);
+
+  eglSwapBuffers(cs.eglDisplay, cs.eglSurface);
+
   logger::resetCtx(cs.logCtx);
 }
 
@@ -404,49 +404,9 @@ void initEGL(ClientState& cs)
     throw EGLErrorException("!!! FAILED TO CREATE EGL SURFACE !!!");
   }
 
-  if (!eglMakeCurrent(cs.eglDisplay, cs.eglSurface, cs.eglSurface, cs.eglContext))
-  {
-    LOG::ERROR(cs.logCtx, "Failed to make EGL the current context!");
-    throw EGLErrorException("!!! FAILED TO MAKE EGL CURRENT CTX !!!");
-  }
-
   glViewport(0, 0, width, height);
 
-  static GLuint bgTexture = loadBGTexture(cs);
-
-  glBindTexture(GL_TEXTURE_2D, bgTexture);
-
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  GLuint shaderProgram = render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::INIT_EGL_VERTEX,
-                                                              anvlk::gfx::ShaderID::INIT_EGL_FRAG>(
-    cs.logCtx, *cs.shaderManagerPtr);
-
-  if (shaderProgram == types::EGLCodes::RET_CODE_FAIL)
-  {
-    LOG::ERROR(cs.logCtx, "Failed to create EGL shader program!");
-    throw EGLErrorException("!!! FAILED TO CREATE EGL SHADER PROGRAM !!!");
-  }
-
-  glUseProgram(shaderProgram);
-
-  GLint posLoc      = glGetAttribLocation(shaderProgram, "position");
-  GLint texCoordLoc = glGetAttribLocation(shaderProgram, "texCoord");
-
-  glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::quad_vertices.data());
-  glEnableVertexAttribArray(posLoc);
-  glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::tex_coords.data());
-  glEnableVertexAttribArray(texCoordLoc);
-
-  glUniform1i(glGetUniformLocation(shaderProgram, "uTexture"), 0);
-
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  updateTimeTexture(cs);
-  renderTimeBox(cs);
-  renderPasswordField(cs);
-
-  eglSwapBuffers(cs.eglDisplay, cs.eglSurface);
+  renderLockScreen(cs);
 }
 
 } // namespace anvlk::render

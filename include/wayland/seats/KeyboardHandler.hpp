@@ -64,21 +64,44 @@ enum KeycodeStatus
   LOST      = -1
 };
 
-constexpr int BACKSPACE_REPEAT_DELAY_MS = 200;
-constexpr int BACKSPACE_REPEAT_RATE_MS  = 50;
+inline void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
+                            types::wayland::WLSurface_*, types::wayland::WLArray_* /*keys*/)
+{
+  auto& cs = *static_cast<ClientState*>(data);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
+  LOG::DEBUG(cs.logCtx, "Keyboard entered surface!");
+  cs.keyboardState.resetState();
+  logger::resetCtx(cs.logCtx);
+}
 
-void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
-                     types::wayland::WLSurface_*, types::wayland::WLArray_* keys);
-void onKeyboardLeave(types::VPtr, types::wayland::WLKeyboard_*, u32, types::wayland::WLSurface_*);
-void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, uint32_t key,
-                   u32 state);
+inline void onKeyboardLeave(types::VPtr data, types::wayland::WLKeyboard_*, u32,
+                            types::wayland::WLSurface_*)
+{
+  // No-op for now
+  auto& cs = *static_cast<ClientState*>(data);
+  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
+  LOG::INFO(cs.logCtx, "Keyboard left surface.");
+  cs.keyboardState.resetState();
+  logger::resetCtx(cs.logCtx);
+}
+
+inline void onKeyboardModifiers(types::VPtr data, types::wayland::WLKeyboard_*, u32,
+                                u32 mods_depressed, u32 mods_latched, u32 mods_locked, u32 group)
+{
+  auto& cs = *static_cast<ClientState*>(data);
+  xkb_state_update_mask(cs.xkbState, mods_depressed, mods_latched, mods_locked, 0, 0, group);
+}
+
+inline void onKeyboardRepeatInfo(anvlk::types::VPtr, anvlk::types::wayland::WLKeyboard_*, i32, i32)
+{
+  // Ignored in this context
+}
+
+void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32 key, u32 kbState);
 void onKeyboardKeymap(types::VPtr data, types::wayland::WLKeyboard_*, [[maybe_unused]] u32 format,
                       i32 fd, u32 size);
-void onKeyboardModifiers(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32 mods_depressed,
-                         u32 mods_latched, u32 mods_locked, u32 group);
-void onKeyboardRepeatInfo(anvlk::types::VPtr, anvlk::types::wayland::WLKeyboard_*, i32, i32);
 
-static constexpr wl_keyboard_listener kKeyboardListener = {
+inline constexpr wl_keyboard_listener kKeyboardListener = {
   .keymap      = onKeyboardKeymap,
   .enter       = onKeyboardEnter,
   .leave       = onKeyboardLeave,

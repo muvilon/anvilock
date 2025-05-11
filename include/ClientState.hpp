@@ -229,14 +229,9 @@ struct ClientState
   // Shader program state
   struct
   {
-    GLuint program             = 0;
-    GLint  color_location      = -1;
-    GLint  offset_location     = -1;
-    GLint  time_location       = -1;
-    GLint  resolution_location = -1;
-    GLint  radius_location     = -1;
-    GLint  position_location   = -1;
-  } shader_state;
+    GLuint textureShaderProgram;
+    GLuint bgTexture;
+  } shaderState;
 
   anvlk::logger::LogContext logCtx;
 

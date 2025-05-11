@@ -11,6 +11,7 @@ void handleBackspace(ClientState& cs, bool ctrl)
   {
     // If CTRL is held, clear the password or reset the index
     cs.pamState.clearPassword();
+    LOG::DEBUG(cs.logCtx, "CTRL + Backspace held. Password buffer cleared!");
   }
   else if (cs.pamState.passwordIndex > 0)
   {
@@ -19,55 +20,6 @@ void handleBackspace(ClientState& cs, bool ctrl)
     cs.pamState.password.resize(cs.pamState.passwordIndex);
   }
   render::renderLockScreen(cs);
-}
-
-void handleBackspaceRepeat(ClientState& cs)
-{
-  if (!cs.keyboardState.backspaceHeld)
-    return;
-
-  auto now = SteadyClock::now();
-  auto ms =
-    std::chrono::duration_cast<std::chrono::milliseconds>(now - cs.keyboardState.lastBackspaceTime)
-      .count();
-  if (ms >= BACKSPACE_REPEAT_RATE_MS)
-  {
-    handleBackspace(cs, false);
-    cs.keyboardState.lastBackspaceTime = now;
-  }
-}
-
-void onKeyboardEnter(types::VPtr data, types::wayland::WLKeyboard_*, u32,
-                     types::wayland::WLSurface_*, types::wayland::WLArray_* /*keys*/)
-{
-  auto& cs = *static_cast<ClientState*>(data);
-  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
-  LOG::DEBUG(cs.logCtx, "Keyboard entered surface!");
-  cs.keyboardState.resetState();
-  logger::resetCtx(cs.logCtx);
-}
-
-void onKeyboardLeave(types::VPtr data, types::wayland::WLKeyboard_*, u32,
-                     types::wayland::WLSurface_*)
-{
-  // No-op for now
-  auto& cs = *static_cast<ClientState*>(data);
-  logger::switchCtx(cs.logCtx, logger::LogCategory::WL_KB);
-  LOG::INFO(cs.logCtx, "Keyboard left surface.");
-  cs.keyboardState.resetState();
-  logger::resetCtx(cs.logCtx);
-}
-
-void onKeyboardModifiers(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32 mods_depressed,
-                         u32 mods_latched, u32 mods_locked, u32 group)
-{
-  auto& cs = *static_cast<ClientState*>(data);
-  xkb_state_update_mask(cs.xkbState, mods_depressed, mods_latched, mods_locked, 0, 0, group);
-}
-
-void onKeyboardRepeatInfo(anvlk::types::VPtr, anvlk::types::wayland::WLKeyboard_*, i32, i32)
-{
-  // Ignored in this context
 }
 
 void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32 key, u32 kbState)
@@ -90,20 +42,21 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
     else if (sym == XKB_KEY_BackSpace)
     {
       handleBackspace(cs, cs.keyboardState.ctrlHeld);
-      LOG::DEBUG(cs.logCtx, "Held backspace: ");
       cs.keyboardState.backspaceHeld     = true;
       cs.keyboardState.lastBackspaceTime = SteadyClock::now();
       shouldRender                       = true; // Backspace should trigger a render
     }
     else if (ALLOWED_KEYS.count(sym) == KeycodeStatus::FOUND && cs.pamState.canSeekIndex())
     {
-      if (!utf8Sym[0] || utf8Sym[0] == '\0')
+      auto len = std::strlen(utf8Sym.data());
+
+      if (!utf8Sym[0] || utf8Sym[0] == '\0' || len > 1)
         return; // Skip if no character was produced
 
-      auto len = std::strlen(utf8Sym.data());
       if (cs.pamState.canSeekToOffset(len))
       {
         cs.pamState.password.append(utf8Sym.data(), len);
+        //LOG::DEBUG(cs.logCtx, "Found UTF8: {} with len: {}", utf8Sym.data(), len);
         cs.pamState.seekToIndex(len);
         shouldRender = true; // Adding to password should trigger a render
       }
