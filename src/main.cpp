@@ -1,10 +1,10 @@
-#include "anvilock/include/runtime/LogLevel.hpp"
 #include <anvilock/include/GlobalFuncs.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
 #include <anvilock/include/freetype/FreeTypeHandler.hpp>
 #include <anvilock/include/pam/PamAuthenticator.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
+#include <anvilock/include/runtime/LogUtils.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
@@ -65,12 +65,14 @@ static auto initXKB(ClientState& state) -> int
 void setHomeDir(ClientState& cs)
 {
   types::Directory home = anvlk::utils::getHomeDir();
-
   if (!home.c_str())
   {
     logger::log(logger::LogLevel::Error, cs.logCtx, "Home directory (env var) not found!");
     return;
   }
+
+  cs.setLogContext(true, runtime::logger::generateLogFilePath(home.c_str()), true,
+                   runtime::logger::getLogLevelFromEnv());
 
   cs.homeDir = home;
   logger::log(logger::LogLevel::Info, cs.logCtx, "Home directory found: '{}'", cs.homeDir);
@@ -81,7 +83,6 @@ auto main() -> int
   ClientState cs;
   cs.pamState.authState.authSuccess = false;
 
-  cs.setLogContext(true, "log.txt", true, runtime::logger::getLogLevelFromEnv());
   setHomeDir(cs);
   auto usernameOpt = utils::getCurrentUsername();
   if (!usernameOpt)
@@ -154,6 +155,7 @@ auto main() -> int
   // freetype gets destroyed via destructor
 
   LOG::INFO(cs.logCtx, "Cleanup job done. Exiting Anvilock...");
+  LOG::INFO(cs.logCtx, "Final log file located at '{}'", cs.logCtx.logFilePath.string());
 
   return ANVLK_SUCCESS;
 }
