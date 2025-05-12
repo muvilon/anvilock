@@ -42,6 +42,7 @@ void onSeatCapabilities(types::VPtr data, [[maybe_unused]] types::wayland::WLSea
   }
   else if (!hasKeyboard && cs.wlKeyboard)
   {
+    wl_keyboard_release(cs.wlKeyboard);
     cs.wlKeyboard = nullptr;
     LOG::INFO(cs.logCtx, "Keyboard capabilities removed.");
   }

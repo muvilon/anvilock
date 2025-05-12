@@ -2,7 +2,7 @@
 #define ANVLK_WAYLAND_SEATS_KEYBOARD_HANDLER_HPP
 
 #include <anvilock/include/ClientState.hpp>
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 
 #include <cassert>
@@ -15,8 +15,6 @@
 
 namespace anvlk::wl
 {
-
-inline constexpr int CONST_UTF8_SIZE = 128;
 
 // XKB keycodes start at 8 due to legacy X11 protocol design.
 inline constexpr u32 XKB_KEYCODE_OFFSET = 8;
@@ -102,7 +100,7 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
 void onKeyboardKeymap(types::VPtr data, types::wayland::WLKeyboard_*, [[maybe_unused]] u32 format,
                       i32 fd, u32 size);
 
-inline constexpr wl_keyboard_listener kKeyboardListener = {
+inline constexpr const wl_keyboard_listener kKeyboardListener = {
   .keymap      = onKeyboardKeymap,
   .enter       = onKeyboardEnter,
   .leave       = onKeyboardLeave,

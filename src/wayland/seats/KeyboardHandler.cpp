@@ -49,7 +49,7 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
     }
     else if (ALLOWED_KEYS.count(sym) == KeycodeStatus::FOUND && cs.pamState.canSeekIndex())
     {
-      auto len = std::strlen(utf8Sym.data());
+      const auto len = std::strlen(utf8Sym.data());
 
       if (!utf8Sym[0] || utf8Sym[0] == '\0' || len > 1)
         return; // Skip if no character was produced
@@ -89,6 +89,7 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
         else
         {
           LOG::ERROR(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication failed.");
+          cs.pamState.clearPassword(); // to clear the pwd index
           cs.pamState.authState.authFailed = true;
           shouldRender                     = true; // Failed auth should trigger a render
         }
