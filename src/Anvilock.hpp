@@ -9,6 +9,7 @@
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/runtime/LogUtils.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
+#include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 #include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
@@ -27,6 +28,16 @@ inline auto initWayland(ClientState& state) -> int
   state.wlRegistry = wl_display_get_registry(state.wlDisplay);
   wl_registry_add_listener(state.wlRegistry, &wl::kRegistryListener, &state);
   wl_display_roundtrip(state.wlDisplay); // Get Wayland objects
+
+  // this should have been bound to the WL registry by now if the compositor
+  // supports EXT-SESSION-LOCK-v1
+  if (state.sessionLock.lockManager == nullptr)
+  {
+    LOG::ERROR(
+      state.logCtx, logger::LogStyle::COLOR_BOLD,
+      "Ext session lock could not be bound to registry. Does your compository support it?");
+    ANVLK_ASSERT(state.sessionLock.lockManager != nullptr);
+  }
 
   state.wlSurface  = wl_compositor_create_surface(state.wlCompositor);
   state.xdgSurface = xdg_wm_base_get_xdg_surface(state.xdgWmBase, state.wlSurface);

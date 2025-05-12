@@ -1,6 +1,6 @@
 #include <anvilock/include/wayland/RegistryHandler.hpp>
 
-#include <anvilock/include/Log.hpp>
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/wayland/OutputHandler.hpp>
 #include <anvilock/include/wayland/seats/SeatHandler.hpp>
 #include <anvilock/include/wayland/xdg/WmBaseHandler.hpp>

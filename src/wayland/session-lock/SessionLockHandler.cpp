@@ -1,3 +1,4 @@
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 

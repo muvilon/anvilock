@@ -1,4 +1,3 @@
-#include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/src/Anvilock.hpp>
 
 using namespace anvlk;
