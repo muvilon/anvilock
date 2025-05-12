@@ -46,9 +46,9 @@ auto PamAuthenticator::PamConvFunc(int numMsg, const types::pam::PamMessage_** m
                                    types::pam::PamResponse_** resp, types::VPtr appDataPtr) -> int
 {
   auto password = static_cast<types::PamString>(appDataPtr);
-  auto reply    = std::make_unique<types::pam::PamResponse_[]>(numMsg);
+  auto reply    = std::make_unique<types::pam::PamResponse_[]>(types::to_usize(numMsg));
 
-  for (types::iter i = 0; i < numMsg; ++i)
+  for (types::iters i = 0; i < types::to_usize(numMsg); ++i)
   {
     if (msg[i]->msg_style == PAM_PROMPT_ECHO_OFF)
     {

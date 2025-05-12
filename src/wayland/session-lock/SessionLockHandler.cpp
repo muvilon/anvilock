@@ -1,4 +1,5 @@
 #include <anvilock/include/LogMacros.hpp>
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 
@@ -24,8 +25,8 @@ void handleSurfaceConfigure(types::VPtr data, types::ext::SessionLockSurfaceV1_*
                             u32 serial, u32 width, u32 height)
 {
   auto& state              = *static_cast<ClientState*>(data);
-  state.outputState.width  = width;
-  state.outputState.height = height;
+  state.outputState.width  = types::Dimensions(width);
+  state.outputState.height = types::Dimensions(height);
 
   ext_session_lock_surface_v1_ack_configure(lockSurface, serial);
   state.sessionLock.surfaceDirty = true;

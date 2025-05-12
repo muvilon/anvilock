@@ -68,7 +68,7 @@ using iter   = int;
 using iters  = std::size_t; // size_t is the size of something in memory
 using Status = int;
 
-using Dimensions = i32;
+using Dimensions = int;
 
 using VPtr = void*;
 
@@ -78,6 +78,16 @@ using AnsiColor = const char*;
 
 using RuntimeErrorMessage = std::string_view;
 using RuntimeErrorString  = std::string;
+
+template <typename T> constexpr auto to_usize(T value) -> iters
+{
+  return static_cast<iters>(value);
+}
+
+template <typename T> constexpr auto to_float(T value) -> float
+{
+  return static_cast<float>(value);
+}
 
 template <std::size_t N> using FloatArray = std::array<float, N>;
 template <std::size_t ROWS, std::size_t COLS>

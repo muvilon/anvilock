@@ -69,7 +69,7 @@ public:
   PasswordBuffer(size_t size)
   {
     // Allocate buffer with proper alignment
-    if (posix_memalign(&m_buffer, get_page_size(), size) != 0)
+    if (posix_memalign(&m_buffer, types::to_usize(get_page_size()), size) != 0)
     {
       throw std::bad_alloc();
     }

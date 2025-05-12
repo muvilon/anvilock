@@ -1,9 +1,8 @@
-#include <EGL/egl.h>
 #include <anvilock/include/Types.hpp>
+#include <anvilock/include/freetype/FreeTypeStruct.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/renderer/GLUtils.hpp>
-#define STB_IMAGE_IMPLEMENTATION
-#include <anvilock/external/stb/stb_image.h>
+#include <anvilock/include/utils/STBImpl.hpp>
 
 namespace anvlk::render
 {
@@ -59,15 +58,16 @@ static auto createTextTexture(ClientState& state, const std::string& text) -> GL
 
   for (const char& c : text)
   {
-    if (FT_Load_Char(state.freeTypeState.ftFace, c, FT_LOAD_RENDER))
+    if (FT_Load_Char(state.freeTypeState.ftFace, freetype::to_ft_ulong(c), FT_LOAD_RENDER))
     {
       LOG::ERROR(state.logCtx, "Failed to load glyph.");
       continue;
     }
 
     // Add proper spacing between characters
-    width += slot->bitmap.width + 1; // +1 for spacing
-    maxHeight   = types::u32(maxHeight) > slot->bitmap.rows ? maxHeight : slot->bitmap.rows;
+    width += types::Dimensions(slot->bitmap.width + 1); // +1 for spacing
+    maxHeight =
+      types::u32(maxHeight) > slot->bitmap.rows ? maxHeight : types::Dimensions(slot->bitmap.rows);
     maxBearingY = FT_Int(maxBearingY) > slot->bitmap_top ? maxBearingY : slot->bitmap_top;
   }
 
@@ -77,7 +77,7 @@ static auto createTextTexture(ClientState& state, const std::string& text) -> GL
   width  = utils::nextPowerOfTwo(width);
   height = utils::nextPowerOfTwo(height);
 
-  auto image = std::make_unique<types::ImageData[]>(width * height);
+  auto image = std::make_unique<types::ImageData[]>(types::to_usize(width * height));
   std::fill(image.get(), image.get() + (width * height), 0);
 
   if (!image)
@@ -87,23 +87,23 @@ static auto createTextTexture(ClientState& state, const std::string& text) -> GL
   }
 
   // Second pass: render glyphs
-  int x_offset = 0;
+  types::uint x_offset = 0;
   for (const char& c : text)
   {
-    if (FT_Load_Char(state.freeTypeState.ftFace, c, FT_LOAD_RENDER))
+    if (FT_Load_Char(state.freeTypeState.ftFace, freetype::to_ft_ulong(c), FT_LOAD_RENDER))
       continue;
 
     // Calculate vertical position for baseline alignment
-    int y_offset = (maxBearingY - slot->bitmap_top) + (height - maxHeight) / 2;
+    i64 y_offset = (maxBearingY - slot->bitmap_top) + (height - maxHeight) / 2;
 
     for (uint row = 0; row < slot->bitmap.rows; row++)
     {
       for (uint col = 0; col < slot->bitmap.width; col++)
       {
-        int dst_row = row + y_offset;
+        i64 dst_row = row + y_offset;
         if (dst_row >= 0 && dst_row < height)
         {
-          image[dst_row * width + x_offset + col] =
+          image[types::to_usize(dst_row * width + x_offset + col)] =
             slot->bitmap.buffer[row * slot->bitmap.width + col];
         }
       }
@@ -266,9 +266,9 @@ static void renderPasswordField(ClientState& state)
   glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
   glUniform2f(offset_location, offset_x, offset_y);
 
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0,
+  glVertexAttribPointer(GLUtils::to_gluint(position_location), 2, GL_FLOAT, GL_FALSE, 0,
                         utils::password_field_vertices.data());
-  glEnableVertexAttribArray(position_location);
+  glEnableVertexAttribArray(GLUtils::to_gluint(position_location));
 
   // Draw the background of the password field
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -281,13 +281,15 @@ static void renderPasswordField(ClientState& state)
   glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
 
   // Set up vertices for dots
-  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE, 0, utils::dot_vertices.data());
+  glVertexAttribPointer(GLUtils::to_gluint(position_location), 2, GL_FLOAT, GL_FALSE, 0,
+                        utils::dot_vertices.data());
 
   // Adjust dot positions based on password input
-  float dot_spacing = field_width / (state.pamState.passwordIndex + 1);
-  for (int i = 0; i < state.pamState.passwordIndex; i++)
+  float dot_spacing = field_width / types::to_float(state.pamState.passwordIndex + 1);
+  for (types::iters i = 0; i < state.pamState.passwordIndex; i++)
   {
-    float x_position = offset_x + (i + 1) * dot_spacing - field_width / 2; // Center the dots
+    float x_position =
+      offset_x + types::to_float(i + 1) * dot_spacing - field_width / 2; // Center the dots
     glUniform2f(offset_location, x_position, offset_y);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
@@ -345,11 +347,13 @@ void renderLockScreen(ClientState& cs)
   GLint posLoc      = glGetAttribLocation(cs.shaderState.textureShaderProgram, "position");
   GLint texCoordLoc = glGetAttribLocation(cs.shaderState.textureShaderProgram, "texCoord");
 
-  glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::quad_vertices.data());
-  glEnableVertexAttribArray(posLoc);
+  glVertexAttribPointer(GLUtils::to_gluint(posLoc), 2, GL_FLOAT, GL_FALSE, 0,
+                        utils::quad_vertices.data());
+  glEnableVertexAttribArray(GLUtils::to_gluint(posLoc));
 
-  glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, utils::tex_coords.data());
-  glEnableVertexAttribArray(texCoordLoc);
+  glVertexAttribPointer(GLUtils::to_gluint(texCoordLoc), 2, GL_FLOAT, GL_FALSE, 0,
+                        utils::tex_coords.data());
+  glEnableVertexAttribArray(GLUtils::to_gluint(texCoordLoc));
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, cs.shaderState.bgTexture);

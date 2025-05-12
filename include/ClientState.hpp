@@ -143,16 +143,16 @@ struct PamState
   bool                         firstEnterPress = true;
   AuthString                   username;
   AuthString                   password;
-  int                          passwordIndex = 0;
+  anvlk::types::iters          passwordIndex = 0;
   bool                         locked        = false;
   AuthState                    authState;
   static constexpr std::size_t MAX_PASSWORD_LENGTH = 128;
 
 public:
   auto canSeekIndex() -> bool;
-  auto canSeekToOffset(const i64& idx) -> bool;
+  auto canSeekToOffset(const anvlk::types::iters& idx) -> bool;
   void clearPassword();
-  void seekToIndex(const i64& idx);
+  void seekToIndex(const anvlk::types::iters& idx);
 };
 
 struct ClientState

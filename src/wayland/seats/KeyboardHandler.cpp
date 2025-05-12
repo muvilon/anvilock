@@ -18,7 +18,7 @@ void handleBackspace(ClientState& cs, bool ctrl)
   {
     // Regular backspace logic: move cursor back and delete last character
     cs.pamState.passwordIndex--;
-    cs.pamState.password.resize(cs.pamState.passwordIndex);
+    cs.pamState.password.resize(types::to_usize(cs.pamState.passwordIndex));
   }
   render::renderLockScreen(cs);
 }

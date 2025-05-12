@@ -3,11 +3,18 @@
 
 #include <GLES2/gl2.h>
 #include <anvilock/include/LogMacros.hpp>
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 #include <vector>
 
 namespace anvlk::render::GLUtils
 {
+
+template <typename T> constexpr auto to_gluint(T value) -> GLuint
+{
+  return static_cast<GLuint>(value);
+}
+
 inline auto checkShaderCompileStatus(GLuint shader, const anvlk::logger::LogContext& logCtx,
                                      const char* shaderName) -> bool
 {
@@ -18,7 +25,7 @@ inline auto checkShaderCompileStatus(GLuint shader, const anvlk::logger::LogCont
 
   GLint logLen = 0;
   glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
-  std::vector<GLchar> log(logLen);
+  std::vector<GLchar> log(types::to_usize(logLen));
   glGetShaderInfoLog(shader, logLen, nullptr, log.data());
 
   LOG::ERROR(logCtx, "{} shader compilation failed: {}", shaderName, log.data());
@@ -34,7 +41,7 @@ inline auto checkProgramLinkStatus(GLuint program, const anvlk::logger::LogConte
 
   GLint logLen = 0;
   glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLen);
-  std::vector<GLchar> log(logLen);
+  std::vector<GLchar> log(types::to_usize(logLen));
   glGetProgramInfoLog(program, logLen, nullptr, log.data());
 
   LOG::ERROR(logCtx, "Shader program linking failed: {}", log.data());

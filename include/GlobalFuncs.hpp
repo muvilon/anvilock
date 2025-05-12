@@ -102,40 +102,6 @@ inline auto getTimeString(std::string_view format) -> std::string
   return stream.str();
 }
 
-// Shader utilities
-inline void shaderCompileStatus(GLuint shader)
-{
-  GLint success = 0;
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    std::array<GLchar, 512> info{};
-    glGetShaderInfoLog(shader, info.size(), nullptr, info.data());
-  }
-}
-
-inline void programLinkStatus(GLuint program)
-{
-  GLint success = 0;
-  glGetProgramiv(program, GL_LINK_STATUS, &success);
-  if (!success)
-  {
-    std::array<GLchar, 512> info{};
-    glGetProgramInfoLog(program, info.size(), nullptr, info.data());
-  }
-}
-
-inline void print_shader_log(GLuint shader)
-{
-  GLint log_length = 0;
-  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-  if (log_length > 1)
-  {
-    auto buffer = std::make_unique<char[]>(log_length);
-    glGetShaderInfoLog(shader, log_length, nullptr, buffer.get());
-  }
-}
-
 // Power-of-two utility (for GPU texture safety)
 [[nodiscard]] constexpr auto nextPowerOfTwo(int v) noexcept -> int
 {

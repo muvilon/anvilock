@@ -47,17 +47,15 @@ void KeyboardState::resetState()
 
 auto PamState::canSeekIndex() -> bool { return password.size() < MAX_PASSWORD_LENGTH; }
 
-auto PamState::canSeekToOffset(const i64& offset) -> bool
+auto PamState::canSeekToOffset(const anvlk::types::iters& offset) -> bool
 {
-  return offset >= 0 &&
-         (password.size() + static_cast<anvlk::types::iter>(offset) <= MAX_PASSWORD_LENGTH);
+  return (password.size() + anvlk::types::to_usize(offset) <= MAX_PASSWORD_LENGTH);
 }
 
-void PamState::seekToIndex(const i64& idx)
+void PamState::seekToIndex(const anvlk::types::iters& idx)
 {
-  if (idx >= 0)
-    passwordIndex += idx;
-  password.resize(passwordIndex);
+  passwordIndex += idx;
+  password.resize(anvlk::types::to_usize(passwordIndex));
 }
 
 void PamState::clearPassword()

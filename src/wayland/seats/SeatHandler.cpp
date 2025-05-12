@@ -1,5 +1,4 @@
-
-#include "anvilock/include/Log.hpp"
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/wayland/seats/SeatHandler.hpp>
 
 namespace anvlk::wl
@@ -53,7 +52,7 @@ void onSeatName(types::VPtr data, [[maybe_unused]] types::wayland::WLSeat_* seat
 {
   auto& cs = *static_cast<ClientState*>(data);
   logger::switchCtx(cs.logCtx, logger::LogCategory::WL_SEAT);
-  LOG::INFO(cs.logCtx, "Seat name => {}", name);
+  LOG::INFO(cs.logCtx, logger::LogStyle::BOLD, "Seat name => {}", name);
   logger::resetCtx(cs.logCtx);
 }
 

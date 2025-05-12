@@ -63,7 +63,7 @@ auto ConfigLoader::load() -> AnvlkConfig
     cfg.time.time_format = TOMLKey{*val};
 
   // Time Box
-  for (int i = 0; i < 4; ++i)
+  for (types::iters i = 0; i < 4; ++i)
   {
     if (auto arr = parser.getArray("time_box", TIMEBOXPOS[i]))
     {

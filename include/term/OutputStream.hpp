@@ -66,7 +66,10 @@ inline constexpr auto underlineColorStream(std::string_view text, types::AnsiCol
   return styleStream(text, {term::ansi::ansiUnderline, color});
 }
 
-inline constexpr auto padSpaces(int length) -> std::string { return std::string(length, ' '); }
+inline constexpr auto padSpaces(int length) -> std::string
+{
+  return std::string(length > 0 ? types::to_usize(length) : 0, ' ');
+}
 
 } // namespace anvlk::term::ostream
 

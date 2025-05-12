@@ -2,6 +2,7 @@
 #define ANVLK_FREETYPE_STRUCT_HPP
 
 #include <freetype/freetype.h>
+#include <freetype/fttypes.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 

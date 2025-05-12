@@ -10,6 +10,11 @@
 namespace anvlk::freetype
 {
 
+template <typename T> constexpr auto to_ft_ulong(T value) -> FT_ULong
+{
+  return static_cast<FT_ULong>(value);
+}
+
 using namespace anvlk;
 
 constexpr int DOT_RADIUS     = 6;
