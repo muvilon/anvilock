@@ -242,7 +242,6 @@ static void renderPasswordField(ClientState& state)
     render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_VERTEX,
                                          anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_FRAG>(
       state.logCtx, *state.shaderManagerPtr);
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -262,10 +261,58 @@ static void renderPasswordField(ClientState& state)
   float offset_x = 0;                           // Horizontally center the field
   float offset_y = -0.8f + field_height / 2.0f; // Vertically align it at the bottom
 
-  // Set up the password field background (using GL_TRIANGLE_STRIP for a rectangle)
-  glUniform4f(color_location, 1.0f, 1.0f, 1.0f, 0.70f); // Light background with transparency
-  glUniform2f(offset_location, offset_x, offset_y);
+  // Determine background and border colors
+  types::FloatArray<4> bgColor, borderColor;
 
+  // Check if we're in a glow state
+  TimePoint currentTime = SteadyClock::now();
+  auto      timeSinceGlowStart =
+    std::chrono::duration<float>(currentTime - state.pwdFieldAnim.glowStartTime);
+  bool shouldGlow = state.pwdFieldAnim.isGlowing &&
+                    timeSinceGlowStart.count() < PasswordFieldAnimation::GLOW_DURATION;
+
+  if (shouldGlow)
+  {
+    // Calculate glow intensity (fade out over time)
+    float glowIntensity =
+      1.0f - (timeSinceGlowStart.count() / PasswordFieldAnimation::GLOW_DURATION);
+
+    // Interpolate between normal and error colors
+    bgColor = {
+      1.0f,                        // R
+      0.3f + 0.7f * glowIntensity, // G (fades from white to red)
+      0.3f + 0.7f * glowIntensity, // B (fades from white to red)
+      0.7f                         // Alpha
+    };
+    borderColor = {
+      1.0f,                 // R
+      0.0f + glowIntensity, // G (fades from red border to white)
+      0.0f + glowIntensity, // B (fades from red border to white)
+      1.0f                  // Alpha
+    };
+
+    // Stop glowing if duration has passed
+    if (!shouldGlow)
+    {
+      state.pwdFieldAnim.isGlowing = false;
+    }
+  }
+  else if (state.pamState.authState.authFailed)
+  {
+    // Static red for authentication failure
+    bgColor     = {1.0f, 0.3f, 0.3f, 0.5f}; // Lighter transparent red background
+    borderColor = {1.0f, 0.0f, 0.0f, 1.0f}; // Solid red border
+  }
+  else
+  {
+    // Normal colors for successful or ongoing authentication
+    bgColor     = {1.0f, 1.0f, 1.0f, 0.70f}; // Light background with transparency
+    borderColor = {0.9f, 0.9f, 0.9f, 0.8f};  // Subtle border
+  }
+
+  // Set background color
+  glUniform4fv(color_location, 1, bgColor.data());
+  glUniform2f(offset_location, offset_x, offset_y);
   glVertexAttribPointer(GLUtils::to_gluint(position_location), 2, GL_FLOAT, GL_FALSE, 0,
                         utils::password_field_vertices.data());
   glEnableVertexAttribArray(GLUtils::to_gluint(position_location));
@@ -273,45 +320,39 @@ static void renderPasswordField(ClientState& state)
   // Draw the background of the password field
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  // Draw the border with a subtle shadow effect
-  glUniform4f(color_location, 0.8f, 0.8f, 0.8f, 1.0f);
+  // Draw the border
+  glUniform4fv(color_location, 1, borderColor.data());
   glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-  // Draw password dots
+  // Draw password dots as circles
   glUniform4f(color_location, 0.3f, 0.3f, 0.3f, 0.8f); // Gray dots
-
-  // Set up vertices for dots
-  glVertexAttribPointer(GLUtils::to_gluint(position_location), 2, GL_FLOAT, GL_FALSE, 0,
-                        utils::dot_vertices.data());
 
   // Adjust dot positions based on password input
   float dot_spacing = field_width / types::to_float(state.pamState.passwordIndex + 1);
+  float dot_radius  = 0.02f; // Radius of each dot
+
   for (types::iters i = 0; i < state.pamState.passwordIndex; i++)
   {
     float x_position =
       offset_x + types::to_float(i + 1) * dot_spacing - field_width / 2; // Center the dots
+
+    // Generate circle vertices
+    std::vector<float> circle_vertices;
+    types::iters       num_segments = 32; // Number of triangle fan segments for smooth circle
+    for (types::iters j = 0; j <= num_segments; ++j)
+    {
+      float angle = types::to_float(2.0f * M_PI * j / num_segments);
+      circle_vertices.push_back(dot_radius * std::cos(angle));
+      circle_vertices.push_back(dot_radius * std::sin(angle));
+    }
+
+    // Set uniform for dot position
     glUniform2f(offset_location, x_position, offset_y);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  }
 
-  // Handle Authentication Failure (Red border for failure)
-  if (state.pamState.authState.authFailed)
-  {
-    types::FloatArray<4> failColor = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for failure
-
-    glUniform4fv(color_location, 1, failColor.data());
-    glUniform2f(offset_location, offset_x, offset_y);
-    glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with failure color
-  }
-
-  // Handle Authentication Success (Green border for success)
-  if (!state.pamState.authState.authFailed && state.pamState.passwordIndex > 0)
-  {
-    types::FloatArray<4> successColor = {0.0f, 1.0f, 0.0f, 1.0f}; // Green for success
-
-    glUniform4fv(color_location, 1, successColor.data());
-    glUniform2f(offset_location, offset_x, offset_y);
-    glDrawArrays(GL_LINE_LOOP, 0, 4); // Re-draw border with success color
+    // Draw circle using triangle fan
+    glVertexAttribPointer(GLUtils::to_gluint(position_location), 2, GL_FLOAT, GL_FALSE, 0,
+                          circle_vertices.data());
+    glDrawArrays(GL_TRIANGLE_FAN, 0, num_segments + 2);
   }
 
   // Disable blending and clean up

@@ -91,7 +91,8 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
           LOG::ERROR(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication failed.");
           cs.pamState.clearPassword(); // to clear the pwd index
           cs.pamState.authState.authFailed = true;
-          shouldRender                     = true; // Failed auth should trigger a render
+          cs.pwdFieldAnim.triggerPasswordFieldGlow();
+          shouldRender = true; // Failed auth should trigger a render
         }
 
         ANVLK_ASSERT(cs.pamState.password.empty() == true);

@@ -63,3 +63,13 @@ void PamState::clearPassword()
   passwordIndex = 0;
   password.clear();
 }
+
+/// PASSWORD FIELD ANIM STATE ///
+
+/* NOTE: THIS IS NOT ASYNC -> BLOCKING!!! */
+void PasswordFieldAnimation::triggerPasswordFieldGlow()
+{
+  PasswordFieldAnimation::isGlowing = true;
+  // TODO: Make this ASYNC
+  PasswordFieldAnimation::glowStartTime = SteadyClock::now();
+}

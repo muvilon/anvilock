@@ -94,21 +94,14 @@ struct PointerEvent
   u32                        axisSource{};
 };
 
-struct AnimationState
+struct PasswordFieldAnimation
 {
-  u64   frameCount{};
-  u64   lastKeyFrame{};
-  u64   authFailFrame{};
-  float currentTime{};
-  float dotBouncePhase{};
-  float bgAlpha{};
-  struct
-  {
-    Coords x{};
-    Coords y{};
-    float  intensity{};
-    u64    start_frame{};
-  } shake;
+  bool                   isGlowing     = false;
+  TimePoint              glowStartTime = SteadyClock::now();
+  static constexpr float GLOW_DURATION = 0.75f;
+
+public:
+  void triggerPasswordFieldGlow();
 };
 
 struct ExtSessionLock
@@ -199,9 +192,9 @@ struct ClientState
   FreeTypeState freeTypeState;
 
   // Animation and rendering state
-  AnimationState animationState;
-  float          offset    = 0.0f;
-  u32            lastFrame = 0;
+  PasswordFieldAnimation pwdFieldAnim;
+  float                  offset    = 0.0f;
+  u32                    lastFrame = 0;
 
   // PAM and authentication
   PamState pamState;
