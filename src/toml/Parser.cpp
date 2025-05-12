@@ -1,3 +1,4 @@
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/toml/Parser.hpp>
 
@@ -13,10 +14,11 @@ TOMLParser::TOMLParser(const anvlk::types::fsPath& path, anvlk::logger::LogConte
   }
   catch (const toml::parse_error& err)
   {
-    const auto&            src      = err.source();
-    const types::LogString location = std::format("{}:{}", src.begin.line, src.begin.column);
-    anvlk::logger::log(anvlk::logger::LogLevel::Error, m_logCtx, "Parse error: {} at {}",
-                       err.description(), location);
+    const auto&            src = err.source();
+    const types::LogString location =
+      std::format("Line {} : Character {}", src.begin.line, src.begin.column);
+    LOG::ERROR(m_logCtx, "{}", err.description());
+    LOG::ERROR(m_logCtx, logger::LogStyle::COLOR_BOLD, "Parsing error occurred at {}", location);
     exit(EXIT_FAILURE);
   }
 }

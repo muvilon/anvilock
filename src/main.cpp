@@ -35,8 +35,8 @@ auto main() -> int
 
   logger::switchCtx(cs.logCtx, logger::LogCategory::CONFIG);
 
-  anvlk::cfg::ConfigLoader loader(cs.logCtx, cs.homeDir);
-  cs.userConfig = loader.load();
+  anvlk::cfg::ConfigLoader cfgLoader(cs.logCtx, cs.homeDir);
+  cs.userConfig = cfgLoader.load();
 
   logger::switchCtx(cs.logCtx, logger::LogCategory::FREETYPE);
 
