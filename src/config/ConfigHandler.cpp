@@ -1,4 +1,4 @@
-#include "anvilock/include/Log.hpp"
+#include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/config/ConfigHandler.hpp>
 #include <stdexcept>
 
