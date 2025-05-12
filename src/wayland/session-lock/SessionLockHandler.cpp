@@ -1,3 +1,4 @@
+#include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
 
 namespace anvlk::wl
@@ -35,7 +36,7 @@ void createLockSurface(ClientState& state)
 {
   logger::switchCtx(state.logCtx, logger::LogCategory::SESSION_LOCK);
   state.wlSurface = wl_compositor_create_surface(state.wlCompositor);
-  assert(state.wlSurface);
+  ANVLK_ASSERT(state.wlSurface != nullptr);
 
   if (!state.outputState.wlOutput)
   {
@@ -63,7 +64,7 @@ void createLockSurface(ClientState& state)
 void initiateSessionLock(ClientState& state)
 {
   state.sessionLock.lockObj = ext_session_lock_manager_v1_lock(state.sessionLock.lockManager);
-  assert(state.sessionLock.extSessionLock);
+  ANVLK_ASSERT(state.sessionLock.lockObj != nullptr);
 
   ext_session_lock_v1_add_listener(state.sessionLock.lockObj, &kSessionLockListener, &state);
 

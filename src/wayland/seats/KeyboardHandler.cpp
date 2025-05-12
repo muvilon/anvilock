@@ -1,5 +1,6 @@
 #include <anvilock/include/LogMacros.hpp>
 #include <anvilock/include/Types.hpp>
+#include <anvilock/include/utils/Assert.hpp>
 #include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
 
 namespace anvlk::wl
@@ -81,13 +82,14 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
 
         if (cs.pamAuth->AuthenticateUser())
         {
-          LOG::INFO(cs.logCtx, "Authentication successful.");
+          LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication successful.");
           cs.pamState.clearPassword();
           cs.pamState.authState.authSuccess = true;
         }
         else
         {
-          LOG::ERROR(cs.logCtx, "Authentication failed. Entered: {}", cs.pamState.password);
+          LOG::ERROR(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication failed. Entered: {}",
+                     cs.pamState.password);
           // sanity clear, password is std::moved when AuthenticateUser() is called
           cs.pamState.clearPassword();
           cs.pamState.authState.authFailed = true;
@@ -113,10 +115,10 @@ void onKeyboardKeymap(types::VPtr data, types::wayland::WLKeyboard_*, [[maybe_un
                       i32 fd, u32 size)
 {
   auto& cs = *static_cast<ClientState*>(data);
-  assert(format == WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1);
+  ANVLK_ASSERT_EQ(format, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1);
 
   char* map = static_cast<char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0));
-  assert(map != MAP_FAILED);
+  ANVLK_ASSERT_NE(map, MAP_FAILED);
 
   auto* keymap = xkb_keymap_new_from_string(cs.xkbContext, map, XKB_KEYMAP_FORMAT_TEXT_V1,
                                             XKB_KEYMAP_COMPILE_NO_FLAGS);

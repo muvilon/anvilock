@@ -81,7 +81,7 @@ void ShaderManager::loadAllShaders()
   for (const auto& [id, relPath] : ShaderPaths)
   {
     types::fsPath fullPath = *m_shaderDir / relPath;
-    LOG::DEBUG(m_ctx, "Loading SHADER: '{}'", shaderIDToStr(id), fullPath.c_str());
+    LOG::TRACE(m_ctx, "Loading SHADER: '{}'", shaderIDToStr(id), fullPath.c_str());
     LOG::TRACE(m_ctx, "SHADER path: '{}'", fullPath.c_str());
 
     if (auto source = loadShaderSource(fullPath))
