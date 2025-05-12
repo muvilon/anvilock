@@ -16,22 +16,10 @@ auto main() -> int
 
   LOG::INFO(cs.logCtx, "Session Lock JOB requested by user @: '{}'", cs.pamState.username);
 
-  if (initWayland(cs) == ANVLK_SUCCESS)
-  {
-    LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized Wayland!!");
-  }
-  else
-  {
-    LOG::ERROR(cs.logCtx, "Failed to initialize Wayland!");
-  }
-  if (initXKB(cs) == ANVLK_SUCCESS)
-  {
-    LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized XKB!");
-  }
-  else
-  {
-    LOG::ERROR(cs.logCtx, "Failed to initialize XKB!");
-  }
+  ANVLK_ASSERT_EQ(initWayland(cs), ANVLK_SUCCESS);
+  LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized Wayland!!");
+  ANVLK_ASSERT_EQ(initXKB(cs), ANVLK_SUCCESS);
+  LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Successfully initialized XKB!");
 
   logger::switchCtx(cs.logCtx, logger::LogCategory::CONFIG);
 
@@ -66,15 +54,7 @@ auto main() -> int
     render::renderLockScreen(cs);
   }
 
-  cs.logCtx.resetContext();
-  wl::unlockAndDestroySessionLock(cs);
-  cs.destroyEGL();
-  cs.disconnectWLDisplay();
-  // freetype gets destroyed via destructor
-
-  LOG::INFO(cs.logCtx, "Cleanup job done. Exiting Anvilock...");
-  LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD_UNDERLINE, "Final log file located at '{}'",
-            cs.logCtx.logFilePath.string());
+  sessionCleanup(cs);
 
   return ANVLK_SUCCESS;
 }

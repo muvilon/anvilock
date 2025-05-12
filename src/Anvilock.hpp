@@ -92,4 +92,17 @@ inline void setHomeDir(ClientState& cs)
   logger::log(logger::LogLevel::Info, cs.logCtx, "Home directory found: '{}'", cs.homeDir);
 }
 
+inline void sessionCleanup(ClientState& cs)
+{
+  cs.logCtx.resetContext();
+  wl::unlockAndDestroySessionLock(cs);
+  cs.destroyEGL();
+  cs.disconnectWLDisplay();
+  // freetype gets destroyed via destructor
+
+  LOG::INFO(cs.logCtx, "Cleanup job done. Exiting Anvilock...");
+  LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD_UNDERLINE, "Final log file located at '{}'",
+            cs.logCtx.logFilePath.string());
+}
+
 #endif

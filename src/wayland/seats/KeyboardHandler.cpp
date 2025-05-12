@@ -80,21 +80,20 @@ void onKeyboardKey(types::VPtr data, types::wayland::WLKeyboard_*, u32, u32, u32
       {
         cs.initPamAuth();
 
+        // password is std::moved when AuthenticateUser() is called
         if (cs.pamAuth->AuthenticateUser())
         {
           LOG::INFO(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication successful.");
-          cs.pamState.clearPassword();
           cs.pamState.authState.authSuccess = true;
         }
         else
         {
-          LOG::ERROR(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication failed. Entered: {}",
-                     cs.pamState.password);
-          // sanity clear, password is std::moved when AuthenticateUser() is called
-          cs.pamState.clearPassword();
+          LOG::ERROR(cs.logCtx, logger::LogStyle::COLOR_BOLD, "Authentication failed.");
           cs.pamState.authState.authFailed = true;
           shouldRender                     = true; // Failed auth should trigger a render
         }
+
+        ANVLK_ASSERT(cs.pamState.password.empty() == true);
 
         cs.pamState.firstEnterPress = false;
       }
