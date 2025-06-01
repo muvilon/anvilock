@@ -6,11 +6,22 @@ An upcoming screen lock for Wayland compositors that abides by the **ext-session
 
 > [!IMPORTANT]
 >
-> ANVILOCK is a [WIP] - Work in Progress
+> ANVILOCK is a [WIP] - Work in Progress (project is going under **massive revamp**!)
 >
-> **This project is undergoing a massive revamp!!**
+> **CHECK OUT THE [UNSTABLE](https://github.com/muvilon/anvilock/tree/unstable) FOR MORE DETAILS!!**
 > 
 > Stay tuned for more updates!
+
+For more details on why a revamp is necessary and it's benefits and hopes for the future, check out this:
+
+**[ANVILOCK PORT TO C++ 20 - A DRAFT PR](https://github.com/muvilon/anvilock/pull/5)**
+
+> [!WARNING]
+>
+> There are a *lot* of changes in the implementational and semantic structure of the **UNSTABLE ANVILOCK**, but the main underlying concept and flow of events remains the same.
+> 
+> Reading through old documentation *should* not really be very misleading.
+> 
 
 ## Understanding Anvilock 
 
