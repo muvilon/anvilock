@@ -1,6 +1,6 @@
 # Anvilock (Unstable branch)
 
-This branch aims to port Anvilock to a better and readable codebase using modern C++ (ideally cpp20)
+This branch aims to port Anvilock to a better and readable codebase using modern C++ (ideally cpp version >= 20)
 
 > [!IMPORTANT]
 > 
@@ -8,6 +8,37 @@ This branch aims to port Anvilock to a better and readable codebase using modern
 > 
 > Expect breaking changes with each passing commit.
 > 
+
+## Dependencies
+
+Currently you will have to manually configure these deps in your system (which is really not *that* hard) but in the future will have a way to ensure deps install before attempted compilation of Anvilock.
+
+### Runtime Dependencies
+
+| Library             | Purpose                                                    | Arch Linux Package | Ubuntu Package                    | Fedora Package        |
+| ------------------- | ---------------------------------------------------------- | ------------------ | --------------------------------- | --------------------- |
+| `libwayland-client` | Handles Wayland client communication.                      | `wayland`          | `libwayland-client0`              | `wayland`             |
+| `libwayland-server` | Enables communication with the display server.             | `wayland`          | `libwayland-server0`              | `wayland`             |
+| `libwayland-egl`    | Interfaces with OpenGL ES 2.0 API for Wayland integration. | `mesa`             | `libwayland-egl1`                 | `mesa-libwayland-egl` |
+| `glesv2`            | Efficient 2D/3D rendering for embedded/low-power devices.  | `mesa`             | `libgles2` or `libgles2-mesa-dev` | `mesa-libGLES`        |
+| `freetype2`         | *(Deprecated)* Previously used for text rendering.         | `freetype2`        | `libfreetype6`                    | `freetype`            |
+| `libxkbcommon`      | Keyboard keymap handling and layout management.            | `libxkbcommon`     | `libxkbcommon0`                   | `libxkbcommon`        |
+| `libpam`            | PAM authentication framework integration.                  | `pam`              | `libpam0g`                        | `pam`                 |
+| `libc`              | Standard C library for memory handling and I/O.            | `glibc`            | `libc6`                           | `glibc`               |
+| `libm`              | Math operations (e.g., used by `stb_image.h`).             | `glibc` (included) | `libm.so.6` (in `libc6`)          | `glibc` (included)    |
+
+---
+
+### Build Dependencies
+
+| Tool         | Role                                     | Arch Linux Package | Ubuntu Package | Fedora Package       |
+| ------------ | ---------------------------------------- | ------------------ | -------------- | -------------------- |
+| `pkg-config` | Finds and configures required libraries. | `pkgconf`          | `pkg-config`   | `pkgconf-pkg-config` |
+| `CMake`      | Main Build system.                       | `cmake`            | `cmake`        | `cmake`              |
+| `Make`       | Required alongside CMake.                | `make`             | `make`         | `make`               |
+| `gcc`        | C/C++ compiler.                          | `gcc`              | `gcc`          | `gcc`                |
+| `clang`      | Alternative C/C++ compiler.              | `clang`            | `clang`        | `clang`              |
+
 
 ## Building
 
@@ -45,5 +76,22 @@ export ANVLK_LOG_LEVEL=INFO
 # For future changes 
 ANVLK_LOG_LEVEL=debug ./build/anvilock
 ```
+
+## FAQ
+
+1. Will this work for KDE or GNOME?
+
+Short Answer is **NO**. They have their own implementations of the Wayland Protocol so unless we attempt to abide by both the general **ext-session-lock-v1** and their protocols, it will **NOT WORK** on those DEs
+
+2. Where can I use this?
+
+Any WM/DE that does not have custom implementations of the Wayland Protocol and has the **ext-session-lock-v1** protocol
+
+Few examples: Hyprland, Sway, Wayfire, Cosmic, etc.
+
+> [!NOTE]
+> 
+> This will **NOT WORK** for compositors like Weston which LACK the **ext-session-lock-v1** protocol needed for Anvilock to work.
+> 
 
 More docs on the porting process will be out soon.
