@@ -2,12 +2,10 @@
 #define ANVLK_GLOBAL_GLOBAL_FUNCS_HPP
 
 #include "Types.hpp"
-#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -22,7 +20,7 @@ namespace anvlk::utils
 // Constants
 inline constexpr types::Dimensions FallbackScreenWidth  = 1920;
 inline constexpr types::Dimensions FallbackScreenHeight = 1080;
-inline constexpr auto              FallbackHomeDir      = "/root";
+inline constexpr types::Directory  FallbackHomeDir      = "/root";
 inline constexpr GLuint            GLRetCodeFail        = 0;
 
 // Math utilities

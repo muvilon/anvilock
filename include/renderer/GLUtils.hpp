@@ -10,9 +10,36 @@
 namespace anvlk::render::GLUtils
 {
 
+namespace VBOBufStat
+{
+//@--> [ initialize the VBO buffer ] //
+constexpr const GLsizei INIT = 0;
+//@--> [ VBO buffer was NOT generated ] //
+constexpr const GLsizei NOT_GEN = 0;
+//@--> [ VBO buffer was generated ] //
+constexpr const GLsizei GEN = 1;
+} // namespace VBOBufStat
+
+enum TextureStatus
+{
+  //@--> [ GL texture has been initialized ] //
+  TEXTURE_INIT = 1,
+  //@--> [ GL texture has been destroyed ] //
+  TEXTURE_DESTROY = 0,
+  //@--> [ GL texture is in UB state ] //
+  UNDEF = -1
+};
+
+// //@--> [ GLUtil generic function to statically cast to <GLUINT> ] //
 template <typename T> constexpr auto to_gluint(T value) -> GLuint
 {
   return static_cast<GLuint>(value);
+}
+
+// //@--> [ GLUtil generic function to statically cast to <GLSIZEI> (which is INT) ] //
+template <typename T> constexpr auto to_glsizei(T value) -> GLsizei
+{
+  return static_cast<GLsizei>(value);
 }
 
 inline auto checkShaderCompileStatus(GLuint shader, const anvlk::logger::LogContext& logCtx,
