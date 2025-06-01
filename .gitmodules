@@ -1,0 +1,7 @@
+[submodule "external/toml++"]
+	path = external/toml++
+	url = https://github.com/marzer/tomlplusplus.git
+
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb.git

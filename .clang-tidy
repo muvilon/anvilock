@@ -4,3 +4,4 @@ CheckOptions:
     value:           '1'
 WarningsAsErrors:  ''
 FormatStyle:       file
+HeaderFilterRegex: '^(?!.*(toml\.hpp)).*$'
