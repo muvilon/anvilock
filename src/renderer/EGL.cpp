@@ -1,11 +1,11 @@
-#include "anvilock/include/widgets/WidgetInterface.hpp"
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/renderer/EGL.hpp>
-#include <anvilock/include/renderer/GLUtils.hpp>
-#include <anvilock/include/utils/Assert.hpp>
-#include <anvilock/include/widgets/BackgroundTexture.hpp>
-#include <anvilock/include/widgets/PasswordField.hpp>
-#include <anvilock/include/widgets/TimeBox.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/renderer/EGL.hpp>
+#include <anvilock/renderer/GLUtils.hpp>
+#include <anvilock/utils/Assert.hpp>
+#include <anvilock/widgets/BackgroundTexture.hpp>
+#include <anvilock/widgets/PasswordField.hpp>
+#include <anvilock/widgets/TimeBox.hpp>
+#include <anvilock/widgets/WidgetInterface.hpp>
 
 namespace anvlk::render
 {

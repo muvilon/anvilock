@@ -1,5 +1,5 @@
-#include <anvilock/include/renderer/GLUtils.hpp>
-#include <anvilock/include/widgets/TimeBox.hpp>
+#include <anvilock/renderer/GLUtils.hpp>
+#include <anvilock/widgets/TimeBox.hpp>
 
 namespace anvlk::widgets
 {

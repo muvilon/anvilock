@@ -1,7 +1,7 @@
-#include <anvilock/include/Log.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/term/AnsiSchema.hpp>
-#include <anvilock/include/term/OutputStream.hpp>
+#include <anvilock/Log.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/term/AnsiSchema.hpp>
+#include <anvilock/term/OutputStream.hpp>
 #include <fstream>
 #include <iostream>
 #include <utility>

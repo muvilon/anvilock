@@ -1,5 +1,5 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/wayland/seats/PointerHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/wayland/seats/PointerHandler.hpp>
 
 namespace anvlk::wl
 {

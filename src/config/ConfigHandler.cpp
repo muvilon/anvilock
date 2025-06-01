@@ -1,5 +1,5 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/config/ConfigHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/config/ConfigHandler.hpp>
 #include <stdexcept>
 
 namespace anvlk::cfg

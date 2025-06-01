@@ -1,6 +1,6 @@
-#include <anvilock/include/Log.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/toml/Parser.hpp>
+#include <anvilock/Log.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/toml/Parser.hpp>
 
 auto main() -> int
 {

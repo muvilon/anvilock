@@ -1,18 +1,18 @@
 #ifndef ANVLK_SRC_HPP
 #define ANVLK_SRC_HPP
 
-#include <anvilock/include/GlobalFuncs.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/config/ConfigHandler.hpp>
-#include <anvilock/include/freetype/FreeTypeHandler.hpp>
-#include <anvilock/include/pam/PamAuthenticator.hpp>
-#include <anvilock/include/renderer/EGL.hpp>
-#include <anvilock/include/runtime/LogUtils.hpp>
-#include <anvilock/include/shaders/ShaderHandler.hpp>
-#include <anvilock/include/utils/Assert.hpp>
-#include <anvilock/include/wayland/RegistryHandler.hpp>
-#include <anvilock/include/wayland/session-lock/SessionLockHandler.hpp>
-#include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
+#include <anvilock/GlobalFuncs.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/config/ConfigHandler.hpp>
+#include <anvilock/freetype/FreeTypeHandler.hpp>
+#include <anvilock/pam/PamAuthenticator.hpp>
+#include <anvilock/renderer/EGL.hpp>
+#include <anvilock/runtime/LogUtils.hpp>
+#include <anvilock/shaders/ShaderHandler.hpp>
+#include <anvilock/utils/Assert.hpp>
+#include <anvilock/wayland/RegistryHandler.hpp>
+#include <anvilock/wayland/session-lock/SessionLockHandler.hpp>
+#include <anvilock/wayland/xdg/SurfaceHandler.hpp>
 
 using namespace anvlk;
 

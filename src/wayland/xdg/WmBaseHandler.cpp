@@ -1,5 +1,5 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/wayland/xdg/WmBaseHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/wayland/xdg/WmBaseHandler.hpp>
 
 namespace anvlk::wl
 {

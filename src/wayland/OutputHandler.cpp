@@ -1,7 +1,5 @@
-
-#include "anvilock/include/Log.hpp"
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/wayland/OutputHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/wayland/OutputHandler.hpp>
 
 namespace anvlk::wl
 {

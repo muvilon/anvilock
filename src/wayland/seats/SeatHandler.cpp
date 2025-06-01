@@ -1,5 +1,5 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/wayland/seats/SeatHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/wayland/seats/SeatHandler.hpp>
 
 namespace anvlk::wl
 {

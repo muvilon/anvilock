@@ -1,12 +1,9 @@
-#include <anvilock/include/wayland/RegistryHandler.hpp>
-
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/wayland/OutputHandler.hpp>
-#include <anvilock/include/wayland/seats/SeatHandler.hpp>
-#include <anvilock/include/wayland/xdg/WmBaseHandler.hpp>
-#include <anvilock/protocols/ext-session-lock-client-protocol.h>
-
-#include <string_view>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/wayland/OutputHandler.hpp>
+#include <anvilock/wayland/RegistryHandler.hpp>
+#include <anvilock/wayland/seats/SeatHandler.hpp>
+#include <anvilock/wayland/xdg/WmBaseHandler.hpp>
+#include <anvlk-protocols/ext-session-lock-client-protocol.h>
 
 namespace anvlk::wl
 {

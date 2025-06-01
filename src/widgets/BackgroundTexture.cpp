@@ -1,9 +1,9 @@
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/runtime/EGLExceptionHandler.hpp>
-#include <anvilock/include/utils/STBImpl.hpp>
-#include <anvilock/include/widgets/BackgroundTexture.hpp>
-#include <anvilock/include/widgets/WidgetInterface.hpp>
-#include <anvilock/include/widgets/WidgetRegistryMacros.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/runtime/EGLExceptionHandler.hpp>
+#include <anvilock/utils/STBImpl.hpp>
+#include <anvilock/widgets/BackgroundTexture.hpp>
+#include <anvilock/widgets/WidgetInterface.hpp>
+#include <anvilock/widgets/WidgetRegistryMacros.hpp>
 
 ANVLK_WIDGET_REGISTRY anvlk::types::WidgetName _BackgroundWidgetName;
 

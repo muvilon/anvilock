@@ -1,4 +1,4 @@
-#include <anvilock/include/widgets/WidgetInterface.hpp>
+#include <anvilock/widgets/WidgetInterface.hpp>
 
 namespace anvlk::widgets
 {

@@ -1,8 +1,6 @@
-
-#include "anvilock/include/Log.hpp"
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/renderer/EGL.hpp>
-#include <anvilock/include/wayland/xdg/SurfaceHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/renderer/EGL.hpp>
+#include <anvilock/wayland/xdg/SurfaceHandler.hpp>
 
 namespace anvlk::wl
 {

@@ -1,7 +1,7 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/utils/Assert.hpp>
-#include <anvilock/include/wayland/seats/KeyboardHandler.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/utils/Assert.hpp>
+#include <anvilock/wayland/seats/KeyboardHandler.hpp>
 
 namespace anvlk::wl
 {

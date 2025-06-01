@@ -1,4 +1,4 @@
-#include <anvilock/src/Anvilock.hpp>
+#include "Anvilock.hpp"
 
 auto main() -> int
 {

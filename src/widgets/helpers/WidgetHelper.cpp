@@ -1,5 +1,5 @@
-#include <anvilock/include/renderer/GLUtils.hpp>
-#include <anvilock/include/widgets/helpers/WidgetHelper.hpp>
+#include <anvilock/renderer/GLUtils.hpp>
+#include <anvilock/widgets/helpers/WidgetHelper.hpp>
 
 namespace anvlk::widgets::helpers
 {

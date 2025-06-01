@@ -1,4 +1,4 @@
-#include <anvilock/include/shaders/ShaderHandler.hpp>
+#include <anvilock/shaders/ShaderHandler.hpp>
 #include <fstream>
 #include <sstream>
 

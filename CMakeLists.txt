@@ -84,12 +84,12 @@ pkg_check_modules(GLES REQUIRED glesv2)
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
 set(PROTOCOL_SRC_FILES 
-  protocols/src/xdg-shell-client-protocol.c 
-  protocols/src/ext-session-lock-client-protocol.c
+  anvlk-protocols/src/xdg-shell-client-protocol.c 
+  anvlk-protocols/src/ext-session-lock-client-protocol.c
 )
 
 add_library(anvilock_logger STATIC ${CMAKE_SOURCE_DIR}/src/logger/Log.cpp)
-target_include_directories(anvilock_logger PUBLIC ${CMAKE_SOURCE_DIR}/../)
+target_include_directories(anvilock_logger PUBLIC ${CMAKE_SOURCE_DIR})
 target_compile_options(anvilock_logger PRIVATE ${COMPILE_OPTIONS})
 
 set(SRC_FILES
@@ -115,7 +115,7 @@ set(SRC_FILES
 )
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})
-target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(${EXECUTABLE_NAME}
     PRIVATE ${FREETYPE_LIBRARIES}
     PRIVATE ${WAYLAND_LIBRARIES}
@@ -174,4 +174,5 @@ message(STATUS "│ Config File:       ${CONFIG_FILE}")
 message(STATUS "│ Global Install:    ${BUILD_GLOBAL}")
 message(STATUS "│ Global shaders:    ${GLOBAL_SHADER_DIR}")
 message(STATUS "│ Local shaders:     ${LOCAL_SHADER_DIR}")
+message(STATUS "│ Source Directory:  ${CMAKE_SOURCE_DIR}")
 message(STATUS "└───────────────────────────────────────\n")

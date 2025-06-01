@@ -1,7 +1,7 @@
-#include <anvilock/include/ClientState.hpp>
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/shaders/ShaderHandler.hpp>
+#include <anvilock/ClientState.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/shaders/ShaderHandler.hpp>
 
 void ClientState::setLogContext(bool writeToFile, fsPath path, bool useTimestamp,
                                 anvlk::logger::LogLevel logLevel)

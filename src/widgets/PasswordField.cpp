@@ -1,8 +1,8 @@
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/renderer/GLUtils.hpp>
-#include <anvilock/include/widgets/PasswordField.hpp>
-#include <anvilock/include/widgets/WidgetInterface.hpp>
-#include <anvilock/include/widgets/WidgetRegistryMacros.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/renderer/GLUtils.hpp>
+#include <anvilock/widgets/PasswordField.hpp>
+#include <anvilock/widgets/WidgetInterface.hpp>
+#include <anvilock/widgets/WidgetRegistryMacros.hpp>
 
 ANVLK_WIDGET_REGISTRY anvlk::types::WidgetName _PasswordFieldWidgetName;
 

@@ -1,5 +1,5 @@
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/pam/PamAuthenticator.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/pam/PamAuthenticator.hpp>
 #include <cstring>
 #include <memory>
 

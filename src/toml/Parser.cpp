@@ -1,6 +1,6 @@
-#include <anvilock/include/LogMacros.hpp>
-#include <anvilock/include/Types.hpp>
-#include <anvilock/include/toml/Parser.hpp>
+#include <anvilock/LogMacros.hpp>
+#include <anvilock/Types.hpp>
+#include <anvilock/toml/Parser.hpp>
 
 namespace anvlk::tomlparser
 {
