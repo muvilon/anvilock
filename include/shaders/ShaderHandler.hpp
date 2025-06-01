@@ -9,8 +9,8 @@
 namespace anvlk::gfx
 {
 
-inline constexpr std::string_view GLOBAL_SHADER_DIR    = "/usr/share/anvilock/shaders/";
-inline constexpr std::string_view REL_LOCAL_SHADER_DIR = ".local/share/anvilock/shaders/";
+inline constexpr const std::string_view GLOBAL_SHADER_DIR    = "/usr/share/anvilock/shaders/";
+inline constexpr const std::string_view REL_LOCAL_SHADER_DIR = ".local/share/anvilock/shaders/";
 
 enum class ShaderID
 {
@@ -26,7 +26,7 @@ enum class ShaderID
 
 inline auto shaderIDToStr(ShaderID id) -> types::ShaderName;
 
-inline const std::unordered_map<ShaderID, std::string_view> ShaderPaths = {
+inline const std::unordered_map<ShaderID, const std::string_view> ShaderPaths = {
   {ShaderID::INIT_EGL_VERTEX, "egl/init/vertex_shader.glsl"},
   {ShaderID::INIT_EGL_FRAG, "egl/init/fragment_shader.glsl"},
   {ShaderID::RENDER_PWD_FIELD_EGL_VERTEX, "egl/render_password_field/vertex_shader.glsl"},

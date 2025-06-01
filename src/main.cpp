@@ -1,11 +1,8 @@
 #include <anvilock/src/Anvilock.hpp>
 
-using namespace anvlk;
-
 auto main() -> int
 {
   ClientState cs;
-  cs.pamState.authState.authSuccess = false;
 
   setHomeDir(cs);
   ANVLK_ASSERT(cs.homeDir.empty() != true);
@@ -41,6 +38,8 @@ auto main() -> int
 
   cs.logCtx.resetContext();
 
+  // all init jobs done, now we commit surface to begin session lock
+  // and session-lock surface re-rendering (dirtying) with EGL
   wl_surface_commit(cs.wlSurface);
 
   while (!cs.pamState.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)

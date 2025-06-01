@@ -3,7 +3,6 @@
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
-#include <anvilock/include/Log.hpp>
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/config/ConfigStruct.hpp>
 #include <anvilock/include/freetype/FreeTypeStruct.hpp>

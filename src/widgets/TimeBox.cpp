@@ -33,6 +33,7 @@ void updateTimeTexture(ClientState& cs)
 
 void renderTimeBox(ClientState& cs)
 {
+  timebox::updateTimeTexture(cs);
   if (cs.timeTexture == render::GLUtils::TextureStatus::TEXTURE_DESTROY)
   {
     LOG::ERROR(cs.logCtx, "No valid texture for rendering.");

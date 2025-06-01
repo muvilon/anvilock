@@ -111,6 +111,7 @@ set(SRC_FILES
   ${CMAKE_SOURCE_DIR}/src/widgets/BackgroundTexture.cpp
   ${CMAKE_SOURCE_DIR}/src/widgets/PasswordField.cpp
   ${CMAKE_SOURCE_DIR}/src/widgets/TimeBox.cpp
+  ${CMAKE_SOURCE_DIR}/src/widgets/WidgetInterface.cpp
 )
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp ${SRC_FILES} ${PROTOCOL_SRC_FILES})

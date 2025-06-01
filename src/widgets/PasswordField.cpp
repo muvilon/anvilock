@@ -1,11 +1,15 @@
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/renderer/GLUtils.hpp>
 #include <anvilock/include/widgets/PasswordField.hpp>
+#include <anvilock/include/widgets/WidgetInterface.hpp>
+#include <anvilock/include/widgets/WidgetRegistryMacros.hpp>
+
+ANVLK_WIDGET_REGISTRY anvlk::types::WidgetName _PasswordFieldWidgetName;
 
 namespace anvlk::widgets
 {
 
-void renderPasswordField(ClientState& state)
+auto renderPasswordField(ClientState& state) -> WidgetRegistryStatus
 {
   GLuint program =
     render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::RENDER_PWD_FIELD_EGL_VERTEX,
@@ -129,6 +133,10 @@ void renderPasswordField(ClientState& state)
   // Disable blending and clean up
   glDisable(GL_BLEND);
   glDeleteProgram(program);
+
+  return {0, true};
 }
+
+REGISTER_WIDGET(_PasswordFieldWidgetName, renderPasswordField);
 
 } // namespace anvlk::widgets

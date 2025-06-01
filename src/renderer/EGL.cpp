@@ -1,3 +1,4 @@
+#include "anvilock/include/widgets/WidgetInterface.hpp"
 #include <anvilock/include/Types.hpp>
 #include <anvilock/include/renderer/EGL.hpp>
 #include <anvilock/include/renderer/GLUtils.hpp>
@@ -57,12 +58,21 @@ void renderLockScreen(ClientState& cs)
 
   if (!initialized)
   {
-    cs.shaderState.bgTexture = widgets::loadBGTexture(cs);
-    cs.shaderState.textureShaderProgram =
-      render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::TEXTURE_EGL_VERTEX,
-                                           anvlk::gfx::ShaderID::TEXTURE_EGL_FRAG>(
-        cs.logCtx, *cs.shaderManagerPtr);
-    initialized = true;
+    // load the function for background widget
+    auto bgTextureLoader = widgets::WidgetFunctionRegistry::instance().getLoader("background");
+
+    if (bgTextureLoader)
+    {
+      LOG::INFO(cs.logCtx, "Loaded background widget successfully!");
+      widgets::WidgetRegistryStatus bgTextureStatus = bgTextureLoader(cs);
+
+      cs.shaderState.bgTexture = bgTextureStatus.first;
+      cs.shaderState.textureShaderProgram =
+        render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::TEXTURE_EGL_VERTEX,
+                                             anvlk::gfx::ShaderID::TEXTURE_EGL_FRAG>(
+          cs.logCtx, *cs.shaderManagerPtr);
+      initialized = true;
+    }
   }
 
   glClear(GL_COLOR_BUFFER_BIT);
@@ -86,9 +96,14 @@ void renderLockScreen(ClientState& cs)
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  widgets::timebox::updateTimeTexture(cs);
   widgets::renderTimeBox(cs);
-  widgets::renderPasswordField(cs);
+  auto pwdFieldLoader = widgets::WidgetFunctionRegistry::instance().getLoader("passwordfield");
+  if (pwdFieldLoader)
+  {
+    auto pwdFieldStatus = pwdFieldLoader(cs);
+    if (!pwdFieldStatus.second)
+      LOG::ERROR(cs.logCtx, "Failed to render password field!");
+  }
 
   eglSwapBuffers(cs.eglDisplay, cs.eglSurface);
 

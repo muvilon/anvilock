@@ -1,11 +1,16 @@
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/runtime/EGLExceptionHandler.hpp>
 #include <anvilock/include/utils/STBImpl.hpp>
 #include <anvilock/include/widgets/BackgroundTexture.hpp>
+#include <anvilock/include/widgets/WidgetInterface.hpp>
+#include <anvilock/include/widgets/WidgetRegistryMacros.hpp>
+
+ANVLK_WIDGET_REGISTRY anvlk::types::WidgetName _BackgroundWidgetName;
 
 namespace anvlk::widgets
 {
 
-auto loadBGTexture(ClientState& cs) -> GLuint
+auto loadBGTexture(ClientState& cs) -> WidgetRegistryStatus
 {
   types::Dimensions width, height;
   int               channels;
@@ -32,7 +37,9 @@ auto loadBGTexture(ClientState& cs) -> GLuint
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   stbi_image_free(image);
-  return texture;
+  return {texture, true};
 }
+
+REGISTER_WIDGET(_BackgroundWidgetName, loadBGTexture);
 
 } // namespace anvlk::widgets

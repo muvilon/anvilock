@@ -1,5 +1,6 @@
-#include "anvilock/include/Types.hpp"
 #include <anvilock/include/ClientState.hpp>
+#include <anvilock/include/LogMacros.hpp>
+#include <anvilock/include/Types.hpp>
 #include <anvilock/include/shaders/ShaderHandler.hpp>
 
 void ClientState::setLogContext(bool writeToFile, fsPath path, bool useTimestamp,

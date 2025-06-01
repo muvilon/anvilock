@@ -114,6 +114,11 @@ template <typename T> constexpr auto to_double(T value) -> double
   return static_cast<double>(value); //@--> [ Convert to double ] //
 }
 
+//@--> [ Widget Name (ex: PasswordField, Background, etc.) ] //
+using WidgetName = const char[];
+//@--> [ Widget Name parameter used when registering the widget at compile time ] //
+using WidgetNameParam = const char*;
+
 //@--> [ Array templates for common data layouts ] //
 template <std::size_t N> using FloatArray = std::array<float, N>; //@--> [ 1D float array ] //
 template <std::size_t ROWS, std::size_t COLS>
