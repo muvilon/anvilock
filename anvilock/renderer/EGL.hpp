@@ -13,7 +13,7 @@ namespace anvlk::render
 {
 
 inline constexpr std::array<EGLint, 11> GLOBAL_EGL_ATTRIBS = {EGL_RENDERABLE_TYPE,
-                                                              EGL_OPENGL_ES2_BIT,
+                                                              EGL_OPENGL_ES3_BIT,
                                                               EGL_SURFACE_TYPE,
                                                               EGL_WINDOW_BIT,
                                                               EGL_RED_SIZE,
@@ -24,9 +24,10 @@ inline constexpr std::array<EGLint, 11> GLOBAL_EGL_ATTRIBS = {EGL_RENDERABLE_TYP
                                                               8,
                                                               EGL_NONE};
 
-inline constexpr std::array<EGLint, 3> EGL_CTX_ATTRIBS = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+inline constexpr std::array<EGLint, 3> EGL_CTX_ATTRIBS = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
 
 void initEGL(ClientState& cs);
+void exitEGL(ClientState& cs);
 void renderLockScreen(ClientState& cs);
 
 } // namespace anvlk::render

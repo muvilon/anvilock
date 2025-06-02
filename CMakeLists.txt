@@ -74,12 +74,12 @@ check_headers(SYSTEM_HEADERS "C")
 # Find Required Packages
 find_package(Freetype REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS EGL GLES3)
+get_target_property(GLES3_PATH OpenGL::GLES3 IMPORTED_LOCATION)
 
 pkg_check_modules(WAYLAND REQUIRED wayland-client wayland-server wayland-egl)
 pkg_check_modules(XKBCOMMON REQUIRED xkbcommon)
 pkg_check_modules(PAM REQUIRED pam)
-pkg_check_modules(OPENGL REQUIRED gl)
-pkg_check_modules(GLES REQUIRED glesv2)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} toml ${WAYLAND_INCLUDE_DIRS} ${XKBCOMMON_INCLUDE_DIRS} ${PAM_INCLUDE_DIRS})
 
@@ -121,7 +121,7 @@ target_link_libraries(${EXECUTABLE_NAME}
     PRIVATE ${WAYLAND_LIBRARIES}
     PRIVATE ${XKBCOMMON_LIBRARIES}
     PRIVATE ${PAM_LIBRARIES}
-    PRIVATE EGL GLESv2 m
+    PRIVATE OpenGL::EGL OpenGL::GLES3 m
     PRIVATE anvilock_logger
 )
 target_compile_options(${EXECUTABLE_NAME} PRIVATE ${COMPILE_OPTIONS})
@@ -169,7 +169,7 @@ message(STATUS "│ Freetype:          ${FREETYPE_LIBRARIES}")
 message(STATUS "│ Wayland:           ${WAYLAND_LIBRARIES}")
 message(STATUS "│ XKBCommon:         ${XKBCOMMON_LIBRARIES}")
 message(STATUS "│ PAM:               ${PAM_LIBRARIES}")
-message(STATUS "│ GLESv2:            ${GLES_LIBRARIES}")
+message(STATUS "│ GLES3 Library:     ${GLES3_PATH}")
 message(STATUS "│ Config File:       ${CONFIG_FILE}")
 message(STATUS "│ Global Install:    ${BUILD_GLOBAL}")
 message(STATUS "│ Global shaders:    ${GLOBAL_SHADER_DIR}")

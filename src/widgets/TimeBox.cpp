@@ -31,7 +31,7 @@ void updateTimeTexture(ClientState& cs)
 }
 } // namespace timebox
 
-void renderTimeBox(ClientState& cs)
+void renderTimeBox(ClientState& cs, float fadeAlpha)
 {
   timebox::updateTimeTexture(cs);
   if (cs.timeTexture == render::GLUtils::TextureStatus::TEXTURE_DESTROY)
@@ -41,7 +41,6 @@ void renderTimeBox(ClientState& cs)
   }
 
   static GLuint VBO = render::GLUtils::VBOBufStat::INIT;
-
   if (VBO == render::GLUtils::VBOBufStat::NOT_GEN)
   {
     glGenBuffers(render::GLUtils::VBOBufStat::GEN, &VBO);
@@ -53,6 +52,22 @@ void renderTimeBox(ClientState& cs)
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // Use custom shader for rounded time box
+  static GLuint shader =
+    render::GLUtils::createShaderProgram<gfx::ShaderID::RENDER_TIME_FIELD_EGL_VERTEX,
+                                         gfx::ShaderID::RENDER_TIME_FIELD_EGL_FRAG>(
+      cs.logCtx, *cs.shaderManagerPtr);
+
+  glUseProgram(shader);
+
+  GLint texLoc    = glGetUniformLocation(shader, "uTexture");
+  GLint alphaLoc  = glGetUniformLocation(shader, "uAlpha");
+  GLint radiusLoc = glGetUniformLocation(shader, "uRadius");
+
+  glUniform1i(texLoc, 0);
+  glUniform1f(alphaLoc, fadeAlpha);
+  glUniform1f(radiusLoc, 0.15f); // adjust for look — 0.1 to 0.2 is nice
+
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)nullptr);
@@ -63,24 +78,22 @@ void renderTimeBox(ClientState& cs)
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, cs.timeTexture);
 
-  glUseProgram(cs.shaderState.textureShaderProgram);
-  glUniform1i(glGetUniformLocation(cs.shaderState.textureShaderProgram, "uTexture"), 0);
-
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR)
-  {
-    LOG::ERROR(cs.logCtx, "OpenGL error: {}", error);
-  }
 
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glUseProgram(0);
   glDisable(GL_BLEND);
 
-  LOG::TRACE(cs.logCtx, "Time box rendered successfully!!");
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR)
+  {
+    LOG::ERROR(cs.logCtx, "OpenGL error when rendering time box: {}", error);
+  }
+
+  LOG::TRACE(cs.logCtx, "Modern time box rendered successfully!");
 }
 
 } // namespace anvlk::widgets

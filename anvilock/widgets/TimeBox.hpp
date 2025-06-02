@@ -9,7 +9,7 @@ namespace timebox
 {
 void updateTimeTexture(ClientState& cs);
 }
-void renderTimeBox(ClientState& cs);
+void renderTimeBox(ClientState& cs, float fadeAlpha = 1.0f);
 } // namespace anvlk::widgets
 
 #endif

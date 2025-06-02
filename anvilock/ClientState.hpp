@@ -2,7 +2,7 @@
 #define ANVLK_GLOBAL_CLIENT_STATE_HPP
 
 #include <EGL/egl.h>
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <anvilock/Types.hpp>
 #include <anvilock/config/ConfigStruct.hpp>
 #include <anvilock/freetype/FreeTypeStruct.hpp>
@@ -147,6 +147,23 @@ public:
   void seekToIndex(const anvlk::types::iters& idx);
 };
 
+struct VertexBufState
+{
+  GLuint VAO = 0;
+  GLuint VBO = 0;
+};
+
+struct FadeOutOverlay
+{
+  bool      active = false;
+  TimePoint startTime;
+
+  GLuint quadVAO       = 0;
+  GLuint shaderProgram = 0;
+
+  static constexpr float DURATION = 1.0f; // seconds
+};
+
 struct ClientState
 {
   /* Wayland Globals */
@@ -216,6 +233,9 @@ struct ClientState
   EGLConfig  eglConfig   = nullptr;
   GLuint     timeTexture = 0;
 
+  FadeOutOverlay fadeOut;
+
+  VertexBufState globalVBState;
   // Shader Manager
   std::unique_ptr<anvlk::gfx::ShaderManager> shaderManagerPtr;
 

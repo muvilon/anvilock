@@ -44,15 +44,13 @@ auto main() -> int
 
   while (!cs.pamState.authState.authSuccess && wl_display_dispatch(cs.wlDisplay) != -1)
   {
-    cs.pamState.authState.authFailed = false;
     if (!cs.sessionLock.surfaceCreated)
-    {
       wl::initiateSessionLock(cs);
-    }
 
     render::renderLockScreen(cs);
   }
 
+  // Now safe to cleanup
   sessionCleanup(cs);
 
   return ANVLK_SUCCESS;

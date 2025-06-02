@@ -1,3 +1,5 @@
+#version 300 es
+
 attribute vec2 position;
 attribute vec2 texCoord;
 varying vec2 vTexCoord;

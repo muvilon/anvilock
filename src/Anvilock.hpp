@@ -81,7 +81,7 @@ inline void setHomeDir(ClientState& cs)
   types::Directory home = anvlk::utils::getHomeDir();
   if (!home.c_str())
   {
-    logger::log(logger::LogLevel::Error, cs.logCtx, "Home directory (env var) not found!");
+    LOG::ERROR(cs.logCtx, "Home directory (env var) not found!");
     return;
   }
 
@@ -89,12 +89,13 @@ inline void setHomeDir(ClientState& cs)
                    runtime::logger::getLogLevelFromEnv());
 
   cs.homeDir = home;
-  logger::log(logger::LogLevel::Info, cs.logCtx, "Home directory found: '{}'", cs.homeDir);
+  LOG::INFO(cs.logCtx, "Home directory found: '{}'", cs.homeDir);
 }
 
 inline void sessionCleanup(ClientState& cs)
 {
   cs.logCtx.resetContext();
+  render::exitEGL(cs);
   wl::unlockAndDestroySessionLock(cs);
   cs.destroyEGL();
   cs.disconnectWLDisplay();

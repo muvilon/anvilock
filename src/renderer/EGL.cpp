@@ -1,3 +1,4 @@
+#include "anvilock/shaders/ShaderHandler.hpp"
 #include <anvilock/Types.hpp>
 #include <anvilock/renderer/EGL.hpp>
 #include <anvilock/renderer/GLUtils.hpp>
@@ -6,6 +7,7 @@
 #include <anvilock/widgets/PasswordField.hpp>
 #include <anvilock/widgets/TimeBox.hpp>
 #include <anvilock/widgets/WidgetInterface.hpp>
+#include <thread>
 
 namespace anvlk::render
 {
@@ -58,6 +60,8 @@ void renderLockScreen(ClientState& cs)
 
   if (!initialized)
   {
+    LOG::INFO(cs.logCtx, "Using GL Version: {}",
+              reinterpret_cast<const char*>(glGetString(GL_VERSION)));
     // load the function for background widget
     auto bgTextureLoader = widgets::WidgetFunctionRegistry::instance().getLoader("background");
 
@@ -71,7 +75,26 @@ void renderLockScreen(ClientState& cs)
         render::GLUtils::createShaderProgram<anvlk::gfx::ShaderID::TEXTURE_EGL_VERTEX,
                                              anvlk::gfx::ShaderID::TEXTURE_EGL_FRAG>(
           cs.logCtx, *cs.shaderManagerPtr);
-      initialized = true;
+
+      GLuint vao;
+      glGenVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+
+      GLint posLoc      = glGetAttribLocation(cs.shaderState.textureShaderProgram, "position");
+      GLint texCoordLoc = glGetAttribLocation(cs.shaderState.textureShaderProgram, "texCoord");
+
+      glVertexAttribPointer(GLUtils::to_gluint(posLoc), 2, GL_FLOAT, GL_FALSE, 0,
+                            utils::quad_vertices.data());
+      glEnableVertexAttribArray(GLUtils::to_gluint(posLoc));
+
+      glVertexAttribPointer(GLUtils::to_gluint(texCoordLoc), 2, GL_FLOAT, GL_FALSE, 0,
+                            utils::tex_coords.data());
+      glEnableVertexAttribArray(GLUtils::to_gluint(texCoordLoc));
+
+      glBindVertexArray(0); // unbind VAO
+
+      cs.globalVBState.VAO = vao;
+      initialized          = true;
     }
   }
 
@@ -79,22 +102,15 @@ void renderLockScreen(ClientState& cs)
 
   glUseProgram(cs.shaderState.textureShaderProgram);
 
-  GLint posLoc      = glGetAttribLocation(cs.shaderState.textureShaderProgram, "position");
-  GLint texCoordLoc = glGetAttribLocation(cs.shaderState.textureShaderProgram, "texCoord");
-
-  glVertexAttribPointer(GLUtils::to_gluint(posLoc), 2, GL_FLOAT, GL_FALSE, 0,
-                        utils::quad_vertices.data());
-  glEnableVertexAttribArray(GLUtils::to_gluint(posLoc));
-
-  glVertexAttribPointer(GLUtils::to_gluint(texCoordLoc), 2, GL_FLOAT, GL_FALSE, 0,
-                        utils::tex_coords.data());
-  glEnableVertexAttribArray(GLUtils::to_gluint(texCoordLoc));
+  glBindVertexArray(cs.globalVBState.VAO);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, cs.shaderState.bgTexture);
   glUniform1i(glGetUniformLocation(cs.shaderState.textureShaderProgram, "uTexture"), 0);
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+  glBindVertexArray(0);
 
   widgets::renderTimeBox(cs);
   auto pwdFieldLoader = widgets::WidgetFunctionRegistry::instance().getLoader("passwordfield");
@@ -153,4 +169,51 @@ void initEGL(ClientState& cs)
   renderLockScreen(cs);
 }
 
+void exitEGL(ClientState& cs)
+{
+  logger::switchCtx(cs.logCtx, logger::LogCategory::EGL);
+
+  if (!eglMakeCurrent(cs.eglDisplay, cs.eglSurface, cs.eglSurface, cs.eglContext))
+  {
+    LOG::ERROR(cs.logCtx, "Failed to make EGL current before exit!");
+    // Proceed anyway
+  }
+
+  // FADE OUT ANIM
+  //
+  // THIS WILL KEEP ONLY THE BG TEXTURE AND FADE OUT INTO BLACK COLOR.
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  for (types::iters step = 0; step <= GLUtils::FadeSteps; ++step)
+  {
+    float alpha = static_cast<float>(step) / GLUtils::FadeSteps;
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Render current background texture first (like renderLockScreen)
+    glUseProgram(cs.shaderState.textureShaderProgram);
+
+    glBindVertexArray(cs.globalVBState.VAO);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, cs.shaderState.bgTexture);
+    glUniform1i(glGetUniformLocation(cs.shaderState.textureShaderProgram, "uTexture"), 0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glBindVertexArray(0);
+
+    // Render fade quad on top
+    GLUtils::renderFadeQuad(alpha, cs.logCtx, *cs.shaderManagerPtr);
+
+    eglSwapBuffers(cs.eglDisplay, cs.eglSurface);
+
+    // Small delay to make animation visible (~16ms per frame for ~60fps)
+    // If you have a frame timing mechanism, use that instead
+    std::this_thread::sleep_for(std::chrono::milliseconds(7));
+  }
+
+  glDisable(GL_BLEND);
+}
 } // namespace anvlk::render

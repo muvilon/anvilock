@@ -6,13 +6,11 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
+#include <pwd.h>
 #include <string>
 #include <string_view>
-#include <utility>
-
-#include <GLES2/gl2.h>
-#include <pwd.h>
 #include <unistd.h>
+#include <utility>
 
 namespace anvlk::utils
 {
@@ -21,7 +19,6 @@ namespace anvlk::utils
 inline constexpr types::Dimensions FallbackScreenWidth  = 1920;
 inline constexpr types::Dimensions FallbackScreenHeight = 1080;
 inline constexpr types::Directory  FallbackHomeDir      = "/root";
-inline constexpr GLuint            GLRetCodeFail        = 0;
 
 // Math utilities
 template <typename T> [[nodiscard]] constexpr auto max(T a, T b) noexcept -> T

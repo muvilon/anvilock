@@ -35,6 +35,19 @@ using u32 = uint32_t; //@--> [ 32-bit unsigned integer ] //
 using u16 = uint16_t; //@--> [ 16-bit unsigned integer ] //
 using u8  = uint8_t;  //@--> [ 8-bit unsigned integer ] //
 
+struct Color
+{
+  u8 r = 0;
+  u8 g = 0;
+  u8 b = 0;
+  u8 a = 255;
+
+  constexpr Color() = default;
+  constexpr Color(u8 red, u8 green, u8 blue, u8 alpha = 255) : r(red), g(green), b(blue), a(alpha)
+  {
+  }
+};
+
 using uint = unsigned int; //@--> [ Platform-defined unsigned int ] //
 
 //@--> [ Signed integer aliases ] //
@@ -107,6 +120,11 @@ template <typename T> constexpr auto to_usize(T value) -> iters
 template <typename T> constexpr auto to_float(T value) -> float
 {
   return static_cast<float>(value); //@--> [ Convert to float ] //
+}
+
+template <typename T> constexpr auto to_int(T value) -> int
+{
+  return static_cast<int>(value); //@--> [ Convert to float ] //
 }
 
 template <typename T> constexpr auto to_double(T value) -> double

@@ -17,9 +17,8 @@ template <typename T> constexpr auto to_ft_ulong(T value) -> FT_ULong
 
 using namespace anvlk;
 
-constexpr int DOT_RADIUS     = 6;
-constexpr int CHAR_HEIGHT_PX = 20;
-constexpr int CHAR_WIDTH_PX  = 10;
+constexpr const int CHAR_HEIGHT_PX = 40;
+constexpr const int CHAR_WIDTH_PX  = 30;
 
 class FreeTypeHandler
 {

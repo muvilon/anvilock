@@ -15,19 +15,26 @@ Currently you will have to manually configure these deps in your system (which i
 
 ### Runtime Dependencies
 
-| Library             | Purpose                                                    | Arch Linux Package | Ubuntu Package                    | Fedora Package        |
-| ------------------- | ---------------------------------------------------------- | ------------------ | --------------------------------- | --------------------- |
-| `libwayland-client` | Handles Wayland client communication.                      | `wayland`          | `libwayland-client0`              | `wayland`             |
-| `libwayland-server` | Enables communication with the display server.             | `wayland`          | `libwayland-server0`              | `wayland`             |
-| `libwayland-egl`    | Interfaces with OpenGL ES 2.0 API for Wayland integration. | `mesa`             | `libwayland-egl1`                 | `mesa-libwayland-egl` |
-| `glesv2`            | Efficient 2D/3D rendering for embedded/low-power devices.  | `mesa`             | `libgles2` or `libgles2-mesa-dev` | `mesa-libGLES`        |
-| `freetype2`         | *(Deprecated)* Previously used for text rendering.         | `freetype2`        | `libfreetype6`                    | `freetype`            |
-| `libxkbcommon`      | Keyboard keymap handling and layout management.            | `libxkbcommon`     | `libxkbcommon0`                   | `libxkbcommon`        |
-| `libpam`            | PAM authentication framework integration.                  | `pam`              | `libpam0g`                        | `pam`                 |
-| `libc`              | Standard C library for memory handling and I/O.            | `glibc`            | `libc6`                           | `glibc`               |
-| `libm`              | Math operations (e.g., used by `stb_image.h`).             | `glibc` (included) | `libm.so.6` (in `libc6`)          | `glibc` (included)    |
+Here’s your updated table, replacing **`glesv2`** with **`gles3`** across all columns and package names:
 
----
+| Library             | Purpose                                            | Arch Linux Package   | Ubuntu Package              | Fedora Package        |
+| ------------------- | -------------------------------------------------- | -------------------- | --------------------------- | --------------------- |
+| `libwayland-client` | Handles Wayland client communication.              | `wayland`            | `libwayland-client0`        | `wayland`             |
+| `libwayland-server` | Enables communication with the display server.     | `wayland`            | `libwayland-server0`        | `wayland`             |
+| `libwayland-egl`    | Interfaces with OpenGL ES for Wayland integration. | `mesa`               | `libwayland-egl1`           | `mesa-libwayland-egl` |
+| `gles3`             | Efficient 2D/3D rendering using OpenGL ES 3.0+.    | `mesa` or `libglvnd` | `libgles-dev` or `libgles3` | `mesa-libGLES`        |
+| `freetype2`         | *(Deprecated)* Previously used for text rendering. | `freetype2`          | `libfreetype6`              | `freetype`            |
+| `libxkbcommon`      | Keyboard keymap handling and layout management.    | `libxkbcommon`       | `libxkbcommon0`             | `libxkbcommon`        |
+| `libpam`            | PAM authentication framework integration.          | `pam`                | `libpam0g`                  | `pam`                 |
+| `libc`              | Standard C library for memory handling and I/O.    | `glibc`              | `libc6`                     | `glibc`               |
+| `libm`              | Math operations (e.g., used by `stb_image.h`).     | `glibc` (included)   | `libm.so.6` (in `libc6`)    | `glibc` (included)    |
+
+> [!NOTE]
+>
+> * On **Ubuntu**, `libgles-dev` provides development headers for both GLES2 and GLES3.
+> * On **Arch**, `mesa` and/or `libglvnd` provide `libGLESv2.so` which includes GLES3.
+> * On **Fedora**, `mesa-libGLES` supports GLES 3+ with no separate `gles3` package.
+> 
 
 ### Build Dependencies
 

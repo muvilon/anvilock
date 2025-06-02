@@ -22,6 +22,8 @@ enum class ShaderID
   RENDER_TIME_FIELD_EGL_FRAG,
   TEXTURE_EGL_VERTEX,
   TEXTURE_EGL_FRAG,
+  FADE_OUT_VERTEX,
+  FADE_OUT_FRAG
 };
 
 inline auto shaderIDToStr(ShaderID id) -> types::ShaderName;
@@ -35,6 +37,8 @@ inline const std::unordered_map<ShaderID, const std::string_view> ShaderPaths = 
   {ShaderID::RENDER_TIME_FIELD_EGL_FRAG, "egl/render_time_box/fragment_shader.glsl"},
   {ShaderID::TEXTURE_EGL_VERTEX, "egl/texture/vertex_shader.glsl"},
   {ShaderID::TEXTURE_EGL_FRAG, "egl/texture/fragment_shader.glsl"},
+  {ShaderID::FADE_OUT_VERTEX, "egl/fadeout/vertex_shader.glsl"},
+  {ShaderID::FADE_OUT_FRAG, "egl/fadeout/fragment_shader.glsl"},
 };
 
 class ShaderManager
