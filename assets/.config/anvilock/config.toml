@@ -14,4 +14,7 @@ top_left  = [-0.20, 0.9]
 top_right = [ 0.45, 0.9]
 bottom_left  = [-0.20, 0.5]
 bottom_right = [ 0.45, 0.5]
+shadow_color = [0.0, 0.0, 0.0, 0.0]
 
+[password_field]
+shadow_color = [0.0, 0.0, 0.0, 0.3]  # RGBA, last is alpha (intensity)

@@ -46,8 +46,8 @@ template <typename T> constexpr void swap(T& a, T& b) noexcept
 // Get HOME directory
 [[nodiscard]] inline auto getHomeDir() -> anvlk::types::Directory
 {
-  const char* home = std::getenv("HOME");
-  return home ? std::string(home) : FallbackHomeDir;
+  types::Directory home = types::Directory(std::getenv("HOME"));
+  return home.empty() ? FallbackHomeDir : home;
 }
 
 [[nodiscard]] inline auto getCurrentUsername() -> std::optional<types::AuthString>
@@ -56,15 +56,9 @@ template <typename T> constexpr void swap(T& a, T& b) noexcept
   passwd* pw  = getpwuid(uid); // Get passwd struct for this UID
   if (pw && pw->pw_name)
   {
-    return std::string(pw->pw_name);
+    return types::AuthString(pw->pw_name);
   }
   return std::nullopt;
-}
-
-// Safe string concatenation
-[[nodiscard]] inline auto safeStrJoin(std::string_view s1, std::string_view s2) -> std::string
-{
-  return std::string(s1) + std::string(s2);
 }
 
 // Get current time string in a safe format

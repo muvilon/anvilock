@@ -15,8 +15,6 @@ Currently you will have to manually configure these deps in your system (which i
 
 ### Runtime Dependencies
 
-Here’s your updated table, replacing **`glesv2`** with **`gles3`** across all columns and package names:
-
 | Library             | Purpose                                            | Arch Linux Package   | Ubuntu Package              | Fedora Package        |
 | ------------------- | -------------------------------------------------- | -------------------- | --------------------------- | --------------------- |
 | `libwayland-client` | Handles Wayland client communication.              | `wayland`            | `libwayland-client0`        | `wayland`             |

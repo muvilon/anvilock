@@ -75,16 +75,16 @@ struct OutputState
 
 struct PointerAxes
 {
-  bool       valid = false;
-  wl_fixed_t value{};
-  i32        discrete{};
+  bool              valid = false;
+  wayland::WLFixed_ value{};
+  i32               discrete{};
 };
 
 struct PointerEvent
 {
   u32                        eventMask{};
-  wl_fixed_t                 surfaceX{};
-  wl_fixed_t                 surfaceY{};
+  wayland::WLFixed_          surfaceX{};
+  wayland::WLFixed_          surfaceY{};
   u32                        button{};
   u32                        state{};
   u32                        time{};

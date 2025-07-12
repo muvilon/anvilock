@@ -7,6 +7,21 @@
 #include <anvilock/shaders/ShaderHandler.hpp>
 #include <vector>
 
+#define ANVLK_USE_GL_PROGRAM_WITH_BLEND(prog)          \
+  do                                                   \
+  {                                                    \
+    glEnable(GL_BLEND);                                \
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); \
+    glUseProgram(prog);                                \
+  } while (0)
+
+#define ANVLK_DELETE_GL_PROGRAM_WITH_BLEND(prog) \
+  do                                             \
+  {                                              \
+    glDisable(GL_BLEND);                         \
+    glDeleteProgram(prog);                       \
+  } while (0)
+
 namespace anvlk::render::GLUtils
 {
 
@@ -169,6 +184,14 @@ inline void renderFadeQuad(float alpha, const logger::LogContext& logCtx,
   glBindVertexArray(0);
 
   glUseProgram(0);
+}
+
+inline void DrawFullscreenQuad()
+{
+  static const types::FloatArray<8> quad = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, quad.data());
+  glEnableVertexAttribArray(0);
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 } // namespace anvlk::render::GLUtils

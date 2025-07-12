@@ -42,7 +42,7 @@ private:
   types::fsPath              m_configPath;
 
   // Helper method to parse float arrays for box corners
-  static auto parseVec2(const toml::array* arr) -> anvlk::types::FloatArray<2>;
+  template <std::size_t N> auto parseVecN(const toml::array* arr) -> anvlk::types::FloatArray<N>;
 
   // Get default config path
   auto getUserConfigPath() -> types::fsPath;

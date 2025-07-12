@@ -33,7 +33,7 @@ inline constexpr auto logLevelColor(LogLevel level) -> types::AnsiColor
   }
 }
 
-inline constexpr auto makeCategory(types::AnsiColor color, types::LogCategoryString name)
+inline constexpr auto MakeLogCategory(types::AnsiColor color, types::LogCategoryString name)
   -> std::pair<types::AnsiColor, types::LogCategoryString>
 {
   return std::make_pair(color, name);
@@ -47,39 +47,39 @@ inline constexpr auto findLogCategory(LogCategory category)
   switch (category)
   {
     case anvlk::logger::LogCategory::MAIN:
-      return makeCategory(ansiBold, "MAIN");
+      return MakeLogCategory(ansiBold, "MAIN");
     case anvlk::logger::LogCategory::CONFIG:
-      return makeCategory(ansiBoldRed, "CONFIG");
+      return MakeLogCategory(ansiBoldRed, "CONFIG");
     case anvlk::logger::LogCategory::TOML:
-      return makeCategory(ansiBoldPurple, "TOML");
+      return MakeLogCategory(ansiBoldPurple, "TOML");
     case anvlk::logger::LogCategory::EGL:
-      return makeCategory(ansiBoldOrange, "EGL");
+      return MakeLogCategory(ansiBoldOrange, "EGL");
     case anvlk::logger::LogCategory::PAM:
-      return makeCategory(ansiBoldCyan, "PAM");
+      return MakeLogCategory(ansiBoldCyan, "PAM");
     case anvlk::logger::LogCategory::FREETYPE:
-      return makeCategory(ansiBoldOrange, "FREETYPE");
+      return MakeLogCategory(ansiBoldOrange, "FREETYPE");
     case anvlk::logger::LogCategory::SHM:
-      return makeCategory(ansiBoldGreen, "SHM");
+      return MakeLogCategory(ansiBoldGreen, "SHM");
     case anvlk::logger::LogCategory::WL_KB:
-      return makeCategory(ansiBoldBlue, "WL_KB");
+      return MakeLogCategory(ansiBoldBlue, "WL_KB");
     case anvlk::logger::LogCategory::WL_PTR:
-      return makeCategory(ansiBoldBlue, "WL_PTR");
+      return MakeLogCategory(ansiBoldBlue, "WL_PTR");
     case anvlk::logger::LogCategory::WL_OUT:
-      return makeCategory(ansiBoldBlue, "WL_OUT");
+      return MakeLogCategory(ansiBoldBlue, "WL_OUT");
     case anvlk::logger::LogCategory::WL_SEAT:
-      return makeCategory(ansiBoldBlue, "WL_SEAT");
+      return MakeLogCategory(ansiBoldBlue, "WL_SEAT");
     case anvlk::logger::LogCategory::WL_REG:
-      return makeCategory(ansiBoldBlue, "WL_REG");
+      return MakeLogCategory(ansiBoldBlue, "WL_REG");
     case anvlk::logger::LogCategory::SESSION_LOCK:
-      return makeCategory(ansiBoldBlue, "SESSION_LOCK");
+      return MakeLogCategory(ansiBoldBlue, "SESSION_LOCK");
     case anvlk::logger::LogCategory::XDG_SURFACE:
-      return makeCategory(ansiBoldYellow, "XDG_SURFACE");
+      return MakeLogCategory(ansiBoldYellow, "XDG_SURFACE");
     case anvlk::logger::LogCategory::XDG_WMBASE:
-      return makeCategory(ansiBoldYellow, "XDG_WMBASE");
+      return MakeLogCategory(ansiBoldYellow, "XDG_WMBASE");
     case anvlk::logger::LogCategory::SHADERS:
-      return makeCategory(ansiGray, "SHADERS");
+      return MakeLogCategory(ansiGray, "SHADERS");
     default:
-      return makeCategory(ansiBold, "MAIN");
+      return MakeLogCategory(ansiBold, "MAIN");
   }
 }
 

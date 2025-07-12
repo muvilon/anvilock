@@ -5,31 +5,6 @@
 namespace anvlk::gfx
 {
 
-auto shaderIDToStr(ShaderID id) -> types::ShaderName
-{
-  switch (id)
-  {
-    case ShaderID::INIT_EGL_VERTEX:
-      return "INIT_EGL_VERTEX";
-    case ShaderID::INIT_EGL_FRAG:
-      return "INIT_EGL_FRAG";
-    case ShaderID::RENDER_PWD_FIELD_EGL_VERTEX:
-      return "RENDER_PWD_FIELD_EGL_VERTEX";
-    case ShaderID::RENDER_PWD_FIELD_EGL_FRAG:
-      return "RENDER_PWD_FIELD_EGL_FRAG";
-    case ShaderID::RENDER_TIME_FIELD_EGL_VERTEX:
-      return "RENDER_TIME_FIELD_EGL_VERTEX";
-    case ShaderID::RENDER_TIME_FIELD_EGL_FRAG:
-      return "RENDER_TIME_FIELD_EGL_FRAG";
-    case ShaderID::TEXTURE_EGL_VERTEX:
-      return "TEXTURE_EGL_VERTEX";
-    case ShaderID::TEXTURE_EGL_FRAG:
-      return "TEXTURE_EGL_FRAG";
-    default:
-      return "UNKNOWN_SHADER_ID";
-  }
-}
-
 ShaderManager::ShaderManager(const types::Directory& homeDir, logger::LogContext& ctx)
     : m_homePath(homeDir.c_str()), m_ctx(ctx)
 {

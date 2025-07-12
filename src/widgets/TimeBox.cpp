@@ -49,20 +49,17 @@ void renderTimeBox(ClientState& cs, float fadeAlpha)
                  cs.userConfig.timeBoxVertices.data(), GL_STATIC_DRAW);
   }
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
   // Use custom shader for rounded time box
   static GLuint shader =
     render::GLUtils::createShaderProgram<gfx::ShaderID::RENDER_TIME_FIELD_EGL_VERTEX,
                                          gfx::ShaderID::RENDER_TIME_FIELD_EGL_FRAG>(
       cs.logCtx, *cs.shaderManagerPtr);
 
-  glUseProgram(shader);
+  ANVLK_USE_GL_PROGRAM_WITH_BLEND(shader);
 
-  GLint texLoc    = glGetUniformLocation(shader, "uTexture");
-  GLint alphaLoc  = glGetUniformLocation(shader, "uAlpha");
-  GLint radiusLoc = glGetUniformLocation(shader, "uRadius");
+  const GLint texLoc    = glGetUniformLocation(shader, "uTexture");
+  const GLint alphaLoc  = glGetUniformLocation(shader, "uAlpha");
+  const GLint radiusLoc = glGetUniformLocation(shader, "uRadius");
 
   glUniform1i(texLoc, 0);
   glUniform1f(alphaLoc, fadeAlpha);
@@ -93,7 +90,7 @@ void renderTimeBox(ClientState& cs, float fadeAlpha)
     LOG::ERROR(cs.logCtx, "OpenGL error when rendering time box: {}", error);
   }
 
-  LOG::TRACE(cs.logCtx, "Modern time box rendered successfully!");
+  LOG::TRACE(cs.logCtx, "Time box rendered successfully!");
 }
 
 } // namespace anvlk::widgets

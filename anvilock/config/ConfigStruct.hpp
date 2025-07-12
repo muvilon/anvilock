@@ -24,7 +24,8 @@ struct Debug
 
 struct Time
 {
-  TOMLKey time_format; // Prefer std::chrono formatting if applicable
+  TOMLKey                     time_format; // Prefer std::chrono formatting if applicable
+  anvlk::types::FloatArray<4> shadowColor = {0.0f, 0.0f, 0.0f, 0.2f};
 };
 
 struct BoxCorners
@@ -40,6 +41,13 @@ struct Vertex
   Coords x{}, y{}, u{}, v{};
 };
 
+struct PasswordFieldConfig
+{
+  anvlk::types::FloatArray<4> shadowColor = {0.0f, 0.0f, 0.0f, 0.25f}; // default RGBA
+  double                      width       = 0.6;
+  double                      height      = 0.12;
+};
+
 // Top-level config
 struct AnvlkConfig
 {
@@ -48,6 +56,8 @@ struct AnvlkConfig
   Debug                 debug;
   Time                  time;
   std::array<Vertex, 4> timeBoxVertices;
+
+  PasswordFieldConfig pwdFieldCfg;
 };
 
 #endif

@@ -42,6 +42,7 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
   {
     u8 r, g, b, a;
   };
+
   auto buffer = std::make_unique<RGBA[]>(types::to_usize(width * height));
   std::fill(buffer.get(), buffer.get() + (width * height), RGBA{.r = 0, .g = 0, .b = 0, .a = 0});
 
@@ -75,8 +76,11 @@ auto createTextTexture(ClientState& state, const std::string& text) -> GLuint
           {
             types::iters shadow_idx = types::to_usize(shadow_row * width + shadow_col);
             auto&        s          = buffer[shadow_idx];
-            s.r = s.g = s.b = 0;
-            s.a             = std::max<u8>(s.a, value / 2); // softer alpha for shadow
+            const auto&  sc         = state.userConfig.time.shadowColor;
+            s.r                     = static_cast<u8>(std::clamp(sc[0], 0.0f, 1.0f) * 255);
+            s.g                     = static_cast<u8>(std::clamp(sc[1], 0.0f, 1.0f) * 255);
+            s.b                     = static_cast<u8>(std::clamp(sc[2], 0.0f, 1.0f) * 255);
+            s.a = std::max<u8>(s.a, static_cast<u8>(std::clamp(sc[3], 0.0f, 1.0f) * value));
           }
 
           // Write main glyph: bright white, full opacity

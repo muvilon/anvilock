@@ -146,6 +146,19 @@ template <std::size_t N>
 using CStrArray = std::array<const char*, N>;                   //@--> [ Array of C-strings ] //
 template <std::size_t N> using CharArray = std::array<char, N>; //@--> [ Char buffer array ] //
 
+struct Vec2
+{
+  int x = 0;
+  int y = 0;
+
+  Vec2() = default;
+  Vec2(int x_, int y_) : x(x_), y(y_) {}
+
+  // Optional convenience methods
+  auto operator==(const Vec2& other) const -> bool { return x == other.x && y == other.y; }
+  auto operator!=(const Vec2& other) const -> bool { return !(*this == other); }
+};
+
 } // namespace anvlk::types
 
 #endif

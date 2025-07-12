@@ -12,21 +12,42 @@ namespace anvlk::gfx
 inline constexpr const std::string_view GLOBAL_SHADER_DIR    = "/usr/share/anvilock/shaders/";
 inline constexpr const std::string_view REL_LOCAL_SHADER_DIR = ".local/share/anvilock/shaders/";
 
+#define SHADER_ID_LIST            \
+  X(INIT_EGL_VERTEX)              \
+  X(INIT_EGL_FRAG)                \
+  X(RENDER_PWD_FIELD_EGL_VERTEX)  \
+  X(RENDER_PWD_FIELD_EGL_FRAG)    \
+  X(RENDER_TIME_FIELD_EGL_VERTEX) \
+  X(RENDER_TIME_FIELD_EGL_FRAG)   \
+  X(TEXTURE_EGL_VERTEX)           \
+  X(TEXTURE_EGL_FRAG)             \
+  X(FADE_OUT_VERTEX)              \
+  X(FADE_OUT_FRAG)                \
+  X(BLUR_VERTEX)                  \
+  X(BLUR_FRAG)                    \
+  X(SHADOW_VERTEX)                \
+  X(SHADOW_FRAG)
+
 enum class ShaderID
 {
-  INIT_EGL_VERTEX,
-  INIT_EGL_FRAG,
-  RENDER_PWD_FIELD_EGL_VERTEX,
-  RENDER_PWD_FIELD_EGL_FRAG,
-  RENDER_TIME_FIELD_EGL_VERTEX,
-  RENDER_TIME_FIELD_EGL_FRAG,
-  TEXTURE_EGL_VERTEX,
-  TEXTURE_EGL_FRAG,
-  FADE_OUT_VERTEX,
-  FADE_OUT_FRAG
+#define X(x) x,
+  SHADER_ID_LIST
+#undef X
 };
 
-inline auto shaderIDToStr(ShaderID id) -> types::ShaderName;
+inline constexpr auto shaderIDToStr(ShaderID id) -> types::ShaderName
+{
+  switch (id)
+  {
+#define X(x)        \
+  case ShaderID::x: \
+    return #x;
+    SHADER_ID_LIST
+#undef X
+    default:
+      return "UNKNOWN_SHADER_ID";
+  }
+}
 
 inline const std::unordered_map<ShaderID, const std::string_view> ShaderPaths = {
   {ShaderID::INIT_EGL_VERTEX, "egl/init/vertex_shader.glsl"},
@@ -39,6 +60,10 @@ inline const std::unordered_map<ShaderID, const std::string_view> ShaderPaths = 
   {ShaderID::TEXTURE_EGL_FRAG, "egl/texture/fragment_shader.glsl"},
   {ShaderID::FADE_OUT_VERTEX, "egl/fadeout/vertex_shader.glsl"},
   {ShaderID::FADE_OUT_FRAG, "egl/fadeout/fragment_shader.glsl"},
+  {ShaderID::SHADOW_VERTEX, "egl/shadow/vertex_shader.glsl"},
+  {ShaderID::SHADOW_FRAG, "egl/shadow/fragment_shader.glsl"},
+  {ShaderID::BLUR_VERTEX, "egl/blur/vertex_shader.glsl"},
+  {ShaderID::BLUR_FRAG, "egl/blur/fragment_shader.glsl"},
 };
 
 class ShaderManager
